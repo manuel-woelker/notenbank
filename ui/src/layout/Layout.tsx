@@ -1,5 +1,6 @@
 import {NavBar} from "./NavBar.tsx";
 import {LeftMenu} from "./LeftMenu.tsx";
+import {Outlet} from "@tanstack/react-router";
 
 export function Layout() {
 
@@ -12,6 +13,7 @@ export function Layout() {
             <LeftMenu />
             </div>
             <div className="column is-9">
+              <Outlet />
               <nav className="breadcrumb" aria-label="breadcrumbs">
                 <ul>
                   <li><a href="../">Bulma</a></li>

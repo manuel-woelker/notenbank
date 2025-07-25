@@ -1,10 +1,13 @@
-import {Layout} from "./layout/Layout.tsx";
+import {RouterProvider} from "@tanstack/react-router";
+import {router} from "./routing.tsx";
+
+
 
 export function App() {
 
   return (
       <>
-        <Layout />
+        <RouterProvider router={router} />
       </>
   )
 }

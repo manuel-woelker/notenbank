@@ -18,19 +18,10 @@ export function NavBar() {
             <div id="navMenu" className="navbar-menu">
               <div className="navbar-start">
                 <a className="navbar-item" href="admin.html">
-                  Home
+                  Schuljahr 2025/2026
                 </a>
                 <a className="navbar-item" href="admin.html">
-                  Orders
-                </a>
-                <a className="navbar-item" href="admin.html">
-                  Payments
-                </a>
-                <a className="navbar-item" href="admin.html">
-                  Exceptions
-                </a>
-                <a className="navbar-item" href="admin.html">
-                  Reports
+                  Klasse 2b
                 </a>
               </div>
 
