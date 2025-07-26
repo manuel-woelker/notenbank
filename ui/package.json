@@ -13,6 +13,7 @@
   "dependencies": {
     "@tanstack/react-router": "^1.129.8",
     "@tanstack/react-router-devtools": "^1.129.8",
+    "@tanstack/react-table": "^8.21.3",
     "bulma": "^1.0.4",
     "immer": "^10.1.1",
     "react": "^19.1.0",

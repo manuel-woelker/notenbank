@@ -1,17 +1,16 @@
 import {
-  Outlet,
   createRouter,
   createRoute,
   createRootRoute, createHashHistory,
 } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import {Layout} from "./layout/Layout.tsx";
+import {SchülerTable} from "./schüler/SchülerTable.tsx";
 
 const rootRoute = createRootRoute({
   component: () => (
       <>
         <Layout />
-        <Outlet />
         <TanStackRouterDevtools />
       </>
   ),
@@ -41,8 +40,7 @@ export const fachRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/fach/$fachName',
   component: function About() {
-    const { fachName } = fachRoute.useParams();
-    return <div className="p-2">Hello {fachName} </div>
+    return <SchülerTable />;
   },
 })
 
