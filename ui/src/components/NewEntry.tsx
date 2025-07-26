@@ -26,7 +26,8 @@ export const NewEntry = (props: NewEntryProps) => {
   }, [onDone]);
   return <>
     {value != null?
-        <input value={value} onChange={onChange} onBlur={onDone} onKeyPress={onKeypress} ref={focusRef}/>:
+        <input value={value} onChange={onChange} onBlur={onDone} onKeyPress={onKeypress} ref={focusRef}
+               className="input" type="text" placeholder="Name des Faches"/>:
     <a onClick={() => setValue("")} autoFocus>+ Fach hinzufügen</a>
     }
   </>

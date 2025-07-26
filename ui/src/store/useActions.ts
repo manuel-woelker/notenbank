@@ -1,34 +1,14 @@
-import {useStore} from "./useStore.ts";
-import {produce} from "immer";
 import type {State} from "./State.ts";
+import {makeActions, type RawAction} from "./makeActions.ts";
 
-
-const actions = {
-  /*  addFach: (fachName: string) => {
-      useStore.setState(state => {
-        console.log(state);
-        return produce(state, state => {
-          state.fächer.push({name: fachName})});
-      })}*/
-
-  addFach: createAction((fachName: string) => (state: State) => {
+// Define your actions with their implementations
+const rawActions: Record<string, RawAction> = {
+  addFach(state: State, fachName: string) {
     state.fächer.push({name: fachName});
-  })
-}
+  },
+} as const;
 
-type Actions = typeof actions;
+// Create the typed actions
+const actions = makeActions(rawActions);
 
-export const useActions: () => Actions = () => {
-  return actions;
-}
-
-
-function createAction<TArgs extends unknown[]>(f: (...args: TArgs) => (state: State) => void): (...args: TArgs) => void {
-  return (...args: TArgs) => {
-    useStore.setState(state => {
-      console.log(state);
-      const innerF = f(...args);
-      return produce(state, innerF);
-    });
-  }
-}
+export const useActions = (): typeof actions => actions;
