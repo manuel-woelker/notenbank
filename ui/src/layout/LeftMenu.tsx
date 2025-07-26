@@ -1,5 +1,6 @@
 import {Link} from "@tanstack/react-router";
 import {useStore} from "../store/useStore.ts";
+import {NewEntry} from "../components/NewEntry.tsx";
 
 export function LeftMenu() {
   const store = useStore();
@@ -11,6 +12,7 @@ export function LeftMenu() {
       </p>
       <ul className="menu-list">
         {fächer.map(fach => <Link key={fach.name} activeProps={{className: "is-active"}} to="/fach/$fachName" params={{fachName: fach.name}}>{fach.name}</Link> )}
+        <NewEntry onNewEntry={(newName) => console.log(newName)} />
       </ul>
       <p className="menu-label">
         Verwaltung
