@@ -1,25 +1,25 @@
-import {useCallback, useEffect, useRef, useState} from "react";
+import {type ChangeEvent, type KeyboardEvent, useCallback, useEffect, useRef, useState} from "react";
 import {useFocus} from "../hooks/useFocus.ts";
 
 export interface NewEntryProps {
-  onNewEntry: (string) => void;
+  onNewEntry: (name: string) => void;
 }
 
 export const NewEntry = (props: NewEntryProps) => {
-  const [value, setValue] = useState(null);
-  const valueRef = useRef();
+  const [value, setValue] = useState<string | null>(null);
+  const valueRef = useRef<string | null>(null);
   useEffect(() => {
     valueRef.current = value;
   })
-  const focusRef = useFocus();
-  const onChange = useCallback((event) => {
+  const focusRef = useFocus<HTMLInputElement>();
+  const onChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     setValue(event.target.value);
   }, []);
   const onDone = useCallback(() => {
-    props.onNewEntry(valueRef.current);
+    props.onNewEntry(valueRef.current!);
     setValue(null);
   }, [props]);
-  const onKeypress = useCallback((event) => {
+  const onKeypress = useCallback((event: KeyboardEvent<HTMLInputElement>) => {
     if(event.key === "Enter") {
       onDone();
     }

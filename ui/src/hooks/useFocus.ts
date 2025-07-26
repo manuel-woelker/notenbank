@@ -1,7 +1,7 @@
-import {RefObject, useCallback} from 'react';
+import {type RefCallback, useCallback} from 'react';
 
-export function useFocus<T extends HTMLElement>(): RefObject<T> {
-  const handleRef = useCallback((node) => {
+export function useFocus<T extends HTMLElement>(): RefCallback<T> {
+  const handleRef = useCallback((node: HTMLElement | null) => {
     node?.focus()
   }, []);
 
