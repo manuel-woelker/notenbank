@@ -1,4 +1,5 @@
 import type {State} from "./State.ts";
+import {create} from "zustand/react";
 
 
 const initialState: State = {
@@ -11,6 +12,10 @@ const initialState: State = {
 
 }
 
+
+export const useStore = create(() => (initialState))
+
+/*
 export const useStore = function() : State {
   return initialState;
-}
+}*/
