@@ -1,16 +1,16 @@
 import {Link} from "@tanstack/react-router";
-import {fachRoute} from "../routing.tsx";
+import {useStore} from "../store/useStore.ts";
 
 export function LeftMenu() {
-  const { fachName } = fachRoute.useParams();
-  const fächer = ["Deutsch", "Mathe", "Musik", "Sachkunde"];
+  const store = useStore();
+  const fächer = store.fächer;
   return (<>
     <aside className="menu is-hidden-mobile"  style={{paddingLeft: 10}}>
       <p className="menu-label">
         Fächer
       </p>
       <ul className="menu-list">
-        {fächer.map(fach => <Link className={fach === fachName?"is-active":""} to="/fach/$fachName" params={{fachName: fach}}>{fach}</Link> )}
+        {fächer.map(fach => <Link key={fach.name} activeProps={{className: "is-active"}} to="/fach/$fachName" params={{fachName: fach.name}}>{fach.name}</Link> )}
       </ul>
       <p className="menu-label">
         Verwaltung
