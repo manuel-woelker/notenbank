@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-(cd ui && pnpm run lint --fix)
+(cd ui && pnpm run typecheck && pnpm run lint --fix)
 
 jj desc
 jj new

@@ -2,7 +2,7 @@ import {useStore} from "./useStore.ts";
 import {produce} from "immer";
 import type {State} from "./State.ts";
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 
 // @ts-expect-error __REDUX_DEVTOOLS_EXTENSION__ is not typed
 const devTools = window.__REDUX_DEVTOOLS_EXTENSION__?.connect({
@@ -11,10 +11,11 @@ const devTools = window.__REDUX_DEVTOOLS_EXTENSION__?.connect({
 
 devTools.init(useStore.getInitialState());
 
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 export type RawAction = (state: State, ...args: any[]) => void;
 
 // Helper to extract action parameters without the state parameter
-type ActionParameters<T> = T extends (state: State, ...args: infer P) => any ? P : never;
+type ActionParameters<T> = T extends (state: State, ...args: infer P) => void ? P : never;
 
 
 type ActionOf<RAW_ACTION> = RAW_ACTION extends RawAction ? (...args: ActionParameters<RAW_ACTION>) => void : never;
@@ -23,8 +24,8 @@ type ActionCreators<T> = {
   [K in keyof T]: ActionOf<T[K]>;
 };
 
-function createAction(name: string, action: (state: State, ...args: any[]) => void) {
-  return (...args: any[]) => {
+function createAction(name: string, action: (state: State, ...args: unknown[]) => void) {
+  return (...args: unknown[]) => {
     useStore.setState(state =>
         produce(state, draft => {
           action(draft, ...args);
