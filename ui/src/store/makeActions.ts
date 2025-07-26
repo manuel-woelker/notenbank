@@ -4,12 +4,11 @@ import type {State} from "./State.ts";
 
 
 
-// @ts-expect-error __REDUX_DEVTOOLS_EXTENSION__ is not typed
 const devTools = window.__REDUX_DEVTOOLS_EXTENSION__?.connect({
   name: "Notenbank",
 });
 
-devTools.init(useStore.getInitialState());
+devTools?.init(useStore.getInitialState());
 
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 export type RawAction = (state: State, ...args: any[]) => void;
