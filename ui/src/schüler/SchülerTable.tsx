@@ -15,7 +15,6 @@ const columns = [
 
 export function SchülerTable() {
   const schüler = useStore(state => state.schüler);
-  console.log(schüler);
   const table = useReactTable({
     data: schüler,
     columns,
