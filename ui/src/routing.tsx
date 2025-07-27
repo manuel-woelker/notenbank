@@ -1,7 +1,7 @@
 import {
   createRouter,
   createRoute,
-  createRootRoute, createHashHistory,
+  createRootRoute, createHashHistory, redirect,
 } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import {Layout} from "./layout/Layout.tsx";
@@ -26,6 +26,11 @@ const indexRoute = createRoute({
         </div>
     )
   },
+  loader: async () => {
+    throw redirect({
+      to: '/schuljahr/2023-2024/klasse/2a/fach/Deutsch',
+    })
+  },
 })
 
 const aboutRoute = createRoute({
@@ -34,18 +39,29 @@ const aboutRoute = createRoute({
   component: function About() {
     return <div className="p-2">Hello from About!</div>
   },
+});
+
+export const schuljahrRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/schuljahr/$schuljahrId',
 })
 
+export const klasseRoute = createRoute({
+  getParentRoute: () => schuljahrRoute,
+  path: '/klasse/$klassenId',
+})
+
+
 export const fachRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/fach/$fachName',
+  getParentRoute: () => klasseRoute,
+  path: '/fach/$fachId',
   component: function About() {
     return <SchülerTable />;
   },
 })
 
 
-const routeTree = rootRoute.addChildren([indexRoute, aboutRoute, fachRoute])
+const routeTree = rootRoute.addChildren([indexRoute, aboutRoute, schuljahrRoute, klasseRoute, fachRoute])
 
 const hashHistory = createHashHistory();
 

@@ -6,11 +6,11 @@ import {useStore} from "./useStore.ts";
 
 // Define your actions with their implementations
 const rawActions = {
-  addFach(state: State, fachName: string) {
-    state.fächer.push({name: fachName});
+  addSchuljahr(state: State, schuljahrName: string) {
+    state.schuljahre.push({id: schuljahrName, name: schuljahrName, klassen: []});
   },
-  clearFächer(state: State) {
-    state.fächer.length = 0;
+  clearSchuljahre(state: State) {
+    state.schuljahre.length = 0;
   },
 } satisfies Record<string, RawAction>;
 
@@ -19,13 +19,13 @@ const actions = makeActions(rawActions);
 
 
 test('actions should modify the store state', () => {
-  actions.clearFächer();
+  actions.clearSchuljahre();
   let store = useStore.getState();
-  expect(store.fächer).toStrictEqual([]);
-  actions.addFach('Deutsch');
+  expect(store.schuljahre).toStrictEqual([]);
+  actions.addSchuljahr('2001/2002');
   store = useStore.getState();
-  expect(store.fächer).toStrictEqual([{
-    name: 'Deutsch'}]);
+  expect(store.schuljahre).toStrictEqual([{
+    name: '2001/2002'}]);
 
 });
 
