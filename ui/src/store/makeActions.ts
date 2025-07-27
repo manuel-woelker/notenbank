@@ -4,9 +4,9 @@ import type {State} from "./State.ts";
 
 
 
-const devTools = window.__REDUX_DEVTOOLS_EXTENSION__?.connect({
+const devTools = typeof window !== "undefined" ? window?.__REDUX_DEVTOOLS_EXTENSION__?.connect({
   name: "Notenbank",
-});
+}) : undefined;
 
 devTools?.init(useStore.getInitialState());
 
