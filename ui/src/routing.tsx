@@ -1,11 +1,13 @@
 import {
   createRouter,
   createRoute,
-  createRootRoute, createHashHistory, redirect,
+  createRootRoute, createHashHistory, redirect, Outlet,
 } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import {Layout} from "./layout/Layout.tsx";
 import {SchülerTable} from "./schüler/SchülerTable.tsx";
+import { LeftMenu } from './layout/LeftMenu.tsx';
+import {NotFoundComponent} from "./layout/NotFoundComponent.tsx";
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -49,6 +51,16 @@ export const schuljahrRoute = createRoute({
 export const klasseRoute = createRoute({
   getParentRoute: () => schuljahrRoute,
   path: '/klasse/$klassenId',
+  component: function Klasse() {
+    return (<div className="columns">
+      <div className="column is-3 ">
+        <LeftMenu />
+      </div>
+      <div className="column is-9">
+        <Outlet />
+      </div>
+    </div>);
+  }
 })
 
 
@@ -65,4 +77,4 @@ const routeTree = rootRoute.addChildren([indexRoute, aboutRoute, schuljahrRoute,
 
 const hashHistory = createHashHistory();
 
-export const router = createRouter({ routeTree, history: hashHistory })
+export const router = createRouter({ routeTree, history: hashHistory, defaultNotFoundComponent: NotFoundComponent })
