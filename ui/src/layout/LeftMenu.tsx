@@ -12,7 +12,7 @@ export function LeftMenu() {
   const addFach = useCallback(async (fachName: string) => {
     actions.addFach(fachName);
     await navigate({to: "/fach/$fachName", params: {fachName: fachName}});
-  }, [actions]);
+  }, [actions, navigate]);
   return (<>
     <aside className="menu is-hidden-mobile"  style={{paddingLeft: 10}}>
       <p className="menu-label">
