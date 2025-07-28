@@ -8,6 +8,7 @@ import {Layout} from "./layout/Layout.tsx";
 import {SchülerTable} from "./schüler/SchülerTable.tsx";
 import { LeftMenu } from './layout/LeftMenu.tsx';
 import {NotFoundComponent} from "./layout/NotFoundComponent.tsx";
+import {ErrorComponent} from "./util/ErrorComponent.tsx";
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -77,4 +78,9 @@ const routeTree = rootRoute.addChildren([indexRoute, aboutRoute, schuljahrRoute,
 
 const hashHistory = createHashHistory();
 
-export const router = createRouter({ routeTree, history: hashHistory, defaultNotFoundComponent: NotFoundComponent })
+export const router = createRouter({
+  routeTree,
+  history: hashHistory,
+  defaultNotFoundComponent: NotFoundComponent,
+  defaultErrorComponent: ErrorComponent,
+});

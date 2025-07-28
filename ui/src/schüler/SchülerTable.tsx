@@ -1,7 +1,6 @@
 import {createColumnHelper, flexRender, getCoreRowModel, useReactTable} from "@tanstack/react-table";
 import type {Schüler} from "../store/State.ts";
 import {useKlasse} from "../store/useParams.ts";
-//import {useStore} from "../store/useStore.ts";
 
 
 const columnHelper = createColumnHelper<Schüler>()
@@ -15,7 +14,6 @@ const columns = [
 ]
 
 export function SchülerTable() {
-  //const schüler = useStore(state => state.schüler);
   const schüler = useKlasse().klasse.schüler;
   const table = useReactTable({
     data: schüler,
