@@ -5,10 +5,11 @@ import {
 } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import {Layout} from "./layout/Layout.tsx";
-import {SchülerTable} from "./schüler/SchülerTable.tsx";
-import { LeftMenu } from './layout/LeftMenu.tsx';
+import { KlassenMenu } from './klasse/KlassenMenu.tsx';
 import {NotFoundComponent} from "./layout/NotFoundComponent.tsx";
 import {ErrorComponent} from "./util/ErrorComponent.tsx";
+import {FachView} from "./klasse/FachView.tsx";
+import {SchülerView} from "./klasse/SchülerView.tsx";
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -31,7 +32,7 @@ const indexRoute = createRoute({
   },
   loader: async () => {
     throw redirect({
-      to: '/schuljahr/2023-2024/klasse/2a/fach/Deutsch',
+      to: '/schuljahr/2023-2024/klasse/2a',
     })
   },
 })
@@ -55,26 +56,32 @@ export const klasseRoute = createRoute({
   component: function Klasse() {
     return (<div className="columns">
       <div className="column is-3 ">
-        <LeftMenu />
+        <KlassenMenu />
       </div>
       <div className="column is-9">
         <Outlet />
       </div>
     </div>);
   }
+});
+
+
+export const schülerRoute = createRoute({
+  getParentRoute: () => klasseRoute,
+  path: '/',
+  component: SchülerView,
 })
+
 
 
 export const fachRoute = createRoute({
   getParentRoute: () => klasseRoute,
   path: '/fach/$fachId',
-  component: function About() {
-    return <SchülerTable />;
-  },
+  component: FachView,
 })
 
 
-const routeTree = rootRoute.addChildren([indexRoute, aboutRoute, schuljahrRoute, klasseRoute, fachRoute])
+const routeTree = rootRoute.addChildren([indexRoute, aboutRoute, schuljahrRoute, klasseRoute, schülerRoute, fachRoute]);
 
 const hashHistory = createHashHistory();
 

@@ -4,10 +4,9 @@ import { useActions } from "../store/useActions.ts";
 import {useCallback} from "react";
 import type {Fach} from "../store/State.ts";
 import {useKlasse} from "../store/useParams.ts";
-import {klasseRoute} from "../routing.tsx";
+import {fachRoute, klasseRoute, schülerRoute} from "../routing.tsx";
 
-export function LeftMenu() {
-  //const store = useStore();
+export function KlassenMenu() {
   const actions = useActions();
   const {
     klasse, schuljahrId, klassenId} = useKlasse();
@@ -23,13 +22,14 @@ export function LeftMenu() {
         Fächer
       </p>
       <ul className="menu-list">
-        {fächer.map(fach => <Link key={fach.id} activeProps={{className: "is-active"}} from={klasseRoute.fullPath} to="fach/$fachName" params={{fachName: fach.name}}>{fach.name}</Link> )}
+        {fächer.map(fach => <Link key={fach.id} activeProps={{className: "is-active"}} to={fachRoute.to} params={{fachId: fach.id}}>{fach.name}</Link> )}
         <NewEntry onNewEntry={addFach} />
       </ul>
       <p className="menu-label">
         Verwaltung
       </p>
       <ul className="menu-list">
+        <li><Link activeProps={{className: "is-active"}} to={schülerRoute.to} activeOptions={{ exact: true }}>Schüler</Link></li>
         <li><a>Klasse</a></li>
       </ul>
     </aside>

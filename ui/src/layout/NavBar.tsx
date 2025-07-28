@@ -5,7 +5,7 @@ export function NavBar() {
         <nav className="navbar is-white">
           <div className="container">
             <div className="navbar-brand" style={{paddingLeft: 10}}>
-              <a className="navbar-item brand-text" href="../index.html">
+              <a className="navbar-item brand-text" href="/#">
                 <img src="books.svg" />
                 Notenbank
               </a>
