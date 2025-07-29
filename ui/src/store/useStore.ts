@@ -1,4 +1,4 @@
-import type {State} from "./State.ts";
+import {makeSchüler, type State} from "./State.ts";
 import {create} from "zustand/react";
 
 
@@ -25,11 +25,11 @@ const initialState: State = {
             {name: "Sachkunde", id: "Sachkunde"},
           ],
           schüler: [
-            {name: "Max Musterschüler"},
-            {name: "Siggi Sitzenbleiber"},
-            {name: "Didi Drückeberger"},
-            {name: "Nina Neunmalschlau"},
-            {name: "Rosa Schweinchen"},
+              makeSchüler("Max", "Musterschüler"),
+              makeSchüler("Siggi", "Sitzenbleiber"),
+              makeSchüler("Didi", "Drückeberger"),
+              makeSchüler("Nina", "Neunmalschlau"),
+              makeSchüler("Rosa", "Schweinchen"),
           ]
         },
       ]

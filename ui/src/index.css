@@ -44,3 +44,19 @@ h1 {
   border-bottom: 1px solid gray;
  margin-bottom: 20px;
 }
+
+.flash {
+  animation-name: flash_keyframes;
+  animation-duration: 1s;
+  animation-iteration-count: initial;
+}
+
+@keyframes flash_keyframes {
+  from {
+    background-color: lightyellow;
+  }
+
+  to {
+    background-color: white;
+  }
+}

@@ -1,4 +1,5 @@
 import {bail} from "../util/error.ts";
+import {makeId} from "../util/id.ts";
 
 export interface Fach {
   id: string,
@@ -6,7 +7,13 @@ export interface Fach {
 }
 
 export interface Schüler {
-  name: string,
+  id: string,
+  vorname: string,
+  nachname: string,
+}
+
+export function makeSchüler(vorname: string, nachname: string): Schüler {
+  return {id: makeId(), vorname, nachname};
 }
 
 export interface Schuljahr {
