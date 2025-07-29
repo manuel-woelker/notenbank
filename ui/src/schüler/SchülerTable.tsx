@@ -4,17 +4,22 @@ import {useKlasse} from "../store/useParams.ts";
 import {NewSchüler} from "../components/NewSchüler.tsx";
 import {useActions} from "../store/useActions.ts";
 import {useRef} from "react";
+import {SchülerTableDefaultCell} from "./SchülerTableDefaultCell.tsx";
 
 
 const columnHelper = createColumnHelper<Schüler>()
 
 const columns = [
-  columnHelper.accessor((schüler) => schüler.vorname + " " + schüler.nachname, {
-    header: 'Name',
-    cell: info => info.getValue(),
-    footer: info => info.column.id,
+  columnHelper.accessor("vorname", {
+    header: 'Vorname',
+    cell: SchülerTableDefaultCell,
+  }),
+  columnHelper.accessor("nachname", {
+    header: 'Nachname',
+    cell: SchülerTableDefaultCell,
   }),
 ]
+
 
 export function SchülerTable() {
   const {
@@ -26,6 +31,13 @@ export function SchülerTable() {
     data: schüler,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    meta: {
+      updateSchüler: (schülerPartial: Partial<Schüler> & Pick<Schüler, "id">) => {
+        actions.updateSchüler(schuljahrId, klassenId, {
+          ...schülerPartial,
+        });
+      },
+    }
   });
 
   const initialSchüler = useRef<Set<string>>(null)
@@ -64,7 +76,7 @@ export function SchülerTable() {
             </tr>
           ))}
         <tr>
-          <td>
+          <td colSpan={3}>
             <NewSchüler onNewSchüler={(vorname, nachname) => {actions.addSchüler(schuljahrId, klassenId, makeSchüler(vorname, nachname))}} />
           </td>
         </tr>

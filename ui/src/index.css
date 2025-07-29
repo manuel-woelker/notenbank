@@ -60,3 +60,8 @@ h1 {
     background-color: white;
   }
 }
+
+.is-borderless:not(:focus) {
+  border: none !important;
+  background-color: transparent !important;
+}
