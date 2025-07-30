@@ -1,21 +1,32 @@
 import {createColumnHelper, flexRender, getCoreRowModel, useReactTable} from "@tanstack/react-table";
 import {type Schüler} from "../store/NotenState.ts";
-import {useKlasse} from "../store/useParams.ts";
+import {useFach, useKlasse} from "../store/useParams.ts";
+import {useMemo} from "react";
 
 
 const columnHelper = createColumnHelper<Schüler>()
 
-const columns = [
-  columnHelper.accessor((schüler: Schüler) => schüler.vorname + " " + schüler.nachname, {
-    header: 'Name',
-    cell: ctx => ctx.getValue(),
-  }),
-]
 
 
 export function NotenTable() {
   const {klasse} = useKlasse();
+  const {fach} = useFach();
   const schüler = klasse.schüler;
+  const columns = useMemo(() => [
+    columnHelper.accessor((schüler: Schüler) => schüler.vorname + " " + schüler.nachname, {
+      header: 'Name',
+      cell: ctx => ctx.getValue(),
+    }),
+      ...fach.notenfeststellungen.map(notenfeststellung => {
+        return columnHelper.accessor((schüler: Schüler) => {
+          const note = notenfeststellung.einzelnoten[schüler.id];
+          return note ? note.note : "-";
+        },{
+          header: notenfeststellung.name,
+          cell: ctx => ctx.getValue(),
+        })})
+  ], [fach]);
+
   //const actions = useActions();
   const table = useReactTable({
     getRowId: schüler => schüler.id,
