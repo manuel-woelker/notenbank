@@ -1,8 +1,8 @@
-import {makeSchüler, type State} from "./State.ts";
+import {makeSchüler, type NotenState} from "./NotenState.ts";
 import {create} from "zustand/react";
 
 
-const initialState: State = {
+const initialState: NotenState = {
   schuljahre: [
     {
       id: "2022-2023",
@@ -30,17 +30,16 @@ const initialState: State = {
               makeSchüler("Didi", "Drückeberger"),
               makeSchüler("Nina", "Neunmalschlau"),
               makeSchüler("Rosa", "Schweinchen"),
-          ]
+          ].sort((a, b) => a.nachname.localeCompare(b.nachname)),
         },
       ]
     },
   ]
-
-
 }
 
 
-export const useStore = create(() => (initialState))
+
+export const useNotenStore = create(() => (initialState))
 
 /*
 export const useStore = function() : State {

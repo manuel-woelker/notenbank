@@ -1,6 +1,6 @@
-import {useStore} from "./useStore.ts";
+import {useNotenStore} from "./useNotenStore.ts";
 import {produce} from "immer";
-import type {State} from "./State.ts";
+import type {NotenState} from "./NotenState.ts";
 
 
 
@@ -8,13 +8,13 @@ const devTools = typeof window !== "undefined" ? window?.__REDUX_DEVTOOLS_EXTENS
   name: "Notenbank",
 }) : undefined;
 
-devTools?.init(useStore.getInitialState());
+devTools?.init(useNotenStore.getInitialState());
 
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-export type RawAction = (state: State, ...args: any[]) => void;
+export type RawAction = (state: NotenState, ...args: any[]) => void;
 
 // Helper to extract action parameters without the state parameter
-type ActionParameters<T> = T extends (state: State, ...args: infer P) => void ? P : never;
+type ActionParameters<T> = T extends (state: NotenState, ...args: infer P) => void ? P : never;
 
 
 type ActionOf<RAW_ACTION> = RAW_ACTION extends RawAction ? (...args: ActionParameters<RAW_ACTION>) => void : never;
@@ -23,16 +23,16 @@ type ActionCreators<T> = {
   [K in keyof T]: ActionOf<T[K]>;
 };
 
-function createAction(name: string, action: (state: State, ...args: unknown[]) => void) {
+function createAction(name: string, action: (state: NotenState, ...args: unknown[]) => void) {
   return (...args: unknown[]) => {
-    useStore.setState(state =>
+    useNotenStore.setState(state =>
         produce(state, draft => {
           action(draft, ...args);
         })
     );
     devTools?.send(
         {type: name, args},
-        useStore.getState()
+        useNotenStore.getState()
     );
   };
 }

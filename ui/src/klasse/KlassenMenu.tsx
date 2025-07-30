@@ -2,7 +2,7 @@ import {Link, useNavigate} from "@tanstack/react-router";
 import {NewEntry} from "../components/NewEntry.tsx";
 import { useActions } from "../store/useActions.ts";
 import {useCallback} from "react";
-import type {Fach} from "../store/State.ts";
+import type {Fach} from "../store/NotenState.ts";
 import {useKlasse} from "../store/useParams.ts";
 import {fachRoute, klasseRoute, schülerRoute} from "../routing.tsx";
 

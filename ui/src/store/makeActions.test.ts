@@ -1,15 +1,15 @@
 import {makeActions, type RawAction} from "./makeActions.ts";
-import type {State} from "./State.ts";
-import {useStore} from "./useStore.ts";
+import type {NotenState} from "./NotenState.ts";
+import {useNotenStore} from "./useNotenStore.ts";
 
 
 
 // Define your actions with their implementations
 const rawActions = {
-  addSchuljahr(state: State, schuljahrName: string) {
+  addSchuljahr(state: NotenState, schuljahrName: string) {
     state.schuljahre.push({id: schuljahrName, name: schuljahrName, klassen: []});
   },
-  clearSchuljahre(state: State) {
+  clearSchuljahre(state: NotenState) {
     state.schuljahre.length = 0;
   },
 } satisfies Record<string, RawAction>;
@@ -20,10 +20,10 @@ const actions = makeActions(rawActions);
 
 test('actions should modify the store state', () => {
   actions.clearSchuljahre();
-  let store = useStore.getState();
+  let store = useNotenStore.getState();
   expect(store.schuljahre).toStrictEqual([]);
   actions.addSchuljahr('2001/2002');
-  store = useStore.getState();
+  store = useNotenStore.getState();
   expect(store.schuljahre).toStrictEqual([{
     name: '2001/2002'}]);
 

@@ -28,10 +28,10 @@ export interface Klasse {
   schüler: Schüler[],
   fächer: Fach[],
 }
-export interface State {
+export interface NotenState {
   schuljahre: Schuljahr[],
 }
 
-export function getKlasse(state: State, schuljahrId: string, klassenId: string): Klasse {
+export function getKlasse(state: NotenState, schuljahrId: string, klassenId: string): Klasse {
   return state.schuljahre.find(schuljahr => schuljahr.id === schuljahrId)?.klassen.find(klasse => klasse.id === klassenId) ?? bail(() => `Klasse ${klassenId} in Schuljahr ${schuljahrId} not found`);
 }
