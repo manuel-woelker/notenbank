@@ -1,4 +1,4 @@
-import {getKlasse, type Schüler, type NotenState, makeFach} from "./NotenState.ts";
+import {getKlasse, type Schüler, type NotenState, makeFach, makeNotenfeststellung} from "./NotenState.ts";
 import {makeActions, type RawAction} from "./makeActions.ts";
 import {bail} from "../util/error.ts";
 
@@ -10,6 +10,13 @@ const rawActions = {
   addFach(state: NotenState, schuljahrId: string, klassenId: string, fachName: string) {
     const klasse = getKlasse(state, schuljahrId, klassenId);
     klasse.fächer.push(makeFach(fachName));
+  },
+  addNotenfeststellung(state: NotenState, schuljahrId: string, klassenId: string, fachId: string, notenfeststellungName: string) {
+    const klasse = getKlasse(state, schuljahrId, klassenId);
+    const fach = klasse.fächer.find(fach => fach.id === fachId) || bail(() => `Fach ${fachId} not found`);
+    const notenfeststellung = makeNotenfeststellung(notenfeststellungName);
+    fach.notenfeststellungen.push(notenfeststellung);
+    return notenfeststellung.id;
   },
   addSchüler(state: NotenState, schuljahrId: string, klassenId: string, schüler: Schüler) {
     const klasse = getKlasse(state, schuljahrId, klassenId);

@@ -1,10 +1,8 @@
-import {useFach} from "../store/useParams.ts";
-import {NotenTable} from "../fach/NotenTable.tsx";
+import {FachNotenTable} from "../fach/FachNotenTable.tsx";
 
 
 export function FachView() {
-  const {fach} = useFach();
-  return (<div><h2>Fach {fach.name}</h2>
-    <NotenTable/>
+  return (<div>
+    <FachNotenTable/>
   </div>);
 }

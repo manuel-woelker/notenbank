@@ -1,6 +1,6 @@
 import {bail} from "../util/error.ts";
 import {makeId} from "../util/id.ts";
-import type {Dayjs} from "dayjs";
+import dayjs, {type Dayjs} from "dayjs";
 
 export type Note = number;
 export type Id = string;
@@ -28,6 +28,11 @@ export interface Fach {
 export function makeFach(name: string): Fach {
   return {id: name, name, notenfeststellungen: []};
 }
+
+export function makeNotenfeststellung(name: string): Notenfeststellung {
+  return {id: name, name, date: dayjs(), einzelnoten: {}};
+}
+
 
 export interface Schüler {
   id: string,

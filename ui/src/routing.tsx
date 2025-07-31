@@ -10,6 +10,8 @@ import {NotFoundComponent} from "./layout/NotFoundComponent.tsx";
 import {ErrorComponent} from "./util/ErrorComponent.tsx";
 import {FachView} from "./klasse/FachView.tsx";
 import {SchülerView} from "./klasse/SchülerView.tsx";
+import {FachLayout} from "./klasse/FachLayout.tsx";
+import {NotenfeststellungView} from "./klasse/NotenfeststellungView.tsx";
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -77,11 +79,23 @@ export const schülerRoute = createRoute({
 export const fachRoute = createRoute({
   getParentRoute: () => klasseRoute,
   path: '/fach/$fachId',
+  component: FachLayout,
+})
+
+export const fachÜbersichtRoute = createRoute({
+  getParentRoute: () => fachRoute,
+  path: '/',
   component: FachView,
 })
 
+export const notenFeststellungRoute = createRoute({
+  getParentRoute: () => fachRoute,
+  path: '/noten/$notenfeststellungId',
+  component: NotenfeststellungView,
+})
 
-const routeTree = rootRoute.addChildren([indexRoute, aboutRoute, schuljahrRoute, klasseRoute, schülerRoute, fachRoute]);
+
+const routeTree = rootRoute.addChildren([indexRoute, aboutRoute, schuljahrRoute, klasseRoute, schülerRoute, fachRoute, fachÜbersichtRoute, notenFeststellungRoute]);
 
 const hashHistory = createHashHistory();
 

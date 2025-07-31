@@ -22,7 +22,19 @@ const diktat1: Notenfeststellung = {
     [initialSchüler[4].id]: makeNote(2),
   }
 }
-deutsch.notenfeststellungen = [diktat1];
+const mündlichHJ1: Notenfeststellung = {
+  id: "mündlichHJ1",
+  name: "Mündlich HJ 1",
+  date: dayjs('2018-04-13 19:18'),
+  einzelnoten: {
+    [initialSchüler[0].id]: makeNote(2.5),
+    [initialSchüler[2].id]: makeNote(1.75),
+    [initialSchüler[1].id]: makeNote(4),
+    [initialSchüler[3].id]: makeNote(5),
+    [initialSchüler[4].id]: makeNote(3),
+  }
+}
+deutsch.notenfeststellungen = [diktat1, mündlichHJ1];
 
 const initialState: NotenState = {
   schuljahre: [

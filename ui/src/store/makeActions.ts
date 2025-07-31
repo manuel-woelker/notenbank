@@ -11,29 +11,31 @@ const devTools = typeof window !== "undefined" ? window?.__REDUX_DEVTOOLS_EXTENS
 devTools?.init(useNotenStore.getInitialState());
 
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-export type RawAction = (state: NotenState, ...args: any[]) => void;
+export type RawAction = (state: NotenState, ...args: any[]) => any;
 
 // Helper to extract action parameters without the state parameter
-type ActionParameters<T> = T extends (state: NotenState, ...args: infer P) => void ? P : never;
+type ActionParameters<T> = T extends (state: NotenState, ...args: infer P) => unknown ? P : never;
 
 
-type ActionOf<RAW_ACTION> = RAW_ACTION extends RawAction ? (...args: ActionParameters<RAW_ACTION>) => void : never;
+type ActionOf<RAW_ACTION> = RAW_ACTION extends RawAction ? (...args: ActionParameters<RAW_ACTION>) => ReturnType<RAW_ACTION> : never;
 // Create a mapped type that transforms raw actions to action creators
 type ActionCreators<T> = {
   [K in keyof T]: ActionOf<T[K]>;
 };
 
-function createAction(name: string, action: (state: NotenState, ...args: unknown[]) => void) {
+function createAction(name: string, action: (state: NotenState, ...args: unknown[]) => unknown) {
   return (...args: unknown[]) => {
+    let result;
     useNotenStore.setState(state =>
         produce(state, draft => {
-          action(draft, ...args);
+          result = action(draft, ...args);
         })
     );
     devTools?.send(
         {type: name, args},
         useNotenStore.getState()
     );
+    return result;
   };
 }
 
