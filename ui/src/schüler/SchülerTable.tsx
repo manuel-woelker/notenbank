@@ -5,6 +5,7 @@ import {NewSchüler} from "../components/NewSchüler.tsx";
 import {useActions} from "../store/useActions.ts";
 import {useRef} from "react";
 import {SchülerTableDefaultCell} from "./SchülerTableDefaultCell.tsx";
+import {getRouteParams} from "../routing.tsx";
 
 
 const columnHelper = createColumnHelper<Schüler>()
@@ -23,7 +24,8 @@ const columns = [
 
 export function SchülerTable() {
   const {
-    klasse, schuljahrId, klassenId} = useKlasse();
+    klasse
+  } = useKlasse();
   const schüler = klasse.schüler;
   const actions = useActions();
   const table = useReactTable({
@@ -33,9 +35,7 @@ export function SchülerTable() {
     getCoreRowModel: getCoreRowModel(),
     meta: {
       updateSchüler: (schülerPartial: Partial<Schüler> & Pick<Schüler, "id">) => {
-        actions.updateSchüler(schuljahrId, klassenId, {
-          ...schülerPartial,
-        });
+        actions.updateSchüler(schülerPartial, getRouteParams());
       },
     }
   });
@@ -46,42 +46,44 @@ export function SchülerTable() {
     initialSchüler.current = new Set(schüler.map(schüler => schüler.id));
   }
   return (
-    <div>
-      <table className="table is-fullwidth is-bordered is-striped is-hoverable">
-        <thead>
-        {table.getHeaderGroups().map(headerGroup => (
-            <tr key={headerGroup.id}>
-              {headerGroup.headers.map(header => (
-                  <th key={header.id}>
-                    {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                        )}
-                  </th>
-              ))}
-            </tr>
+      <div>
+        <table className="table is-fullwidth is-bordered is-striped is-hoverable">
+          <thead>
+          {table.getHeaderGroups().map(headerGroup => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map(header => (
+                    <th key={header.id}>
+                      {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                          )}
+                    </th>
+                ))}
+              </tr>
 
-        ))}
-        </thead>
-        <tbody>
-        {table.getRowModel().rows.map(row => (
-            <tr key={row.id} className={initialSchüler.current?.has(row.id) ? "" : "flash"}>
-              {row.getVisibleCells().map(cell => (
-                  <td key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-              ))}
-            </tr>
           ))}
-        <tr>
-          <td colSpan={3}>
-            <NewSchüler onNewSchüler={(vorname, nachname) => {actions.addSchüler(schuljahrId, klassenId, makeSchüler(vorname, nachname))}} />
-          </td>
-        </tr>
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+          {table.getRowModel().rows.map(row => (
+              <tr key={row.id} className={initialSchüler.current?.has(row.id) ? "" : "flash"}>
+                {row.getVisibleCells().map(cell => (
+                    <td key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </td>
+                ))}
+              </tr>
+          ))}
+          <tr>
+            <td colSpan={3}>
+              <NewSchüler onNewSchüler={(vorname, nachname) => {
+                actions.addSchüler(makeSchüler(vorname, nachname), getRouteParams())
+              }}/>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
   )
 }

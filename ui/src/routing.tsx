@@ -105,3 +105,12 @@ export const router = createRouter({
   defaultNotFoundComponent: NotFoundComponent,
   defaultErrorComponent: ErrorComponent,
 });
+
+export const getRouteParams = ():{
+  schuljahrId: string,
+  klassenId: string,
+  fachId: string,
+  notenfeststellungId: string,
+} => {
+  return router.__store.state.matches.at(-1)?.params ?? {};
+}

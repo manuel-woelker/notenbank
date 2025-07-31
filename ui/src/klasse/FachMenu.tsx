@@ -1,20 +1,18 @@
 import {Link, useNavigate} from "@tanstack/react-router";
 import {NewEntry} from "../components/NewEntry.tsx";
-import { useActions } from "../store/useActions.ts";
+import {useActions} from "../store/useActions.ts";
 import {useCallback} from "react";
-import {useFach, useKlasse} from "../store/useParams.ts";
-import {fachÜbersichtRoute, notenFeststellungRoute} from "../routing.tsx";
+import {useFach} from "../store/useParams.ts";
+import {fachÜbersichtRoute, getRouteParams, notenFeststellungRoute} from "../routing.tsx";
 
 export function FachMenu() {
   const actions = useActions();
-  const {
-    schuljahrId, klassenId} = useKlasse();
   const {fach} = useFach();
   const navigate = useNavigate()
   const addNotenfeststellung = useCallback(async (notenfeststellungName: string) => {
-    const notenfeststellungId = actions.addNotenfeststellung(schuljahrId, klassenId, fach.id, notenfeststellungName);
+    const notenfeststellungId = actions.addNotenfeststellung(notenfeststellungName, getRouteParams());
     await navigate({to: notenFeststellungRoute.to, params: {notenfeststellungId}});
-  }, [actions, navigate, schuljahrId, klassenId, fach.id]);
+  }, [actions, navigate]);
   return (<>
     <aside className="menu is-hidden-mobile"  style={{paddingLeft: 10}}>
       <ul className="menu-list">

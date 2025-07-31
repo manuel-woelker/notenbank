@@ -63,3 +63,7 @@ export interface NotenState {
 export function getKlasse(state: NotenState, schuljahrId: string, klassenId: string): Klasse {
   return state.schuljahre.find(schuljahr => schuljahr.id === schuljahrId)?.klassen.find(klasse => klasse.id === klassenId) ?? bail(() => `Klasse ${klassenId} in Schuljahr ${schuljahrId} not found`);
 }
+
+export function getKlasse2(state: NotenState, params: {schuljahrId: string, klassenId: string}): Klasse {
+  return state.schuljahre.find(schuljahr => schuljahr.id === params.schuljahrId)?.klassen.find(klasse => klasse.id === params.klassenId) ?? bail(() => `Klasse ${params.klassenId} in Schuljahr ${params.schuljahrId} not found`);
+}
