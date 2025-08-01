@@ -11,10 +11,13 @@ export function NotenInput(props: NotenInputProps) {
   const onChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     props.onChangeNote(props.schülerId, parseFloat(event.target.value));
   }, [props]);
-  console.log(props.note);
+  let value: number | "" = props.note.note;
+  if (isNaN(value)) {
+    value = "";
+  }
   return (
     <div>
-      <input type="number" placeholder="Note" inputMode="numeric" step="0.25" min="0.75" max="6" value={props.note.note} onChange={onChange}/>
+      <input type="number" placeholder="Note" inputMode="numeric" step="0.25" min="0.75" max="6" value={value} onChange={onChange}/>
     </div>
   );
 }

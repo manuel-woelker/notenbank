@@ -16,7 +16,6 @@ export function NotenfeststellungTable() {
   const {klasse} = useKlasse();
   const {notenfeststellung} = useNotenfeststellung();
   const changeNote = useCallback((schülerId: Id, note: Note) => {
-    console.log(schülerId, note);
     actions.updateNote({
       schülerId,
       note
@@ -30,6 +29,17 @@ export function NotenfeststellungTable() {
         note
       }
   }), [schüler, notenfeststellung]);
+  const average = useMemo(() => {
+    let sum = 0;
+    let count = 0;
+    notendata.forEach(notendata => {
+      if (notendata.note && !isNaN(notendata.note.note)) {
+        sum += notendata.note.note;
+        count++;
+      }
+    });
+    return sum / count;
+  }, [notendata]);
   const columns = useMemo(() => [
     columnHelper.accessor((notendata: Notendata) => notendata.vorname + " " + notendata.nachname, {
       header: 'Name',
@@ -85,6 +95,11 @@ export function NotenfeststellungTable() {
               </tr>
           ))}
           </tbody>
+          <tfoot>
+          <tr>
+            <td><i>Durchschnitt:</i></td><td><i>{average}</i></td>
+          </tr>
+          </tfoot>
         </table>
       </div>
   )

@@ -39,7 +39,6 @@ const rawActions = {
   },
   updateNote(state: NotenState, {schülerId, note}: { schülerId: Id, note: Note }) {
     const notenfeststellung = getNotenfeststellung(state);
-    console.log(note);
     notenfeststellung.einzelnoten[schülerId].note = note;
   }
 } satisfies Record<string, RawAction>;
