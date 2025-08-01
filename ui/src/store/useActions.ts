@@ -1,4 +1,12 @@
-import {addFach, getKlasse, type LocalId, makeNotenfeststellung, type NotenState, type Schüler} from "./NotenState.ts";
+import {
+  addFach,
+  getKlasse, getNotenfeststellung,
+  type Id,
+  type LocalId,
+  makeNotenfeststellung, type Note,
+  type NotenState,
+  type Schüler
+} from "./NotenState.ts";
 import {makeActions, type RawAction} from "./makeActions.ts";
 import {bail} from "../util/error.ts";
 
@@ -29,6 +37,11 @@ const rawActions = {
     const schüler: Schüler = klasse.schüler.find(schüler => schüler.id === schülerPartial.id) || bail(() => `Schüler ${schülerPartial.id} not found`);
     Object.assign(schüler, schülerPartial);
   },
+  updateNote(state: NotenState, {schülerId, note}: { schülerId: Id, note: Note }) {
+    const notenfeststellung = getNotenfeststellung(state);
+    console.log(note);
+    notenfeststellung.einzelnoten[schülerId].note = note;
+  }
 } satisfies Record<string, RawAction>;
 
 // Create the typed actions

@@ -1,35 +1,53 @@
 import {createColumnHelper, flexRender, getCoreRowModel, useReactTable} from "@tanstack/react-table";
-import {type Schüler} from "../store/NotenState.ts";
+import {type Einzelnote, type Id, type Note, type Schüler} from "../store/NotenState.ts";
 import {useKlasse, useNotenfeststellung} from "../store/useParams.ts";
-import {useMemo} from "react";
+import {useCallback, useMemo} from "react";
+import {NotenInput} from "../klasse/NotenInput.tsx";
+import {actions} from "../store/useActions.ts";
 
 
-const columnHelper = createColumnHelper<Schüler>()
+type Notendata = Schüler & {note: Einzelnote}
+const columnHelper = createColumnHelper<Notendata>()
+
 
 
 
 export function NotenfeststellungTable() {
   const {klasse} = useKlasse();
   const {notenfeststellung} = useNotenfeststellung();
+  const changeNote = useCallback((schülerId: Id, note: Note) => {
+    console.log(schülerId, note);
+    actions.updateNote({
+      schülerId,
+      note
+    });
+  }, [])
   const schüler = klasse.schüler;
+  const notendata: Notendata[] = useMemo(() => schüler.map(schüler => {
+      const note = notenfeststellung.einzelnoten[schüler.id];
+      return {
+        ...schüler,
+        note
+      }
+  }), [schüler, notenfeststellung]);
   const columns = useMemo(() => [
-    columnHelper.accessor((schüler: Schüler) => schüler.vorname + " " + schüler.nachname, {
+    columnHelper.accessor((notendata: Notendata) => notendata.vorname + " " + notendata.nachname, {
       header: 'Name',
       cell: ctx => ctx.getValue(),
     }),
-    columnHelper.accessor((schüler: Schüler) => {
-      const note = notenfeststellung.einzelnoten[schüler.id];
-      return note ? note.note : "-";
+    columnHelper.accessor((notendata: Notendata) => {
+      const note = notendata.note;
+      return note;
     },{
       header: notenfeststellung.name,
-      cell: ctx => ctx.getValue(),
+      cell: ctx => <NotenInput note={ctx.getValue()} schülerId={ctx.row.id} onChangeNote={changeNote}/>,
     })
-  ], [notenfeststellung]);
+  ], [notenfeststellung, changeNote]);
 
   //const actions = useActions();
   const table = useReactTable({
     getRowId: schüler => schüler.id,
-    data: schüler,
+    data: notendata,
     columns,
     getCoreRowModel: getCoreRowModel(),
     meta: {
