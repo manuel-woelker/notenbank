@@ -11,6 +11,7 @@ export interface Einzelnote {
 }
 
 export interface RouteParams {
+  uninitialized?: boolean,
   schuljahrId?: Id,
   klassenId?: Id,
   fachId?: Id,

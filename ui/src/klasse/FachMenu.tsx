@@ -3,7 +3,7 @@ import {NewEntry} from "../components/NewEntry.tsx";
 import {useActions} from "../store/useActions.ts";
 import {useCallback} from "react";
 import {useFach} from "../store/useParams.ts";
-import {fachÜbersichtRoute, notenFeststellungRoute} from "../routing.tsx";
+import {fachRoute, notenFeststellungRoute} from "../routing.tsx";
 
 export function FachMenu() {
   const actions = useActions();
@@ -16,7 +16,7 @@ export function FachMenu() {
   return (<>
     <aside className="menu is-hidden-mobile"  style={{paddingLeft: 10}}>
       <ul className="menu-list">
-        <li><Link activeProps={{className: "is-active"}} to={fachÜbersichtRoute.to} activeOptions={{ exact: true }}>Übersicht</Link></li>
+        <li><Link activeProps={{className: "is-active"}} to={fachRoute.to} activeOptions={{ exact: true }} params={{fachId: fach.id}}>Übersicht</Link></li>
       </ul>
       <p className="menu-label">
         Notenfeststellungen

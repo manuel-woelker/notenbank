@@ -1,11 +1,7 @@
-import {
-  createRouter,
-  createRoute,
-  createRootRoute, createHashHistory, redirect, Outlet,
-} from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
+import {createHashHistory, createRootRoute, createRoute, createRouter, Outlet, redirect,} from '@tanstack/react-router'
+import {TanStackRouterDevtools} from '@tanstack/react-router-devtools'
 import {Layout} from "./layout/Layout.tsx";
-import { KlassenMenu } from './klasse/KlassenMenu.tsx';
+import {KlassenMenu} from './klasse/KlassenMenu.tsx';
 import {NotFoundComponent} from "./layout/NotFoundComponent.tsx";
 import {ErrorComponent} from "./util/ErrorComponent.tsx";
 import {FachView} from "./klasse/FachView.tsx";
@@ -42,7 +38,7 @@ const indexRoute = createRoute({
 
 const aboutRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/about',
+  path: 'about',
   component: function About() {
     return <div className="p-2">Hello from About!</div>
   },
@@ -50,12 +46,12 @@ const aboutRoute = createRoute({
 
 export const schuljahrRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/schuljahr/$schuljahrId',
+  path: 'schuljahr/$schuljahrId',
 })
 
 export const klasseRoute = createRoute({
   getParentRoute: () => schuljahrRoute,
-  path: '/klasse/$klassenId',
+  path: 'klasse/$klassenId',
   component: function Klasse() {
     return (<div className="columns">
       <div className="column is-3 ">
@@ -79,7 +75,7 @@ export const schülerRoute = createRoute({
 
 export const fachRoute = createRoute({
   getParentRoute: () => klasseRoute,
-  path: '/fach/$fachId',
+  path: 'fach/$fachId',
   component: FachLayout,
 })
 
@@ -91,7 +87,7 @@ export const fachÜbersichtRoute = createRoute({
 
 export const notenFeststellungRoute = createRoute({
   getParentRoute: () => fachRoute,
-  path: '/noten/$notenfeststellungId',
+  path: 'noten/$notenfeststellungId',
   component: NotenfeststellungView,
 })
 
@@ -116,6 +112,7 @@ export const getRouteParams = ():{
   return router.__store.state.matches.at(-1)?.params ?? {};
 }
 
-router.subscribe("onResolved", () => {
-  setNotenStoreRouteParams(getRouteParams());
+router.subscribe("onLoad", () => {
+  const routeParams = getRouteParams();
+  setNotenStoreRouteParams(routeParams);
 })

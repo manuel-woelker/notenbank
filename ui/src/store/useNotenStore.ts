@@ -48,7 +48,9 @@ addFach(fächer, {name: "Sachkunde"});
 deutsch.notenfeststellungen = [diktat1, mündlichHJ1];
 
 const initialState: NotenState = {
-  routeParams: {},
+  routeParams: {
+    uninitialized: true,
+  },
   schuljahre: [
     {
       id: "2022-2023",
