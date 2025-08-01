@@ -9,6 +9,13 @@ export interface Einzelnote {
   note: Note,
 }
 
+export interface RouteParams {
+  schuljahrId?: Id,
+  klassenId?: Id,
+  fachId?: Id,
+  notenfeststellungId?: Id,
+}
+
 export function makeNote(note: Note): Einzelnote {
   return {note};
 }
@@ -58,12 +65,10 @@ export interface Klasse {
 }
 export interface NotenState {
   schuljahre: Schuljahr[],
+  routeParams: RouteParams,
 }
 
-export function getKlasse(state: NotenState, schuljahrId: string, klassenId: string): Klasse {
+export function getKlasse(state: NotenState): Klasse {
+  const {schuljahrId, klassenId} = state.routeParams;
   return state.schuljahre.find(schuljahr => schuljahr.id === schuljahrId)?.klassen.find(klasse => klasse.id === klassenId) ?? bail(() => `Klasse ${klassenId} in Schuljahr ${schuljahrId} not found`);
-}
-
-export function getKlasse2(state: NotenState, params: {schuljahrId: string, klassenId: string}): Klasse {
-  return state.schuljahre.find(schuljahr => schuljahr.id === params.schuljahrId)?.klassen.find(klasse => klasse.id === params.klassenId) ?? bail(() => `Klasse ${params.klassenId} in Schuljahr ${params.schuljahrId} not found`);
 }

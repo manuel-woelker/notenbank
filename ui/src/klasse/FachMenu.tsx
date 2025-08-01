@@ -3,14 +3,14 @@ import {NewEntry} from "../components/NewEntry.tsx";
 import {useActions} from "../store/useActions.ts";
 import {useCallback} from "react";
 import {useFach} from "../store/useParams.ts";
-import {fachÜbersichtRoute, getRouteParams, notenFeststellungRoute} from "../routing.tsx";
+import {fachÜbersichtRoute, notenFeststellungRoute} from "../routing.tsx";
 
 export function FachMenu() {
   const actions = useActions();
   const {fach} = useFach();
   const navigate = useNavigate()
   const addNotenfeststellung = useCallback(async (notenfeststellungName: string) => {
-    const notenfeststellungId = actions.addNotenfeststellung(notenfeststellungName, getRouteParams());
+    const notenfeststellungId = actions.addNotenfeststellung(notenfeststellungName);
     await navigate({to: notenFeststellungRoute.to, params: {notenfeststellungId}});
   }, [actions, navigate]);
   return (<>

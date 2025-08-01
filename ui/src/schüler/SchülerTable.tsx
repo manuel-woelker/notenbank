@@ -5,7 +5,6 @@ import {NewSchüler} from "../components/NewSchüler.tsx";
 import {useActions} from "../store/useActions.ts";
 import {useRef} from "react";
 import {SchülerTableDefaultCell} from "./SchülerTableDefaultCell.tsx";
-import {getRouteParams} from "../routing.tsx";
 
 
 const columnHelper = createColumnHelper<Schüler>()
@@ -35,7 +34,7 @@ export function SchülerTable() {
     getCoreRowModel: getCoreRowModel(),
     meta: {
       updateSchüler: (schülerPartial: Partial<Schüler> & Pick<Schüler, "id">) => {
-        actions.updateSchüler(schülerPartial, getRouteParams());
+        actions.updateSchüler(schülerPartial);
       },
     }
   });
@@ -78,7 +77,7 @@ export function SchülerTable() {
           <tr>
             <td colSpan={3}>
               <NewSchüler onNewSchüler={(vorname, nachname) => {
-                actions.addSchüler(makeSchüler(vorname, nachname), getRouteParams())
+                actions.addSchüler(makeSchüler(vorname, nachname))
               }}/>
             </td>
           </tr>

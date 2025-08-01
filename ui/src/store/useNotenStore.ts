@@ -1,4 +1,4 @@
-import {makeFach, makeNote, makeSchüler, type Notenfeststellung, type NotenState} from "./NotenState.ts";
+import {makeFach, makeNote, makeSchüler, type Notenfeststellung, type NotenState, type RouteParams} from "./NotenState.ts";
 import {create} from "zustand/react";
 import dayjs from 'dayjs'
 
@@ -37,6 +37,7 @@ const mündlichHJ1: Notenfeststellung = {
 deutsch.notenfeststellungen = [diktat1, mündlichHJ1];
 
 const initialState: NotenState = {
+  routeParams: {},
   schuljahre: [
     {
       id: "2022-2023",
@@ -69,6 +70,9 @@ const initialState: NotenState = {
 
 export const useNotenStore = create(() => (initialState))
 
+
+
+export const setNotenStoreRouteParams = (routeParams: RouteParams) => useNotenStore.setState(state => ({...state, routeParams}));
 /*
 export const useStore = function() : State {
   return initialState;

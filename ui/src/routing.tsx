@@ -12,6 +12,7 @@ import {FachView} from "./klasse/FachView.tsx";
 import {SchülerView} from "./klasse/SchülerView.tsx";
 import {FachLayout} from "./klasse/FachLayout.tsx";
 import {NotenfeststellungView} from "./klasse/NotenfeststellungView.tsx";
+import {setNotenStoreRouteParams} from "./store/useNotenStore.ts";
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -114,3 +115,7 @@ export const getRouteParams = ():{
 } => {
   return router.__store.state.matches.at(-1)?.params ?? {};
 }
+
+router.subscribe("onResolved", () => {
+  setNotenStoreRouteParams(getRouteParams());
+})

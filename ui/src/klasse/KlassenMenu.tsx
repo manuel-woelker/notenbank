@@ -1,10 +1,10 @@
 import {Link, useNavigate} from "@tanstack/react-router";
 import {NewEntry} from "../components/NewEntry.tsx";
-import { useActions } from "../store/useActions.ts";
+import {useActions} from "../store/useActions.ts";
 import {useCallback} from "react";
 import type {Fach} from "../store/NotenState.ts";
 import {useKlasse} from "../store/useParams.ts";
-import {fachRoute, getRouteParams, klasseRoute, schülerRoute} from "../routing.tsx";
+import {fachRoute, klasseRoute, schülerRoute} from "../routing.tsx";
 
 export function KlassenMenu() {
   const actions = useActions();
@@ -13,7 +13,7 @@ export function KlassenMenu() {
   const fächer: Fach[] = klasse.fächer;
   const navigate = useNavigate()
   const addFach = useCallback(async (fachName: string) => {
-    actions.addFach(fachName, getRouteParams());
+    actions.addFach(fachName);
     await navigate({from: klasseRoute.fullPath, to: "fach/$fachName", params: {fachName: fachName}});
   }, [actions, navigate]);
   return (<>
