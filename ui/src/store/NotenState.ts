@@ -1,9 +1,10 @@
 import {bail} from "../util/error.ts";
-import {makeId} from "../util/id.ts";
+import {makeUniqueId} from "../util/id.ts";
 import dayjs, {type Dayjs} from "dayjs";
 
 export type Note = number;
 export type Id = string;
+export type LocalId = string;
 
 export interface Einzelnote {
   note: Note,
@@ -32,8 +33,30 @@ export interface Fach {
   notenfeststellungen: Notenfeststellung[],
 }
 
-export function makeFach(name: string): Fach {
-  return {id: name, name, notenfeststellungen: []};
+export function addFach(fächer: Fach[], rawFach: Pick<Fach, "name">): Fach {
+  const id = findUniqueId(fächer, rawFach.name);
+  const fach = {notenfeststellungen: [],...rawFach, id};
+  fächer.push(fach);
+  return fach;
+}
+
+export function findUniqueId<T extends {id: string}>(items: T[], name: string): string {
+  function isUnique(id: string): boolean {
+    return !items.find(item => item.id === id);
+  }
+  const base_id = makeId(name);
+  if (isUnique(base_id)) {
+    return base_id;
+  }
+  let i = 2;
+  while (!isUnique(`${base_id}_${i}`)) {
+    i++;
+  }
+  return `${base_id}_${i}`;
+}
+
+export function makeId(name: string): string {
+  return name.replace(/\W+/g, '-')
 }
 
 export function makeNotenfeststellung(name: string): Notenfeststellung {
@@ -48,7 +71,7 @@ export interface Schüler {
 }
 
 export function makeSchüler(vorname: string, nachname: string): Schüler {
-  return {id: makeId(), vorname, nachname};
+  return {id: makeUniqueId(), vorname, nachname};
 }
 
 export interface Schuljahr {

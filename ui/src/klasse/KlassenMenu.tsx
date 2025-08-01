@@ -4,7 +4,7 @@ import {useActions} from "../store/useActions.ts";
 import {useCallback} from "react";
 import type {Fach} from "../store/NotenState.ts";
 import {useKlasse} from "../store/useParams.ts";
-import {fachRoute, klasseRoute, schülerRoute} from "../routing.tsx";
+import {fachRoute, schülerRoute} from "../routing.tsx";
 
 export function KlassenMenu() {
   const actions = useActions();
@@ -13,8 +13,8 @@ export function KlassenMenu() {
   const fächer: Fach[] = klasse.fächer;
   const navigate = useNavigate()
   const addFach = useCallback(async (fachName: string) => {
-    actions.addFach(fachName);
-    await navigate({from: klasseRoute.fullPath, to: "fach/$fachName", params: {fachName: fachName}});
+    const fachId = actions.addFach(fachName);
+    await navigate({to: fachRoute.to, params: {fachId}});
   }, [actions, navigate]);
   return (<>
     <aside className="menu is-hidden-mobile"  style={{paddingLeft: 10}}>

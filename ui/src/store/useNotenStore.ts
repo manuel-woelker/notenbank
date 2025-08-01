@@ -1,4 +1,11 @@
-import {makeFach, makeNote, makeSchüler, type Notenfeststellung, type NotenState, type RouteParams} from "./NotenState.ts";
+import {
+  addFach, type Fach,
+  makeNote,
+  makeSchüler,
+  type Notenfeststellung,
+  type NotenState,
+  type RouteParams
+} from "./NotenState.ts";
 import {create} from "zustand/react";
 import dayjs from 'dayjs'
 
@@ -9,7 +16,6 @@ const initialSchüler = [
   makeSchüler("Nina", "Neunmalschlau"),
   makeSchüler("Rosa", "Schweinchen"),
 ].sort((a, b) => a.nachname.localeCompare(b.nachname));
-const deutsch = makeFach("Deutsch");
 const diktat1: Notenfeststellung = {
   id: "diktat1",
   name: "Diktat 1",
@@ -34,6 +40,11 @@ const mündlichHJ1: Notenfeststellung = {
     [initialSchüler[4].id]: makeNote(3),
   }
 }
+const fächer: Fach[] = [];
+const deutsch = addFach(fächer, {name: "Deutsch"});
+addFach(fächer, {name: "Mathe"});
+addFach(fächer, {name: "Musik"});
+addFach(fächer, {name: "Sachkunde"});
 deutsch.notenfeststellungen = [diktat1, mündlichHJ1];
 
 const initialState: NotenState = {
@@ -53,12 +64,7 @@ const initialState: NotenState = {
         {
           id: "2a",
           name: "2a",
-          fächer: [
-              deutsch,
-              makeFach("Mathe"),
-              makeFach("Musik"),
-              makeFach("Sachkunde"),
-          ],
+          fächer,
           schüler: initialSchüler,
         },
       ]

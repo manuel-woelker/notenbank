@@ -1,4 +1,4 @@
-import {getKlasse, makeFach, makeNotenfeststellung, type NotenState, type Schüler} from "./NotenState.ts";
+import {addFach, getKlasse, type LocalId, makeNotenfeststellung, type NotenState, type Schüler} from "./NotenState.ts";
 import {makeActions, type RawAction} from "./makeActions.ts";
 import {bail} from "../util/error.ts";
 
@@ -7,9 +7,10 @@ const rawActions = {
   addSchuljahr(state: NotenState, schuljahrName: string) {
     state.schuljahre.push({id: schuljahrName, name: schuljahrName, klassen: []});
   },
-  addFach(state: NotenState, fachName: string) {
+  addFach(state: NotenState, fachName: string): LocalId {
     const klasse = getKlasse(state);
-    klasse.fächer.push(makeFach(fachName));
+    const fach = addFach(klasse.fächer, {name: fachName});
+    return fach.id;
   },
   addNotenfeststellung(state: NotenState, notenfeststellungName: string): string {
     const klasse = getKlasse(state);
