@@ -1,4 +1,4 @@
-import {FachNotenTable} from "../fach/FachNotenTable.tsx";
+import {FachNotenTable} from "./FachNotenTable.tsx";
 
 
 export function FachView() {

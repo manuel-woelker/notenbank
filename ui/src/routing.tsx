@@ -1,13 +1,13 @@
 import {createHashHistory, createRootRoute, createRoute, createRouter, Outlet, redirect,} from '@tanstack/react-router'
 import {TanStackRouterDevtools} from '@tanstack/react-router-devtools'
 import {Layout} from "./layout/Layout.tsx";
-import {KlassenMenu} from './klasse/KlassenMenu.tsx';
+import {KlassenMenu} from './views/klasse/KlassenMenu.tsx';
 import {NotFoundComponent} from "./layout/NotFoundComponent.tsx";
 import {ErrorComponent} from "./util/ErrorComponent.tsx";
-import {FachView} from "./klasse/FachView.tsx";
-import {SchülerView} from "./klasse/SchülerView.tsx";
-import {FachLayout} from "./klasse/FachLayout.tsx";
-import {NotenfeststellungView} from "./klasse/NotenfeststellungView.tsx";
+import {FachView} from "./views/fach/FachView.tsx";
+import {SchülerView} from "./views/klasse/SchülerView.tsx";
+import {FachLayout} from "./views/fach/FachLayout.tsx";
+import {NotenfeststellungView} from "./views/notenfeststellung/NotenfeststellungView.tsx";
 import {setNotenStoreRouteParams} from "./store/useNotenStore.ts";
 
 const rootRoute = createRootRoute({

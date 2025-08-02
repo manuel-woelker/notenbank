@@ -1,8 +1,8 @@
 import {createColumnHelper, flexRender, getCoreRowModel, useReactTable} from "@tanstack/react-table";
-import {makeSchüler, type Schüler} from "../store/NotenState.ts";
-import {useKlasse} from "../store/useParams.ts";
-import {NewSchüler} from "../components/NewSchüler.tsx";
-import {useActions} from "../store/useActions.ts";
+import {makeSchüler, type Schüler} from "../../store/NotenState.ts";
+import {useKlasse} from "../../store/useParams.ts";
+import {NewSchüler} from "../../components/NewSchüler.tsx";
+import {useActions} from "../../store/useActions.ts";
 import {useRef} from "react";
 import {SchülerTableDefaultCell} from "./SchülerTableDefaultCell.tsx";
 

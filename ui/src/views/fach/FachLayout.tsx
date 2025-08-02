@@ -1,4 +1,4 @@
-import {useFach} from "../store/useParams.ts";
+import {useFach} from "../../store/useParams.ts";
 import {Outlet} from "@tanstack/react-router";
 import {FachMenu} from "./FachMenu.tsx";
 

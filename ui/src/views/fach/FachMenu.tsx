@@ -1,9 +1,9 @@
 import {Link, useNavigate} from "@tanstack/react-router";
-import {NewEntry} from "../components/NewEntry.tsx";
-import {useActions} from "../store/useActions.ts";
+import {NewEntry} from "../../components/NewEntry.tsx";
+import {useActions} from "../../store/useActions.ts";
 import {useCallback} from "react";
-import {useFach} from "../store/useParams.ts";
-import {fachRoute, notenFeststellungRoute} from "../routing.tsx";
+import {useFach} from "../../store/useParams.ts";
+import {fachRoute, notenFeststellungRoute} from "../../routing.tsx";
 
 export function FachMenu() {
   const actions = useActions();

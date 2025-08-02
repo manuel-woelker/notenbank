@@ -1,10 +1,10 @@
 import {Link, useNavigate} from "@tanstack/react-router";
-import {NewEntry} from "../components/NewEntry.tsx";
-import {useActions} from "../store/useActions.ts";
+import {NewEntry} from "../../components/NewEntry.tsx";
+import {useActions} from "../../store/useActions.ts";
 import {useCallback} from "react";
-import type {Fach} from "../store/NotenState.ts";
-import {useKlasse} from "../store/useParams.ts";
-import {fachRoute, schülerRoute} from "../routing.tsx";
+import type {Fach} from "../../store/NotenState.ts";
+import {useKlasse} from "../../store/useParams.ts";
+import {fachRoute, schülerRoute} from "../../routing.tsx";
 
 export function KlassenMenu() {
   const actions = useActions();

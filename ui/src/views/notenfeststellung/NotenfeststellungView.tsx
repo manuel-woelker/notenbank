@@ -1,5 +1,5 @@
-import {useFach} from "../store/useParams.ts";
-import {NotenfeststellungTable} from "../fach/NotenfeststellungTable.tsx";
+import {useFach} from "../../store/useParams.ts";
+import {NotenfeststellungTable} from "./NotenfeststellungTable.tsx";
 
 
 export function NotenfeststellungView() {

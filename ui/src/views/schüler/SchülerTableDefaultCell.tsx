@@ -1,5 +1,5 @@
 import type {CellContext, ColumnDefTemplate} from "@tanstack/react-table";
-import type {Schüler} from "../store/NotenState.ts";
+import type {Schüler} from "../../store/NotenState.ts";
 import {useEffect, useState} from "react";
 
 
