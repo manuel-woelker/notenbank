@@ -9,6 +9,7 @@ import {
 } from "./NotenState.ts";
 import {makeActions, type RawAction} from "./makeActions.ts";
 import {bail} from "../util/error.ts";
+import {deriveNotenfeststellungAverage} from "./NotenStateDerivations.ts";
 
 // Define your actions with their implementations
 const rawActions = {
@@ -40,6 +41,7 @@ const rawActions = {
   updateNote(state: NotenState, {schülerId, note}: { schülerId: Id, note: Note }) {
     const notenfeststellung = getNotenfeststellung(state);
     notenfeststellung.einzelnoten[schülerId].note = note;
+    deriveNotenfeststellungAverage(notenfeststellung);
   }
 } satisfies Record<string, RawAction>;
 
@@ -47,3 +49,4 @@ const rawActions = {
 export const actions = makeActions(rawActions);
 
 export const useActions = (): typeof actions => actions;
+

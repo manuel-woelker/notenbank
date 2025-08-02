@@ -27,6 +27,7 @@ export interface Notenfeststellung {
   name: string,
   date: Dayjs,
   einzelnoten: Record<Id, Einzelnote>,
+  average?: Note,
 }
 export interface Fach {
   id: string,
@@ -63,7 +64,6 @@ export function makeId(name: string): string {
 export function makeNotenfeststellung(name: string): Notenfeststellung {
   return {id: name, name, date: dayjs(), einzelnoten: {}};
 }
-
 
 export interface Schüler {
   id: string,

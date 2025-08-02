@@ -10,8 +10,6 @@ type SchülerWithNote = Schüler & {note: Einzelnote}
 const columnHelper = createColumnHelper<SchülerWithNote>()
 
 
-
-
 export function NotenfeststellungTable() {
   const {klasse} = useKlasse();
   const {notenfeststellung} = useNotenfeststellung();
@@ -29,17 +27,6 @@ export function NotenfeststellungTable() {
         note
       }
   }), [schüler, notenfeststellung]);
-  const average = useMemo(() => {
-    let sum = 0;
-    let count = 0;
-    schülerWithNote.forEach(notendata => {
-      if (notendata.note && !isNaN(notendata.note.note)) {
-        sum += notendata.note.note;
-        count++;
-      }
-    });
-    return sum / count;
-  }, [schülerWithNote]);
   const columns = useMemo(() => [
     columnHelper.accessor((notendata: SchülerWithNote) => notendata.vorname + " " + notendata.nachname, {
       header: 'Name',
@@ -96,7 +83,7 @@ export function NotenfeststellungTable() {
           </tbody>
           <tfoot>
           <tr>
-            <td><i>Durchschnitt:</i></td><td><i>{average}</i></td>
+            <td><i>Durchschnitt:</i></td><td><i>{notenfeststellung.average}</i></td>
           </tr>
           </tfoot>
         </table>
