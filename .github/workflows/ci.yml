@@ -21,6 +21,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
+          cache-dependency-path: 'ui/pnpm-lock.yaml'
       - name: Install packages
         run: scripts/install-packages.sh
       - name: Check format
