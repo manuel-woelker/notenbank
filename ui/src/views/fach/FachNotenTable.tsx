@@ -69,6 +69,15 @@ export function FachNotenTable() {
               </tr>
           ))}
           </tbody>
+          <tfoot>
+          <tr>
+            <td><i>Ø Durchschnitt:</i></td>
+            {fach.notenfeststellungen.map(notenfeststellung => {
+              return <td key={notenfeststellung.id}><i>{notenfeststellung.average}</i></td>
+            })}
+
+          </tr>
+          </tfoot>
         </table>
       </div>
   )

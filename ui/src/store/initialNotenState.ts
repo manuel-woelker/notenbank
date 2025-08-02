@@ -23,7 +23,7 @@ export const makeInitialNotenState = (): NotenState => {
     }
   }
   const mündlichHJ1: Notenfeststellung = {
-    id: "mündlichHJ1",
+    id: "muendlichHJ1",
     name: "Mündlich HJ 1",
     date: dayjs('2018-04-13 19:18'),
     einzelnoten: {
