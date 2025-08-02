@@ -28,4 +28,8 @@ jobs:
         run: scripts/check-format.sh
       - name: Check types
         run: scripts/check-types.sh
+      - name: UI Build
+        run: scripts/build-ui.sh
+      - name: UI Tests
+        run: scripts/test-ui.sh
 

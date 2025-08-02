@@ -25,7 +25,10 @@ test('actions should modify the store state', () => {
   actions.addSchuljahr('2001/2002');
   store = useNotenStore.getState();
   expect(store.schuljahre).toStrictEqual([{
-    name: '2001/2002'}]);
+    name: '2001/2002',
+    id: '2001/2002',
+    klassen: [],
+  }]);
 
 });
 
