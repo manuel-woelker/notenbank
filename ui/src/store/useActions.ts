@@ -40,7 +40,12 @@ const rawActions = {
   },
   updateNote(state: NotenState, {schülerId, note}: { schülerId: Id, note: Note }) {
     const notenfeststellung = getNotenfeststellung(state);
-    notenfeststellung.einzelnoten[schülerId].note = note;
+    let einzelnote = notenfeststellung.einzelnoten[schülerId];
+    if (!einzelnote) {
+      einzelnote = {note};
+      notenfeststellung.einzelnoten[schülerId] = einzelnote;
+    }
+    einzelnote.note = note;
     deriveNotenfeststellungAverage(notenfeststellung);
   }
 } satisfies Record<string, RawAction>;

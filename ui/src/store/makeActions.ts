@@ -1,6 +1,7 @@
 import {useNotenStore} from "./useNotenStore.ts";
 import {produce} from "immer";
 import type {NotenState} from "./NotenState.ts";
+import {saveNotenState} from "../persistence/persistence.ts";
 
 
 
@@ -31,9 +32,11 @@ function createAction(name: string, action: (state: NotenState, ...args: unknown
           result = action(draft, ...args);
         })
     );
+    const state = useNotenStore.getState();
+    saveNotenState(state);
     devTools?.send(
         {type: name, args},
-        useNotenStore.getState()
+        state
     );
     return result;
   };

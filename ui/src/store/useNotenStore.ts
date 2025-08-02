@@ -1,9 +1,13 @@
 import {type RouteParams} from "./NotenState.ts";
 import {create} from "zustand/react";
 import {makeInitialNotenState} from "./initialNotenState.ts";
+import {loadNotenState} from "../persistence/persistence.ts";
 
 
-export const useNotenStore = create(makeInitialNotenState)
+
+
+export const useNotenStore = create(() =>
+    loadNotenState() ?? makeInitialNotenState())
 
 
 

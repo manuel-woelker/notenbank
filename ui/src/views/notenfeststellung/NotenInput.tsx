@@ -11,7 +11,7 @@ export function NotenInput(props: NotenInputProps) {
   const onChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     props.onChangeNote(props.schülerId, parseFloat(event.target.value));
   }, [props]);
-  let value: number | "" = props.note.note;
+  let value: number | "" = props.note?.note ?? "";
   if (isNaN(value)) {
     value = "";
   }

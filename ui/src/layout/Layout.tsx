@@ -3,7 +3,7 @@ import {Outlet} from "@tanstack/react-router";
 import {useNotenStore} from "../store/useNotenStore.ts";
 
 export function Layout() {
-  const uninitialized = useNotenStore(state => state.routeParams.uninitialized);
+  const uninitialized = useNotenStore(state => state.routeParams?.uninitialized);
 
   if(uninitialized) {
     return (
