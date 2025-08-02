@@ -32,4 +32,11 @@ jobs:
         run: scripts/build-ui.sh
       - name: UI Tests
         run: scripts/test-ui.sh
-
+      - name: Upload UI
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload entire repository
+          path: 'ui/dist'
+      - name: Deploy UI to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
