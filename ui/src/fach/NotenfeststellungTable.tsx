@@ -6,8 +6,8 @@ import {NotenInput} from "../klasse/NotenInput.tsx";
 import {actions} from "../store/useActions.ts";
 
 
-type Notendata = Schüler & {note: Einzelnote}
-const columnHelper = createColumnHelper<Notendata>()
+type SchülerWithNote = Schüler & {note: Einzelnote}
+const columnHelper = createColumnHelper<SchülerWithNote>()
 
 
 
@@ -22,7 +22,7 @@ export function NotenfeststellungTable() {
     });
   }, [])
   const schüler = klasse.schüler;
-  const notendata: Notendata[] = useMemo(() => schüler.map(schüler => {
+  const schülerWithNote: SchülerWithNote[] = useMemo(() => schüler.map(schüler => {
       const note = notenfeststellung.einzelnoten[schüler.id];
       return {
         ...schüler,
@@ -32,20 +32,20 @@ export function NotenfeststellungTable() {
   const average = useMemo(() => {
     let sum = 0;
     let count = 0;
-    notendata.forEach(notendata => {
+    schülerWithNote.forEach(notendata => {
       if (notendata.note && !isNaN(notendata.note.note)) {
         sum += notendata.note.note;
         count++;
       }
     });
     return sum / count;
-  }, [notendata]);
+  }, [schülerWithNote]);
   const columns = useMemo(() => [
-    columnHelper.accessor((notendata: Notendata) => notendata.vorname + " " + notendata.nachname, {
+    columnHelper.accessor((notendata: SchülerWithNote) => notendata.vorname + " " + notendata.nachname, {
       header: 'Name',
       cell: ctx => ctx.getValue(),
     }),
-    columnHelper.accessor((notendata: Notendata) => {
+    columnHelper.accessor((notendata: SchülerWithNote) => {
       const note = notendata.note;
       return note;
     },{
@@ -54,10 +54,9 @@ export function NotenfeststellungTable() {
     })
   ], [notenfeststellung, changeNote]);
 
-  //const actions = useActions();
   const table = useReactTable({
     getRowId: schüler => schüler.id,
-    data: notendata,
+    data: schülerWithNote,
     columns,
     getCoreRowModel: getCoreRowModel(),
     meta: {
