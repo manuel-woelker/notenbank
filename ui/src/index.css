@@ -62,6 +62,11 @@ h1 {
 }
 
 .is-borderless:not(:focus) {
+  box-shadow: none !important;
   border: none !important;
   background-color: transparent !important;
+}
+
+table.is-vcentered td {
+  vertical-align: middle;
 }

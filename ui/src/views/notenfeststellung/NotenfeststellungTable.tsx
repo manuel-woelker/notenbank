@@ -2,7 +2,7 @@ import {createColumnHelper, flexRender, getCoreRowModel, useReactTable} from "@t
 import {type Einzelnote, type Id, type Note, type Schüler} from "../../store/NotenState.ts";
 import {useKlasse, useNotenfeststellung} from "../../store/useParams.ts";
 import {useCallback, useMemo} from "react";
-import {NotenInput} from "../klasse/NotenInput.tsx";
+import {NotenInput} from "./NotenInput.tsx";
 import {actions} from "../../store/useActions.ts";
 
 
@@ -31,6 +31,7 @@ export function NotenfeststellungTable() {
     columnHelper.accessor((notendata: SchülerWithNote) => notendata.vorname + " " + notendata.nachname, {
       header: 'Name',
       cell: ctx => ctx.getValue(),
+      size: 200,
     }),
     columnHelper.accessor((notendata: SchülerWithNote) => {
       const note = notendata.note;
@@ -52,12 +53,12 @@ export function NotenfeststellungTable() {
 
   return (
       <div>
-        <table className="table is-fullwidth is-bordered is-striped is-hoverable">
+        <table className="table is-fullwidth is-bordered is-striped is-hoverable is-vcentered">
           <thead>
           {table.getHeaderGroups().map(headerGroup => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map(header => (
-                    <th key={header.id}>
+                    <th key={header.id} style={{width: header.getSize()}}>
                       {header.isPlaceholder
                           ? null
                           : flexRender(
@@ -83,7 +84,7 @@ export function NotenfeststellungTable() {
           </tbody>
           <tfoot>
           <tr>
-            <td><i>Durchschnitt:</i></td><td><i>{notenfeststellung.average}</i></td>
+            <td><i>Ø Durchschnitt:</i></td><td><i>{notenfeststellung.average}</i></td>
           </tr>
           </tfoot>
         </table>

@@ -17,7 +17,7 @@ export function NotenInput(props: NotenInputProps) {
   }
   return (
     <div>
-      <input type="number" placeholder="Note" inputMode="numeric" step="0.25" min="0.75" max="6" value={value} onChange={onChange}/>
+      <input className="input is-borderless" type="number" placeholder="Note" inputMode="numeric" step="0.25" min="0.75" max="6" value={value} onChange={onChange}/>
     </div>
   );
 }

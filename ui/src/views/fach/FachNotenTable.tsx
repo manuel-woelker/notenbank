@@ -39,6 +39,7 @@ export function FachNotenTable() {
 
   return (
       <div>
+        <h4 className="subtitle is-4">{fach.name} - Notenübersicht</h4>
         <table className="table is-fullwidth is-bordered is-striped is-hoverable">
           <thead>
           {table.getHeaderGroups().map(headerGroup => (

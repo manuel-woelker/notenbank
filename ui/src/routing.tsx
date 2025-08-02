@@ -5,7 +5,7 @@ import {KlassenMenu} from './views/klasse/KlassenMenu.tsx';
 import {NotFoundComponent} from "./layout/NotFoundComponent.tsx";
 import {ErrorComponent} from "./util/ErrorComponent.tsx";
 import {FachView} from "./views/fach/FachView.tsx";
-import {SchülerView} from "./views/klasse/SchülerView.tsx";
+import {SchülerView} from "./views/schüler/SchülerView.tsx";
 import {FachLayout} from "./views/fach/FachLayout.tsx";
 import {NotenfeststellungView} from "./views/notenfeststellung/NotenfeststellungView.tsx";
 import {setNotenStoreRouteParams} from "./store/useNotenStore.ts";
