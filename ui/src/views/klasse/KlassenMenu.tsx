@@ -27,7 +27,7 @@ export function KlassenMenu() {
       </p>
       <ul className="menu-list">
         {fächer.map(fach => <Link key={fach.id} activeProps={{className: "is-active"}} to={fachRoute.to} params={{fachId: fach.id}}>{fach.name}</Link> )}
-        <NewEntry onNewEntry={addFach} />
+        <NewEntry onNewEntry={addFach} label="+ Fach hinzufügen" placeholder="Name des Faches"   />
       </ul>
     </aside>
     </>);

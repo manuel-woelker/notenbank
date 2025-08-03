@@ -64,8 +64,8 @@ export const makeInitialNotenState = (): NotenState => {
         name: "2023-2024",
         klassen: [
           {
-            id: "2a",
-            name: "2a",
+            id: "2b",
+            name: "2b",
             fächer,
             schüler: initialSchüler,
           },

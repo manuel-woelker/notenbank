@@ -23,7 +23,7 @@ export function FachMenu() {
       </p>
       <ul className="menu-list">
         {fach.notenfeststellungen.map(notenfeststellung => <Link key={notenfeststellung.id} activeProps={{className: "is-active"}} to={notenFeststellungRoute.to} params={{notenfeststellungId: notenfeststellung.id}}>{notenfeststellung.name}</Link> )}
-        <NewEntry onNewEntry={addNotenfeststellung} />
+        <NewEntry onNewEntry={addNotenfeststellung} label="+ Notenfeststellung hinzufügen" placeholder="Name der Notenfeststellung" />
       </ul>
     </aside>
     </>);

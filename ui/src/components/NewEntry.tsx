@@ -2,6 +2,8 @@ import {type ChangeEvent, type KeyboardEvent, useCallback, useEffect, useRef, us
 import {useFocus} from "../hooks/useFocus.ts";
 
 export interface NewEntryProps {
+  placeholder: string;
+  label: string;
   onNewEntry: (name: string) => void;
 }
 
@@ -19,16 +21,16 @@ export const NewEntry = (props: NewEntryProps) => {
     props.onNewEntry(valueRef.current!);
     setValue(null);
   }, [props]);
-  const onKeypress = useCallback((event: KeyboardEvent<HTMLInputElement>) => {
-    if(event.key === "Enter") {
+  const onKeyDown = useCallback((event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
       onDone();
     }
   }, [onDone]);
   return <>
     {value != null?
-        <input value={value} onChange={onChange} onBlur={onDone} onKeyPress={onKeypress} ref={focusRef}
-               className="input" type="text" placeholder="Name des Faches"/>:
-    <a onClick={() => setValue("")} autoFocus>+ Fach hinzufügen</a>
+        <input value={value} onChange={onChange} onBlur={onDone} onKeyDown={onKeyDown} ref={focusRef}
+               className="input" type="text" placeholder={props.placeholder} />:
+    <a onClick={() => setValue("")} autoFocus>{props.label}</a>
     }
   </>
 };
