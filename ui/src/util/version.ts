@@ -1,0 +1,1 @@
+export const VERSION = import.meta.env.VITE_REPO_VERSION ?? "vDEV";

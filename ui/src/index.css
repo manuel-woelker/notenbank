@@ -70,3 +70,8 @@ h1 {
 table.is-vcentered td {
   vertical-align: middle;
 }
+
+.version {
+  color: #AAA;
+  font-size: 0.6em;
+}

@@ -1,3 +1,4 @@
+import {VERSION} from "../util/version.ts";
 
 export function NavBar() {
   return (
@@ -25,6 +26,11 @@ export function NavBar() {
                 </a>
               </div>
 
+            </div>
+            <div className="navbar-end">
+              <div className="navbar-item version">
+                {VERSION}
+              </div>
             </div>
           </div>
         </nav>
