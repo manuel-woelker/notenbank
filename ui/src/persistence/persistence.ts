@@ -10,7 +10,9 @@ interface PersistentState {
 }
 
 export function saveNotenState(state: NotenState) {
-
+  if (typeof localStorage === "undefined") {
+    return;
+  }
   const persistentState = {
     "version": CURRENT_VERSION,
     state: {
@@ -22,6 +24,9 @@ export function saveNotenState(state: NotenState) {
 }
 
 export function loadNotenState(): NotenState | undefined {
+  if (typeof localStorage === "undefined") {
+    return undefined;
+  }
   const persistentStateString = localStorage.getItem(STORAGE_KEY);
   if (!persistentStateString) {
     console.debug("No NotenState found in localStorage, creating new one");
