@@ -31,7 +31,7 @@ const indexRoute = createRoute({
   },
   loader: async () => {
     throw redirect({
-      to: '/schuljahr/2023-2024/klasse/2a',
+      to: '/schuljahr/2023-2024/klasse/2b',
     })
   },
 })
