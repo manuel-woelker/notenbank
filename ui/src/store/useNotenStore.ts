@@ -1,7 +1,7 @@
-import {type RouteParams} from "./NotenState.ts";
 import {create} from "zustand/react";
-import {makeInitialNotenState} from "./initialNotenState.ts";
+import {makeInitialNotenState} from "./state/initialNotenState.ts";
 import {loadNotenState} from "../persistence/persistence.ts";
+import type {RouteParams} from "./state/RouteParams.ts";
 
 
 

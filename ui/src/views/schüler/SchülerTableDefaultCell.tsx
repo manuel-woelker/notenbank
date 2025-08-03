@@ -1,6 +1,6 @@
 import type {CellContext, ColumnDefTemplate} from "@tanstack/react-table";
-import type {Schüler} from "../../store/NotenState.ts";
 import {useEffect, useState} from "react";
+import type {Schüler} from "../../store/state/Schüler.ts";
 
 
 interface SchülerTableMetaType {

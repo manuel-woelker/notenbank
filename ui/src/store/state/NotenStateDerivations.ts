@@ -1,4 +1,4 @@
-import type {Notenfeststellung} from "./NotenState.ts";
+import type {Notenfeststellung} from "./Notenfeststellung.ts";
 
 export function deriveNotenfeststellungAverage(notenfeststellung: Notenfeststellung) {
   let sum = 0;

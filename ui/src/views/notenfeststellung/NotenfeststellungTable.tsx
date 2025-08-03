@@ -1,9 +1,11 @@
 import {createColumnHelper, flexRender, getCoreRowModel, useReactTable} from "@tanstack/react-table";
-import {type Einzelnote, type Id, type Note, type Schüler} from "../../store/NotenState.ts";
 import {useKlasse, useNotenfeststellung} from "../../store/useParams.ts";
 import {useCallback, useMemo} from "react";
 import {NotenInput} from "./NotenInput.tsx";
 import {actions} from "../../store/useActions.ts";
+import type {Einzelnote, Note} from "../../store/state/Einzelnote.ts";
+import type {Id} from "../../store/state/id.ts";
+import type {Schüler} from "../../store/state/Schüler.ts";
 
 
 type SchülerWithNote = Schüler & {note: Einzelnote}

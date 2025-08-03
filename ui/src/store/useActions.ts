@@ -1,15 +1,15 @@
 import {
-  addFach,
-  getKlasse, getNotenfeststellung,
-  type Id,
-  type LocalId,
-  makeNotenfeststellung, type Note,
-  type NotenState,
-  type Schüler
-} from "./NotenState.ts";
+  type NotenState
+} from "./state/NotenState.ts";
 import {makeActions, type RawAction} from "./makeActions.ts";
 import {bail} from "../util/error.ts";
-import {deriveNotenfeststellungAverage} from "./NotenStateDerivations.ts";
+import {deriveNotenfeststellungAverage} from "./state/NotenStateDerivations.ts";
+import {addFach} from "./state/Fach.ts";
+import type {Id, LocalId} from "./state/id.ts";
+import type {Note} from "./state/Einzelnote.ts";
+import type {Schüler} from "./state/Schüler.ts";
+import {getKlasse} from "./state/Klasse.ts";
+import {getNotenfeststellung, makeNotenfeststellung} from "./state/Notenfeststellung.ts";
 
 // Define your actions with their implementations
 const rawActions = {

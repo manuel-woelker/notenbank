@@ -1,7 +1,7 @@
 import {createColumnHelper, flexRender, getCoreRowModel, useReactTable} from "@tanstack/react-table";
-import {type Schüler} from "../../store/NotenState.ts";
 import {useFach, useKlasse} from "../../store/useParams.ts";
 import {useMemo} from "react";
+import type {Schüler} from "../../store/state/Schüler.ts";
 
 
 const columnHelper = createColumnHelper<Schüler>()

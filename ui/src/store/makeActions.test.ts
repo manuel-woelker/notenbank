@@ -1,5 +1,5 @@
 import {makeActions, type RawAction} from "./makeActions.ts";
-import type {NotenState} from "./NotenState.ts";
+import type {NotenState} from "./state/NotenState.ts";
 import {useNotenStore} from "./useNotenStore.ts";
 
 

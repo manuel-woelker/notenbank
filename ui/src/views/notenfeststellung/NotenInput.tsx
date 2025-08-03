@@ -1,5 +1,6 @@
-import type {Einzelnote, Id, LocalId, Note} from "../../store/NotenState.ts";
 import {type ChangeEvent, useCallback} from "react";
+import type {Einzelnote, Note} from "../../store/state/Einzelnote.ts";
+import type {Id, LocalId} from "../../store/state/id.ts";
 
 export interface NotenInputProps {
   schülerId: LocalId;

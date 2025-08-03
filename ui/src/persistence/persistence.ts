@@ -1,4 +1,4 @@
-import type {NotenState} from "../store/NotenState.ts";
+import type {NotenState} from "../store/state/NotenState.ts";
 
 
 const CURRENT_VERSION = 1;

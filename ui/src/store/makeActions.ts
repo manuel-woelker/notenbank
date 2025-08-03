@@ -1,6 +1,6 @@
 import {useNotenStore} from "./useNotenStore.ts";
 import {produce} from "immer";
-import type {NotenState} from "./NotenState.ts";
+import type {NotenState} from "./state/NotenState.ts";
 import {saveNotenState} from "../persistence/persistence.ts";
 
 

@@ -1,7 +1,7 @@
 import {fachRoute, klasseRoute, notenFeststellungRoute, schuljahrRoute} from "../routing.tsx";
-import {getKlasse} from "./NotenState.ts";
 import {useNotenStore} from "./useNotenStore.ts";
 import {bail} from "../util/error.ts";
+import {getKlasse} from "./state/Klasse.ts";
 
 
 export function useKlasse() {

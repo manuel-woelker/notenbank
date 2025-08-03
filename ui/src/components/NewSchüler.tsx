@@ -1,5 +1,6 @@
 import {type ChangeEvent, type KeyboardEvent, useCallback, useEffect, useRef, useState} from "react";
-import type {Schüler} from "../store/NotenState.ts";
+
+import type {Schüler} from "../store/state/Schüler.ts";
 
 export interface NewSchülerProps {
   onNewSchüler: (vorname: string, nachname: string) => void;

@@ -1,6 +1,10 @@
-import {addFach, type Fach, makeNote, makeSchüler, type Notenfeststellung, type NotenState} from "./NotenState.ts";
+import {type NotenState} from "./NotenState.ts";
 import dayjs from "dayjs";
 import {deriveNotenfeststellungAverage} from "./NotenStateDerivations.ts";
+import {addFach, type Fach} from "./Fach.ts";
+import {makeNote} from "./Einzelnote.ts";
+import {makeSchüler} from "./Schüler.ts";
+import type {Notenfeststellung} from "./Notenfeststellung.ts";
 
 export const makeInitialNotenState = (): NotenState => {
   const initialSchüler = [
