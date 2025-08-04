@@ -44,3 +44,10 @@ export function loadNotenState(): NotenState | undefined {
   };
   return state;
 }
+
+export function destroyNotenState() {
+  if (typeof localStorage === "undefined") {
+    return;
+  }
+  localStorage.removeItem(STORAGE_KEY);
+}
