@@ -52,7 +52,7 @@ export function DebugConsole() {
         {isOpen && <DebugComponent />}
       </DebugContainer>
       <ToggleButton onClick={toggleDebug} aria-label={isOpen ? 'Close debug' : 'Open debug'}>
-        {isOpen ? '×' : '🐛️'}
+        {isOpen ? '×' : '🔨'}
       </ToggleButton>
     </>
   );

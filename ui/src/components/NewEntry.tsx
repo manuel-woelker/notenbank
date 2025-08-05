@@ -18,12 +18,20 @@ export const NewEntry = (props: NewEntryProps) => {
     setValue(event.target.value);
   }, []);
   const onDone = useCallback(() => {
+    const value = valueRef.current?.trim();
+    if (value == null || value === "") {
+      setValue(null);
+      return;
+    }
     props.onNewEntry(valueRef.current!);
     setValue(null);
   }, [props]);
   const onKeyDown = useCallback((event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
       onDone();
+    }
+    if (event.key === 'Escape') {
+      setValue(null);
     }
   }, [onDone]);
   return <>
