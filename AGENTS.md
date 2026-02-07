@@ -43,7 +43,41 @@ cd ui
   - `TECHSTACK.md` - Technology choices and rationale
   - `DOCUMENTATION.md` - Documentation index
   - `use-cases/` - Use case requirements, each in a separate subfolder
-- `src/` - Source code (to be created)
+- `ui/src/` - UI source code
+
+## UI Folder Structure
+
+The UI follows a **use-case based** (feature-first) folder structure instead of organizing by technical concern (components/, pages/, etc.).
+
+**Structure:**
+```
+ui/src/
+├── features/              # Feature modules organized by use case
+│   └── administration/    # U1 Administration use case
+│       ├── classes/       # Classes entity (all related files together)
+│       ├── students/      # Students entity (future)
+│       └── subjects/      # Subjects entity (future)
+├── shared/                # Shared utilities and components
+├── App.tsx                # Main application component
+└── main.tsx               # Application entry point
+```
+
+**Benefits:**
+- **Cohesion**: All files for a specific entity (classes, students, subjects) are in one place
+- **Discoverability**: Easy to find repository, types, context, and components for each entity
+- **Scalability**: Adding new entities follows the same pattern
+- **Independence**: Changes to one entity don't affect others
+
+**Entity folder contents:**
+Each entity folder (e.g., `classes/`) contains:
+- `*Repository.ts` - Data access layer with CRUD operations and tests
+- `types.ts` - TypeScript interfaces and types
+- `*Context.tsx` - React Context for state management
+- `*Table.tsx` - Table component for listing
+- `*List.tsx` - Page component for the list view
+- `Create*Modal.tsx` - Modal for creating new entities
+
+When implementing new entities (students, subjects), follow this same structure.
 
 ## Use Cases
 

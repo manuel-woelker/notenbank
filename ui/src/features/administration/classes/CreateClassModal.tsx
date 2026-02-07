@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Modal, Form, Input, message } from 'antd';
-import { useClassContext } from '../../contexts/ClassContext';
+import { useClassContext } from './ClassContext';
 
 interface CreateClassModalProps {
   open: boolean;

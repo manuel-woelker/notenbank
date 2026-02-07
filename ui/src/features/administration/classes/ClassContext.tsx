@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Class, CreateClassInput, ClassContextValue } from '../types/class';
-import { classRepository } from '../repositories/ClassRepository';
+import { Class, CreateClassInput, ClassContextValue } from './types';
+import { classRepository } from './ClassRepository';
 
 const ClassContext = createContext<ClassContextValue | undefined>(undefined);
 

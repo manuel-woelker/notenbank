@@ -10,7 +10,7 @@ import {
 } from '@ant-design/icons'
 import './App.css'
 import { GIT_INFO } from './git-info'
-import { ClassList } from './pages/classes/ClassList'
+import { ClassList } from './features/administration/classes/ClassList'
 
 const { Header, Sider, Content, Footer } = Layout
 

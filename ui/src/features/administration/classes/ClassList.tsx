@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Button, Space, Typography } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
-import { useClassContext } from '../../contexts/ClassContext';
-import { ClassTable } from '../../components/classes/ClassTable';
+import { useClassContext } from './ClassContext';
+import { ClassTable } from './ClassTable';
 import { CreateClassModal } from './CreateClassModal';
 
 const { Title } = Typography;

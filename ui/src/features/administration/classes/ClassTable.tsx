@@ -1,7 +1,7 @@
 import React from 'react';
 import { Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { Class } from '../../types/class';
+import { Class } from './types';
 
 interface ClassTableProps {
   classes: Class[];

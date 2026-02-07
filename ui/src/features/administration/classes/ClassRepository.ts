@@ -1,4 +1,4 @@
-import { Class, CreateClassInput } from '../types/class';
+import { Class, CreateClassInput } from './types';
 
 const DB_NAME = 'notenbank';
 const DB_VERSION = 1;
@@ -165,6 +165,24 @@ export class IndexedDBClassRepository implements ClassRepository {
     };
   }
 }
+
+/**
+ * Singleton instance of the repository (lazy initialization to avoid test issues)
+ */
+let _classRepository: IndexedDBClassRepository | null = null;
+export const classRepository = {
+  get findAll() { return this._ensureInstance().findAll.bind(this._ensureInstance()); },
+  get findById() { return this._ensureInstance().findById.bind(this._ensureInstance()); },
+  get create() { return this._ensureInstance().create.bind(this._ensureInstance()); },
+  get update() { return this._ensureInstance().update.bind(this._ensureInstance()); },
+  get delete() { return this._ensureInstance().delete.bind(this._ensureInstance()); },
+  _ensureInstance() {
+    if (!_classRepository) {
+      _classRepository = new IndexedDBClassRepository();
+    }
+    return _classRepository;
+  }
+};
 
 // Tests
 if (import.meta.vitest) {
