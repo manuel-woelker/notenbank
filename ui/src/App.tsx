@@ -6,14 +6,17 @@ import {
   UserOutlined,
   VideoCameraOutlined,
   UploadOutlined,
+  TeamOutlined,
 } from '@ant-design/icons'
 import './App.css'
 import { GIT_INFO } from './git-info'
+import { ClassList } from './pages/classes/ClassList'
 
 const { Header, Sider, Content, Footer } = Layout
 
 function App() {
   const [collapsed, setCollapsed] = useState(false)
+  const [selectedMenu, setSelectedMenu] = useState('1')
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken()
@@ -36,12 +39,18 @@ function App() {
         <Menu
           theme="dark"
           mode="inline"
-          defaultSelectedKeys={['1']}
+          selectedKeys={[selectedMenu]}
+          onClick={(e) => setSelectedMenu(e.key)}
           items={[
             {
               key: '1',
               icon: <UserOutlined />,
               label: 'Dashboard',
+            },
+            {
+              key: 'classes',
+              icon: <TeamOutlined />,
+              label: 'Classes',
             },
             {
               key: '2',
@@ -82,8 +91,14 @@ function App() {
             borderRadius: borderRadiusLG,
           }}
         >
-          <h1>Welcome to Notenbank</h1>
-          <p>This is the main content area. Your application content will go here.</p>
+          {selectedMenu === 'classes' ? (
+            <ClassList />
+          ) : (
+            <>
+              <h1>Welcome to Notenbank</h1>
+              <p>This is the main content area. Your application content will go here.</p>
+            </>
+          )}
         </Content>
         <Footer style={{ textAlign: 'center' }}>
           Notenbank | Commit:{' '}

@@ -10,7 +10,8 @@
       "Bash(../tool-tool.exe pnpm install @ant-design/icons)",
       "Bash(../tool-tool.exe pnpm build)",
       "Bash(../tool-tool.exe node scripts/generate-git-info.js)",
-      "Bash(bash scripts/generate-git-info.sh:*)"
+      "Bash(bash scripts/generate-git-info.sh:*)",
+      "WebFetch(domain:ant.design)"
     ]
   }
 }
