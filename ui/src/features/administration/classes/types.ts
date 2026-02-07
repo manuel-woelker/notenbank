@@ -1,11 +1,10 @@
+import { BaseEntity } from '../../../shared/repositories/types'
+
 /**
  * Class entity representing a class/group in the student administration system
  */
-export interface Class {
-  id: string // UUID for unique identification
+export interface Class extends BaseEntity {
   name: string // Class name (e.g., "Class 5A", "Grade 10B")
-  createdAt: Date // Timestamp for creation
-  updatedAt: Date // Timestamp for last update
 }
 
 /**
