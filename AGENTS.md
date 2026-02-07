@@ -13,7 +13,7 @@ Notenbank is a student administration system built as a web application. The pro
 - **Bundler**: Vite (hot reload, fast bundling)
 - **UI Framework**: React
 - **Testing Framework**: Vitest (for unit tests)
-
+- **UI Component Library**: Ant Design (see https://ant.design/llms.txt for component docs)
 
 
 ## Development Commands
@@ -24,16 +24,15 @@ Notenbank is a student administration system built as a web application. The pro
 cd ui
 ../tool-tool.exe pnpm install         # Install dependencies
 ../tool-tool.exe pnpm build           # Build for production
-../tool-tool.exe pnpm dev             # Start development server
 ```
+
+**Never** start the dev server, it is already running.
 
 Note: These commands are not yet set up but should be configured when creating the project structure.
 
 - **Install dependencies**: `../tool-tool.exe pnpm install`
-- **Start dev server**: `../tool-tool.exe pnpm dev` (typical Vite setup)
 - **Build for production**: `../tool-tool.exe pnpm build`
 - **Run tests**: `../tool-tool.exe pnpm test`
-- **Run tests in watch mode**: `../tool-tool.exe pnpm test:watch`
 - **Run single test file**: `../tool-tool.exe pnpm test path/to/test.spec.ts`
 
 ## Project Structure

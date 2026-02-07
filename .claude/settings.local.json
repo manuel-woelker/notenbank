@@ -6,7 +6,9 @@
       "Bash(xargs cat:*)",
       "WebSearch",
       "WebFetch(domain:github.com)",
-      "Bash(../tool-tool.exe pnpm install)"
+      "Bash(../tool-tool.exe pnpm install)",
+      "Bash(../tool-tool.exe pnpm install @ant-design/icons)",
+      "Bash(../tool-tool.exe pnpm build)"
     ]
   }
 }

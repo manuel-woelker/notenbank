@@ -1,38 +1,94 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { Layout, Menu, theme } from 'antd'
+import {
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
+  UserOutlined,
+  VideoCameraOutlined,
+  UploadOutlined,
+} from '@ant-design/icons'
 import './App.css'
-import {Button} from "antd";
+
+const { Header, Sider, Content, Footer } = Layout
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [collapsed, setCollapsed] = useState(false)
+  const {
+    token: { colorBgContainer, borderRadiusLG },
+  } = theme.useToken()
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <Button type="primary">
-          Foobar
-        </Button>
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <Layout style={{ minHeight: '100vh' }}>
+      <Sider trigger={null} collapsible collapsed={collapsed}>
+        <div
+          style={{
+            height: 32,
+            margin: 16,
+            color: 'white',
+            fontSize: '20px',
+            fontWeight: 'bold',
+            textAlign: 'center',
+          }}
+        >
+          {collapsed ? 'NB' : 'Notenbank'}
+        </div>
+        <Menu
+          theme="dark"
+          mode="inline"
+          defaultSelectedKeys={['1']}
+          items={[
+            {
+              key: '1',
+              icon: <UserOutlined />,
+              label: 'Dashboard',
+            },
+            {
+              key: '2',
+              icon: <VideoCameraOutlined />,
+              label: 'Content',
+            },
+            {
+              key: '3',
+              icon: <UploadOutlined />,
+              label: 'Upload',
+            },
+          ]}
+        />
+      </Sider>
+      <Layout>
+        <Header style={{ padding: 0, background: colorBgContainer }}>
+          <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+            {collapsed ? (
+              <MenuUnfoldOutlined
+                style={{ fontSize: '18px', padding: '0 24px', cursor: 'pointer' }}
+                onClick={() => setCollapsed(!collapsed)}
+              />
+            ) : (
+              <MenuFoldOutlined
+                style={{ fontSize: '18px', padding: '0 24px', cursor: 'pointer' }}
+                onClick={() => setCollapsed(!collapsed)}
+              />
+            )}
+            <h2 style={{ margin: 0 }}>Notenbank Application</h2>
+          </div>
+        </Header>
+        <Content
+          style={{
+            margin: '24px 16px',
+            padding: 24,
+            minHeight: 280,
+            background: colorBgContainer,
+            borderRadius: borderRadiusLG,
+          }}
+        >
+          <h1>Welcome to Notenbank</h1>
+          <p>This is the main content area. Your application content will go here.</p>
+        </Content>
+        <Footer style={{ textAlign: 'center' }}>
+          Notenbank
+        </Footer>
+      </Layout>
+    </Layout>
   )
 }
 
