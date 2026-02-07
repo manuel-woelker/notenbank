@@ -38,7 +38,9 @@
       "Bash(../tool-tool.exe pnpm lint)",
       "Bash(../tool-tool.exe pnpm format:check)",
       "Bash(../tool-tool.exe pnpm test:*)",
-      "Bash(../tool-tool.exe pnpm test:ci)"
+      "Bash(../tool-tool.exe pnpm test:ci)",
+      "WebFetch(domain:tanstack.com)",
+      "Bash(/c/projects/notenbank/tool-tool.exe pnpm list:*)"
     ]
   }
 }
