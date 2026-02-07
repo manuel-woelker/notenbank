@@ -29,7 +29,15 @@
       "Bash(../tool-tool.exe pnpm run lint)",
       "Bash(../tool-tool.exe pnpm run typecheck)",
       "Bash(../tool-tool.exe pnpm run format)",
-      "Bash(../tool-tool.exe pnpm run format:check)"
+      "Bash(../tool-tool.exe pnpm run format:check)",
+      "Bash(../tool-tool.exe pnpm add -D @vitest/coverage-v8)",
+      "Bash(../tool-tool.exe pnpm typecheck)",
+      "Bash(../tool-tool.exe pnpm*)",
+      "Bash(../tool-tool.exe pnpm:*)",
+      "Bash(../tool-tool.exe pnpm test --coverage --reporter=verbose)",
+      "Bash(../tool-tool.exe pnpm lint)",
+      "Bash(../tool-tool.exe pnpm format:check)",
+      "Bash(../tool-tool.exe pnpm test:*)"
     ]
   }
 }
