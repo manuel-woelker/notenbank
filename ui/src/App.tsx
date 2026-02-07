@@ -8,6 +8,7 @@ import {
   UploadOutlined,
 } from '@ant-design/icons'
 import './App.css'
+import { GIT_INFO } from './git-info'
 
 const { Header, Sider, Content, Footer } = Layout
 
@@ -69,7 +70,7 @@ function App() {
                 onClick={() => setCollapsed(!collapsed)}
               />
             )}
-            <h2 style={{ margin: 0 }}>Notenbank Application</h2>
+            <h2 style={{ margin: 0 }}>Notenbank</h2>
           </div>
         </Header>
         <Content
@@ -85,7 +86,9 @@ function App() {
           <p>This is the main content area. Your application content will go here.</p>
         </Content>
         <Footer style={{ textAlign: 'center' }}>
-          Notenbank
+          Notenbank | Commit:{' '}
+          <span title={GIT_INFO.commitMessage}>{GIT_INFO.commitHash}</span> | Date:{' '}
+          {GIT_INFO.commitDate}
         </Footer>
       </Layout>
     </Layout>

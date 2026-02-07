@@ -24,6 +24,7 @@ Notenbank is a student administration system built as a web application. The pro
 cd ui
 ../tool-tool.exe pnpm install         # Install dependencies
 ../tool-tool.exe pnpm build           # Build for production
+../tool-tool.exe node <script.js>     # Run Node.js scripts
 ```
 
 **Never** start the dev server, it is already running.
@@ -34,6 +35,7 @@ Note: These commands are not yet set up but should be configured when creating t
 - **Build for production**: `../tool-tool.exe pnpm build`
 - **Run tests**: `../tool-tool.exe pnpm test`
 - **Run single test file**: `../tool-tool.exe pnpm test path/to/test.spec.ts`
+- **Run Node.js scripts**: `../tool-tool.exe node <script.js>`
 
 ## Project Structure
 
