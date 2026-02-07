@@ -8,7 +8,9 @@
     "prebuild": "node scripts/generate-git-info.js",
     "build": "tsc -b && vite build",
     "lint": "eslint ",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@ant-design/icons": "^6.1.0",

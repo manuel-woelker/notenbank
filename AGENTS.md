@@ -29,8 +29,6 @@ cd ui
 
 **Never** start the dev server, it is already running.
 
-Note: These commands are not yet set up but should be configured when creating the project structure.
-
 - **Install dependencies**: `../tool-tool.exe pnpm install`
 - **Build for production**: `../tool-tool.exe pnpm build`
 - **Run tests**: `../tool-tool.exe pnpm test`
@@ -100,4 +98,6 @@ Always run these tests after completing a feature.
 
 Use snapshot tests where appropriate.
 
-Prefer data driven tests to reduce code duplication. 
+Prefer data driven tests to reduce code duplication.
+
+Prefer black box testing and try to avoid mocking as much as possible.

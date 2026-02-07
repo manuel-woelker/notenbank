@@ -18,7 +18,7 @@ export interface ClassRepository {
 /**
  * IndexedDB implementation of ClassRepository
  */
-class IndexedDBClassRepository implements ClassRepository {
+export class IndexedDBClassRepository implements ClassRepository {
   private dbPromise: Promise<IDBDatabase>;
 
   constructor() {
@@ -165,6 +165,3 @@ class IndexedDBClassRepository implements ClassRepository {
     };
   }
 }
-
-// Export singleton instance
-export const classRepository: ClassRepository = new IndexedDBClassRepository();

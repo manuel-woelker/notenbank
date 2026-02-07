@@ -11,7 +11,11 @@
       "Bash(../tool-tool.exe pnpm build)",
       "Bash(../tool-tool.exe node scripts/generate-git-info.js)",
       "Bash(bash scripts/generate-git-info.sh:*)",
-      "WebFetch(domain:ant.design)"
+      "WebFetch(domain:ant.design)",
+      "Bash(../tool-tool.exe pnpm list fake-indexeddb)",
+      "Bash(../tool-tool.exe pnpm add -D fake-indexeddb)",
+      "Bash(../tool-tool.exe pnpm test src/repositories/ClassRepository.ts)",
+      "Bash(../tool-tool.exe pnpm test)"
     ]
   }
 }
