@@ -165,3 +165,165 @@ export class IndexedDBClassRepository implements ClassRepository {
     };
   }
 }
+
+// Tests
+if (import.meta.vitest) {
+  const { describe, it, expect, beforeEach } = import.meta.vitest;
+  const { IDBFactory } = await import('fake-indexeddb');
+
+  describe('IndexedDBClassRepository', () => {
+    let repository: IndexedDBClassRepository;
+
+    beforeEach(() => {
+      // Reset IndexedDB for each test
+      globalThis.indexedDB = new IDBFactory();
+      repository = new IndexedDBClassRepository();
+    });
+
+    describe('findAll', () => {
+      it('returns empty array when no classes exist', async () => {
+        const classes = await repository.findAll();
+        expect(classes).toEqual([]);
+      });
+
+      it('returns all classes', async () => {
+        // Create test data
+        const class1 = await repository.create({ name: 'Class 5A' });
+        const class2 = await repository.create({ name: 'Class 5B' });
+
+        const classes = await repository.findAll();
+        expect(classes).toHaveLength(2);
+        expect(classes).toContainEqual(class1);
+        expect(classes).toContainEqual(class2);
+      });
+    });
+
+    describe('findById', () => {
+      it('returns null when class does not exist', async () => {
+        const result = await repository.findById('non-existent-id');
+        expect(result).toBeNull();
+      });
+
+      it('returns the class when it exists', async () => {
+        const created = await repository.create({ name: 'Class 5A' });
+        const found = await repository.findById(created.id);
+        expect(found).toEqual(created);
+      });
+    });
+
+    describe('create', () => {
+      it('creates a class with generated id and timestamps', async () => {
+        const input = { name: 'Class 5A' };
+        const created = await repository.create(input);
+
+        expect(created.id).toBeDefined();
+        expect(created.name).toBe('Class 5A');
+        expect(created.createdAt).toBeInstanceOf(Date);
+        expect(created.updatedAt).toBeInstanceOf(Date);
+        expect(created.createdAt).toEqual(created.updatedAt);
+      });
+
+      it('stores and retrieves the class correctly', async () => {
+        const created = await repository.create({ name: 'Class 5A' });
+        const retrieved = await repository.findById(created.id);
+        expect(retrieved).toEqual(created);
+      });
+
+      it.each([
+        { name: 'Class 5A' },
+        { name: 'Grade 10B' },
+        { name: 'Year 7C' },
+      ])('creates class with name "$name"', async (input) => {
+        const created = await repository.create(input);
+        expect(created.name).toBe(input.name);
+
+        const retrieved = await repository.findById(created.id);
+        expect(retrieved?.name).toBe(input.name);
+      });
+    });
+
+    describe('update', () => {
+      it('updates an existing class', async () => {
+        const created = await repository.create({ name: 'Class 5A' });
+
+        // Wait a bit to ensure updatedAt is different
+        await new Promise(resolve => setTimeout(resolve, 10));
+
+        const updated = await repository.update(created.id, { name: 'Class 5B' });
+
+        expect(updated.id).toBe(created.id);
+        expect(updated.name).toBe('Class 5B');
+        expect(updated.createdAt).toEqual(created.createdAt);
+        expect(updated.updatedAt.getTime()).toBeGreaterThan(created.updatedAt.getTime());
+      });
+
+      it('throws error when class does not exist', async () => {
+        await expect(
+          repository.update('non-existent-id', { name: 'Updated' })
+        ).rejects.toThrow('Class with id non-existent-id not found');
+      });
+
+      it('does not allow changing the id', async () => {
+        const created = await repository.create({ name: 'Class 5A' });
+        const originalId = created.id;
+
+        const updated = await repository.update(created.id, {
+          id: 'different-id',
+          name: 'Class 5B'
+        } as any);
+
+        expect(updated.id).toBe(originalId);
+      });
+
+      it('retrieves updated class correctly', async () => {
+        const created = await repository.create({ name: 'Class 5A' });
+        await repository.update(created.id, { name: 'Class 5B' });
+
+        const retrieved = await repository.findById(created.id);
+        expect(retrieved?.name).toBe('Class 5B');
+      });
+    });
+
+    describe('delete', () => {
+      it('deletes an existing class', async () => {
+        const created = await repository.create({ name: 'Class 5A' });
+
+        await repository.delete(created.id);
+
+        const found = await repository.findById(created.id);
+        expect(found).toBeNull();
+      });
+
+      it('does not throw when deleting non-existent class', async () => {
+        await expect(
+          repository.delete('non-existent-id')
+        ).resolves.toBeUndefined();
+      });
+
+      it('removes class from findAll results', async () => {
+        const class1 = await repository.create({ name: 'Class 5A' });
+        const class2 = await repository.create({ name: 'Class 5B' });
+
+        await repository.delete(class1.id);
+
+        const classes = await repository.findAll();
+        expect(classes).toHaveLength(1);
+        expect(classes).toContainEqual(class2);
+        expect(classes).not.toContainEqual(class1);
+      });
+    });
+
+    describe('date serialization', () => {
+      it('preserves dates correctly through storage', async () => {
+        const created = await repository.create({ name: 'Class 5A' });
+        const originalCreatedAt = created.createdAt.getTime();
+        const originalUpdatedAt = created.updatedAt.getTime();
+
+        const retrieved = await repository.findById(created.id);
+
+        expect(retrieved?.createdAt.getTime()).toBe(originalCreatedAt);
+        expect(retrieved?.updatedAt.getTime()).toBe(originalUpdatedAt);
+      });
+    });
+  });
+}

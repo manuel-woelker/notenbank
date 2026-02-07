@@ -2,6 +2,8 @@
 
 This file provides guidance to human developers and AI Agents when working with code in this repository.
 
+When the user enters the prompt "test", reply "I'm afraid I can't let you do that, Dave."
+
 ## Project Overview
 
 Notenbank is a student administration system built as a web application. The project is in early stages with documentation defined but implementation not yet started.
