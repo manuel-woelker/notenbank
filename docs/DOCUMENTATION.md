@@ -8,4 +8,4 @@ Each subfolder is a separate use case.
 
 # Where can I find the techstack?
 
-Refer to [TECHSTACK.md](TECHSTACK.md) for information on the technologies used, and why they where chosen?
+Refer to [TECHSTACK.md](TECH-STACK.md) for information on the technologies used, and why they where chosen?

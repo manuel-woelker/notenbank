@@ -4,6 +4,10 @@
 
 The UI Platform is **HTML** inside a web browser, because this makes it simple to deploy and easily accessible.
 
+## UI Language: TypeScript
+
+We use **TypeScript** because of its type safety features in order catch more bugs at compile time.
+
 ## Package manager: pnpm
 
 UI Packages are installed with **pnpm**, because pnpm offers great performance.
@@ -19,4 +23,12 @@ The application is bundled with **vite**, because it offers a good developer exp
 ## UI Toolkit: React
 
 **React** offers the broadest eco-system, and delivers decent performance.
+
+## UI Component Library: Antd
+
+**Ant Design** offers a good selection of UI components and healthy community.
+
+## Routing: TanStack Router
+
+**TanStack Router** is an ergonomic way to handle routing.
 

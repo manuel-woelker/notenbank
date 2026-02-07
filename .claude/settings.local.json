@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(test:*)"
+      "Bash(test:*)",
+      "Bash(find:*)",
+      "Bash(xargs cat:*)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "Bash(../tool-tool.exe pnpm install)"
     ]
   }
 }
