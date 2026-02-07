@@ -87,3 +87,17 @@ let state = Arc::new(Mutex::new(data));
 ```
 
 Keep documentation focused and concise—explain the "Why", not the "What" (the code shows what it does).
+
+## Testing strategy
+
+Features should always be automatically tested to ensure proper functionality.
+
+Tests should be colocated with the code, i.e. in the same file.
+
+Use vitest for tests, they can be run using `../tool-tool.exe pnpm test`.
+
+Always run these tests after completing a feature.
+
+Use snapshot tests where appropriate.
+
+Prefer data driven tests to reduce code duplication. 
