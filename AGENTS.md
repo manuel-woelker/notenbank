@@ -14,16 +14,27 @@ Notenbank is a student administration system built as a web application. The pro
 - **UI Framework**: React
 - **Testing Framework**: Vitest (for unit tests)
 
+
+
 ## Development Commands
+
+**IMPORTANT:** Use `./tool-tool.exe` to ensure the correct Node.js and pnpm versions are used. tool-tool automatically downloads and runs the correct versions specified in the project configuration.
+
+```bash
+cd ui
+../tool-tool.exe pnpm install         # Install dependencies
+../tool-tool.exe pnpm build           # Build for production
+../tool-tool.exe pnpm dev             # Start development server
+```
 
 Note: These commands are not yet set up but should be configured when creating the project structure.
 
-- **Install dependencies**: `pnpm install`
-- **Start dev server**: `pnpm dev` (typical Vite setup)
-- **Build for production**: `pnpm build`
-- **Run tests**: `pnpm test`
-- **Run tests in watch mode**: `pnpm test:watch`
-- **Run single test file**: `pnpm test path/to/test.spec.ts`
+- **Install dependencies**: `../tool-tool.exe pnpm install`
+- **Start dev server**: `../tool-tool.exe pnpm dev` (typical Vite setup)
+- **Build for production**: `../tool-tool.exe pnpm build`
+- **Run tests**: `../tool-tool.exe pnpm test`
+- **Run tests in watch mode**: `../tool-tool.exe pnpm test:watch`
+- **Run single test file**: `../tool-tool.exe pnpm test path/to/test.spec.ts`
 
 ## Project Structure
 
