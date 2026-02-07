@@ -1,46 +1,49 @@
-import React, { useState } from 'react';
-import { Modal, Form, Input, message } from 'antd';
-import { useClassContext } from './ClassContext';
+import React, { useState } from 'react'
+import { Modal, Form, Input, message } from 'antd'
+import { useClassContext } from './ClassContext'
 
 interface CreateClassModalProps {
-  open: boolean;
-  onClose: () => void;
+  open: boolean
+  onClose: () => void
 }
 
 /**
  * Modal component for creating a new class
  */
-export const CreateClassModal: React.FC<CreateClassModalProps> = ({ open, onClose }) => {
-  const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
-  const { createClass } = useClassContext();
+export const CreateClassModal: React.FC<CreateClassModalProps> = ({
+  open,
+  onClose,
+}) => {
+  const [form] = Form.useForm()
+  const [loading, setLoading] = useState(false)
+  const { createClass } = useClassContext()
 
   const handleSubmit = async () => {
     try {
-      const values = await form.validateFields();
-      setLoading(true);
+      const values = await form.validateFields()
+      setLoading(true)
 
-      await createClass({ name: values.name });
+      await createClass({ name: values.name })
 
-      message.success('Class created successfully');
-      form.resetFields();
-      onClose();
-    } catch (error: any) {
+      message.success('Class created successfully')
+      form.resetFields()
+      onClose()
+    } catch (error: unknown) {
       // If it's a validation error, don't show message
-      if (error.errorFields) {
-        return;
+      if (error && typeof error === 'object' && 'errorFields' in error) {
+        return
       }
-      console.error('Failed to create class:', error);
-      message.error('Failed to create class. Please try again.');
+      console.error('Failed to create class:', error)
+      message.error('Failed to create class. Please try again.')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const handleCancel = () => {
-    form.resetFields();
-    onClose();
-  };
+    form.resetFields()
+    onClose()
+  }
 
   return (
     <Modal
@@ -52,11 +55,7 @@ export const CreateClassModal: React.FC<CreateClassModalProps> = ({ open, onClos
       okText="Create"
       cancelText="Cancel"
     >
-      <Form
-        form={form}
-        layout="vertical"
-        name="createClass"
-      >
+      <Form form={form} layout="vertical" name="createClass">
         <Form.Item
           name="name"
           label="Class Name"
@@ -69,5 +68,5 @@ export const CreateClassModal: React.FC<CreateClassModalProps> = ({ open, onClos
         </Form.Item>
       </Form>
     </Modal>
-  );
-};
+  )
+}

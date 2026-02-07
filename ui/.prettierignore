@@ -1,0 +1,18 @@
+# Dependencies
+node_modules
+pnpm-lock.yaml
+
+# Build outputs
+dist
+build
+.vite
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Coverage
+coverage
+
+# Misc
+.DS_Store
+*.log

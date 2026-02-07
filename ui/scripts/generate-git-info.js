@@ -30,7 +30,9 @@ const gitCommand = findGitCommand()
 const getGitCommitHash = () => {
   if (!gitCommand) return 'dev'
   try {
-    return execSync(`"${gitCommand}" rev-parse --short HEAD`, { encoding: 'utf8' }).trim()
+    return execSync(`"${gitCommand}" rev-parse --short HEAD`, {
+      encoding: 'utf8',
+    }).trim()
   } catch {
     return 'dev'
   }
@@ -39,7 +41,9 @@ const getGitCommitHash = () => {
 const getGitCommitDate = () => {
   if (!gitCommand) return new Date().toISOString().split('T')[0]
   try {
-    return execSync(`"${gitCommand}" log -1 --format=%cd --date=short`, { encoding: 'utf8' }).trim()
+    return execSync(`"${gitCommand}" log -1 --format=%cd --date=short`, {
+      encoding: 'utf8',
+    }).trim()
   } catch {
     return new Date().toISOString().split('T')[0]
   }
@@ -48,7 +52,9 @@ const getGitCommitDate = () => {
 const getGitCommitMessage = () => {
   if (!gitCommand) return 'Development build'
   try {
-    return execSync(`"${gitCommand}" log -1 --format=%s`, { encoding: 'utf8' }).trim()
+    return execSync(`"${gitCommand}" log -1 --format=%s`, {
+      encoding: 'utf8',
+    }).trim()
   } catch {
     return 'Development build'
   }

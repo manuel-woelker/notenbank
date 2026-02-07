@@ -1,11 +1,11 @@
-import React from 'react';
-import { Table } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
-import { Class } from './types';
+import React from 'react'
+import { Table } from 'antd'
+import type { ColumnsType } from 'antd/es/table'
+import { Class } from './types'
 
 interface ClassTableProps {
-  classes: Class[];
-  loading: boolean;
+  classes: Class[]
+  loading: boolean
 }
 
 /**
@@ -31,12 +31,10 @@ export const ClassTable: React.FC<ClassTableProps> = ({ classes, loading }) => {
     {
       title: 'Actions',
       key: 'actions',
-      render: () => (
-        <span style={{ color: '#999' }}>-</span>
-      ),
+      render: () => <span style={{ color: '#999' }}>-</span>,
       width: 100,
     },
-  ];
+  ]
 
   return (
     <Table
@@ -53,5 +51,5 @@ export const ClassTable: React.FC<ClassTableProps> = ({ classes, loading }) => {
         showTotal: (total) => `Total ${total} classes`,
       }}
     />
-  );
-};
+  )
+}

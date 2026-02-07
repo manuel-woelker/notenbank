@@ -67,15 +67,25 @@ function App() {
       </Sider>
       <Layout>
         <Header style={{ padding: 0, background: colorBgContainer }}>
-          <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+          <div
+            style={{ display: 'flex', alignItems: 'center', height: '100%' }}
+          >
             {collapsed ? (
               <MenuUnfoldOutlined
-                style={{ fontSize: '18px', padding: '0 24px', cursor: 'pointer' }}
+                style={{
+                  fontSize: '18px',
+                  padding: '0 24px',
+                  cursor: 'pointer',
+                }}
                 onClick={() => setCollapsed(!collapsed)}
               />
             ) : (
               <MenuFoldOutlined
-                style={{ fontSize: '18px', padding: '0 24px', cursor: 'pointer' }}
+                style={{
+                  fontSize: '18px',
+                  padding: '0 24px',
+                  cursor: 'pointer',
+                }}
                 onClick={() => setCollapsed(!collapsed)}
               />
             )}
@@ -96,14 +106,17 @@ function App() {
           ) : (
             <>
               <h1>Welcome to Notenbank</h1>
-              <p>This is the main content area. Your application content will go here.</p>
+              <p>
+                This is the main content area. Your application content will go
+                here.
+              </p>
             </>
           )}
         </Content>
         <Footer style={{ textAlign: 'center' }}>
           Notenbank | Commit:{' '}
-          <span title={GIT_INFO.commitMessage}>{GIT_INFO.commitHash}</span> | Date:{' '}
-          {GIT_INFO.commitDate}
+          <span title={GIT_INFO.commitMessage}>{GIT_INFO.commitHash}</span> |
+          Date: {GIT_INFO.commitDate}
         </Footer>
       </Layout>
     </Layout>

@@ -17,7 +17,19 @@
       "Bash(../tool-tool.exe pnpm test src/repositories/ClassRepository.ts)",
       "Bash(../tool-tool.exe pnpm test)",
       "Bash(git mv:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(../tool-tool.exe pnpm add -D prettier eslint-config-prettier)",
+      "Bash(../tool-tool.exe pnpm add -D husky lint-staged)",
+      "Bash(../tool-tool.exe pnpm exec husky init)",
+      "Bash(./tool-tool.exe pnpm:*)",
+      "Bash(ui/.husky/pre-commit << 'EOF'\n#!/usr/bin/env sh\n. \"$\\(dirname -- \"$0\"\\)/_/husky.sh\"\n\ncd ui\n../tool-tool.exe pnpm lint-staged\nEOF)",
+      "Bash(chmod:*)",
+      "Bash(../tool-tool.exe pnpm run prepare)",
+      "Bash(git config:*)",
+      "Bash(../tool-tool.exe pnpm run lint)",
+      "Bash(../tool-tool.exe pnpm run typecheck)",
+      "Bash(../tool-tool.exe pnpm run format)",
+      "Bash(../tool-tool.exe pnpm run format:check)"
     ]
   }
 }
