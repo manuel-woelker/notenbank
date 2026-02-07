@@ -67,8 +67,11 @@ cd ui
 # Format check
 ../tool-tool.exe pnpm format:check
 
-# Run tests with coverage
-../tool-tool.exe pnpm test --coverage
+# Run tests with coverage (same as CI)
+../tool-tool.exe pnpm test:ci
+
+# Or just run tests with coverage without JSON output
+../tool-tool.exe pnpm test:coverage
 
 # Build
 ../tool-tool.exe pnpm build

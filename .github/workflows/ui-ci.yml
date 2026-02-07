@@ -53,7 +53,7 @@ jobs:
         continue-on-error: false
 
       - name: Run tests with coverage
-        run: pnpm test --coverage --reporter=verbose --reporter=json --outputFile=test-results.json
+        run: pnpm test:ci
         continue-on-error: false
 
       - name: Build
