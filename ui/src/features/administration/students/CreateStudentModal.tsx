@@ -50,7 +50,7 @@ export const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
         classId: values.classId,
       })
 
-      message.success('Student added successfully')
+      message.success('Schüler erfolgreich hinzugefügt')
       form.resetFields()
       onClose()
     } catch (error: unknown) {
@@ -58,7 +58,9 @@ export const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
         return
       }
       console.error('Failed to create student:', error)
-      message.error('Failed to add student. Please try again.')
+      message.error(
+        'Schüler konnte nicht hinzugefügt werden. Bitte erneut versuchen.'
+      )
     } finally {
       setLoading(false)
     }
@@ -74,48 +76,51 @@ export const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
 
   return (
     <Modal
-      title="Add Student"
+      title="Schüler hinzufügen"
       open={open}
       onOk={handleSubmit}
       onCancel={handleCancel}
       confirmLoading={loading}
-      okText="Add"
-      cancelText="Cancel"
+      okText="Hinzufügen"
+      cancelText="Abbrechen"
       okButtonProps={{ disabled: !hasClasses && !classId }}
     >
       <Form form={form} layout="vertical" name="createStudent">
         <Form.Item
           name="firstName"
-          label="First Name"
+          label="Vorname"
           rules={[
-            { required: true, message: 'Please enter a first name' },
-            { min: 1, message: 'First name must be at least 1 character' },
+            { required: true, message: 'Bitte einen Vornamen eingeben' },
+            { min: 1, message: 'Der Vorname muss mindestens 1 Zeichen haben' },
           ]}
         >
-          <Input placeholder="e.g., Alex" autoFocus />
+          <Input placeholder="z. B. Alex" autoFocus />
         </Form.Item>
         <Form.Item
           name="lastName"
-          label="Last Name"
+          label="Nachname"
           rules={[
-            { required: true, message: 'Please enter a last name' },
-            { min: 1, message: 'Last name must be at least 1 character' },
+            { required: true, message: 'Bitte einen Nachnamen eingeben' },
+            {
+              min: 1,
+              message: 'Der Nachname muss mindestens 1 Zeichen haben',
+            },
           ]}
         >
-          <Input placeholder="e.g., Johnson" />
+          <Input placeholder="z. B. Mustermann" />
         </Form.Item>
         <Form.Item
           name="classId"
-          label="Class"
-          rules={[{ required: true, message: 'Please select a class' }]}
+          label="Klasse"
+          rules={[{ required: true, message: 'Bitte eine Klasse auswählen' }]}
         >
           <Select
             placeholder={
-              classesLoading ? 'Loading classes...' : 'Select a class'
+              classesLoading ? 'Lade Klassen...' : 'Klasse auswählen'
             }
             options={classOptions}
             loading={classesLoading}
-            notFoundContent="No classes yet"
+            notFoundContent="Noch keine Klassen"
             showSearch
             optionFilterProp="label"
             disabled={isClassLocked}
@@ -123,7 +128,7 @@ export const CreateStudentModal: React.FC<CreateStudentModalProps> = ({
         </Form.Item>
         {!classesLoading && !hasClasses && !isClassLocked ? (
           <Text type="secondary">
-            Create a class first so you can assign students to it.
+            Erstelle zuerst eine Klasse, damit du Schüler zuordnen kannst.
           </Text>
         ) : null}
       </Form>

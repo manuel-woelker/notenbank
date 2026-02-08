@@ -5,8 +5,8 @@ const { Title } = Typography
 export function UploadPage() {
   return (
     <div>
-      <Title level={2}>Upload</Title>
-      <p>Upload functionality will be implemented here.</p>
+      <Title level={2}>Hochladen</Title>
+      <p>Funktionen zum Hochladen werden hier implementiert.</p>
     </div>
   )
 }

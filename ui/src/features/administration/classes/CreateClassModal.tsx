@@ -25,7 +25,7 @@ export const CreateClassModal: React.FC<CreateClassModalProps> = ({
 
       await createClass({ name: values.name })
 
-      message.success('Class created successfully')
+      message.success('Klasse erfolgreich erstellt')
       form.resetFields()
       onClose()
     } catch (error: unknown) {
@@ -34,7 +34,9 @@ export const CreateClassModal: React.FC<CreateClassModalProps> = ({
         return
       }
       console.error('Failed to create class:', error)
-      message.error('Failed to create class. Please try again.')
+      message.error(
+        'Klasse konnte nicht erstellt werden. Bitte erneut versuchen.'
+      )
     } finally {
       setLoading(false)
     }
@@ -47,24 +49,27 @@ export const CreateClassModal: React.FC<CreateClassModalProps> = ({
 
   return (
     <Modal
-      title="Create New Class"
+      title="Neue Klasse erstellen"
       open={open}
       onOk={handleSubmit}
       onCancel={handleCancel}
       confirmLoading={loading}
-      okText="Create"
-      cancelText="Cancel"
+      okText="Erstellen"
+      cancelText="Abbrechen"
     >
       <Form form={form} layout="vertical" name="createClass">
         <Form.Item
           name="name"
-          label="Class Name"
+          label="Klassenname"
           rules={[
-            { required: true, message: 'Please enter a class name' },
-            { min: 1, message: 'Class name must be at least 1 character' },
+            { required: true, message: 'Bitte einen Klassennamen eingeben' },
+            {
+              min: 1,
+              message: 'Der Klassenname muss mindestens 1 Zeichen haben',
+            },
           ]}
         >
-          <Input placeholder="e.g., Class 5A, Grade 10B" autoFocus />
+          <Input placeholder="z. B. Klasse 5A, Jahrgang 10B" autoFocus />
         </Form.Item>
       </Form>
     </Modal>

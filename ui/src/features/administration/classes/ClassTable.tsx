@@ -38,17 +38,19 @@ export const ClassTable: React.FC<ClassTableProps> = ({
   const handleCreate = async () => {
     const trimmedName = newClassName.trim()
     if (!trimmedName) {
-      message.error('Please enter a class name.')
+      message.error('Bitte einen Klassennamen eingeben.')
       return
     }
     try {
       setSaving(true)
       await onCreateClass(trimmedName)
       setNewClassName('')
-      message.success('Class added.')
+      message.success('Klasse hinzugefügt.')
     } catch (error) {
       console.error('Failed to add class:', error)
-      message.error('Failed to add class. Please try again.')
+      message.error(
+        'Klasse konnte nicht hinzugefügt werden. Bitte erneut versuchen.'
+      )
     } finally {
       setSaving(false)
     }
@@ -69,7 +71,7 @@ export const ClassTable: React.FC<ClassTableProps> = ({
         if (isNewRow(record)) {
           return (
             <Input
-              placeholder="New class name"
+              placeholder="Neuer Klassenname"
               value={newClassName}
               onChange={(event) => setNewClassName(event.target.value)}
               onPressEnter={() => void handleCreate()}
@@ -80,7 +82,7 @@ export const ClassTable: React.FC<ClassTableProps> = ({
       },
     },
     {
-      title: 'Created At',
+      title: 'Erstellt am',
       dataIndex: 'createdAt',
       key: 'createdAt',
       render: (date: Date | undefined, record) => {
@@ -97,7 +99,7 @@ export const ClassTable: React.FC<ClassTableProps> = ({
       width: 200,
     },
     {
-      title: 'Actions',
+      title: 'Aktionen',
       key: 'actions',
       render: (_, record) => {
         if (!('isNew' in record)) {
@@ -110,7 +112,7 @@ export const ClassTable: React.FC<ClassTableProps> = ({
             loading={saving}
             disabled={!newClassName.trim()}
           >
-            Add
+            Hinzufügen
           </Button>
         )
       },
@@ -139,7 +141,7 @@ export const ClassTable: React.FC<ClassTableProps> = ({
         style: { cursor: isNewRow(record) ? 'default' : 'pointer' },
       })}
       locale={{
-        emptyText: 'No classes found. Use the top row to add one.',
+        emptyText: 'Keine Klassen gefunden. Oben eine neue Klasse hinzufügen.',
       }}
       pagination={false}
     />
@@ -174,7 +176,7 @@ if (import.meta.vitest) {
       const classes = [
         {
           id: 'class-1',
-          name: 'Class 1',
+          name: 'Klasse 1',
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -189,7 +191,7 @@ if (import.meta.vitest) {
         />
       )
 
-      fireEvent.click(getByText('Class 1'))
+      fireEvent.click(getByText('Klasse 1'))
 
       expect(onSelectClass).toHaveBeenCalledWith('class-1')
     })
@@ -214,16 +216,16 @@ if (import.meta.vitest) {
       )
 
       await act(async () => {
-        fireEvent.change(getByPlaceholderText('New class name'), {
-          target: { value: 'Class B' },
+        fireEvent.change(getByPlaceholderText('Neuer Klassenname'), {
+          target: { value: 'Klasse B' },
         })
       })
 
       await act(async () => {
-        fireEvent.click(getByRole('button', { name: 'Add' }))
+        fireEvent.click(getByRole('button', { name: 'Hinzufügen' }))
       })
 
-      expect(onCreateClass).toHaveBeenCalledWith('Class B')
+      expect(onCreateClass).toHaveBeenCalledWith('Klasse B')
     })
   })
 }

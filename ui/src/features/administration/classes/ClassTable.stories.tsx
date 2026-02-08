@@ -6,19 +6,19 @@ import type { Class } from './types'
 const sampleClasses: Class[] = [
   {
     id: 'class-1',
-    name: 'Mathematics 101',
+    name: 'Mathematik 101',
     createdAt: new Date('2024-10-15T09:00:00Z'),
     updatedAt: new Date('2024-10-20T08:45:00Z'),
   },
   {
     id: 'class-2',
-    name: 'Biology 201',
+    name: 'Biologie 201',
     createdAt: new Date('2024-10-22T13:30:00Z'),
     updatedAt: new Date('2024-10-25T12:10:00Z'),
   },
   {
     id: 'class-3',
-    name: 'History 301',
+    name: 'Geschichte 301',
     createdAt: new Date('2024-11-01T08:15:00Z'),
     updatedAt: new Date('2024-11-02T10:05:00Z'),
   },
@@ -53,7 +53,9 @@ export const Empty: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     await expect(
-      canvas.getByText('No classes found. Click "Add Class" to create one.')
+      canvas.getByText(
+        'Keine Klassen gefunden. Oben eine neue Klasse hinzufügen.'
+      )
     ).toBeInTheDocument()
   },
 }

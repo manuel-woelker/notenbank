@@ -42,7 +42,7 @@ export const ClassStudentsList: React.FC<ClassStudentsListProps> = ({
       >
         <div>
           <Title level={2} style={{ margin: 0 }}>
-            Students
+            Schüler
           </Title>
           {selectedClass ? (
             <Text type="secondary">{selectedClass.name}</Text>
@@ -51,7 +51,7 @@ export const ClassStudentsList: React.FC<ClassStudentsListProps> = ({
       </div>
 
       {!selectedClass && !classesLoading ? (
-        <Text type="secondary">Class not found.</Text>
+        <Text type="secondary">Klasse nicht gefunden.</Text>
       ) : null}
 
       {selectedClass ? (

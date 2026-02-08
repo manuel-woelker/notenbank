@@ -42,33 +42,35 @@ export function RootLayout() {
   const breadcrumbItems = useMemo(() => {
     const path = location.pathname
     if (path === '/') {
-      return [{ title: 'Dashboard', onClick: () => navigate({ to: '/' }) }]
+      return [{ title: 'Übersicht', onClick: () => navigate({ to: '/' }) }]
     }
     if (path.startsWith('/classes')) {
       const parts = path.split('/').filter(Boolean)
       const items = [
-        { title: 'Classes', onClick: () => navigate({ to: '/classes' }) },
+        { title: 'Klassen', onClick: () => navigate({ to: '/classes' }) },
       ]
       if (parts.length >= 2) {
         const classId = parts[1]
         const className = classes.find((item) => item.id === classId)?.name
         items.push({
-          title: className ?? `Class ${classId}`,
+          title: className ?? `Klasse ${classId}`,
           onClick: () => navigate({ to: `/classes/${classId}/students` }),
         })
       }
       if (parts[2] === 'students') {
-        items.push({ title: 'Students', onClick: async () => {} })
+        items.push({ title: 'Schüler', onClick: async () => {} })
       }
       return items
     }
     if (path.startsWith('/content')) {
-      return [{ title: 'Content', onClick: () => navigate({ to: '/content' }) }]
+      return [{ title: 'Inhalte', onClick: () => navigate({ to: '/content' }) }]
     }
     if (path.startsWith('/upload')) {
-      return [{ title: 'Upload', onClick: () => navigate({ to: '/upload' }) }]
+      return [
+        { title: 'Hochladen', onClick: () => navigate({ to: '/upload' }) },
+      ]
     }
-    return [{ title: 'Dashboard', onClick: () => navigate({ to: '/' }) }]
+    return [{ title: 'Übersicht', onClick: () => navigate({ to: '/' }) }]
   }, [location.pathname, navigate, classes])
 
   return (
@@ -94,25 +96,25 @@ export function RootLayout() {
             {
               key: 'dashboard',
               icon: <UserOutlined />,
-              label: 'Dashboard',
+              label: 'Übersicht',
               onClick: () => navigate({ to: '/' }),
             },
             {
               key: 'classes',
               icon: <TeamOutlined />,
-              label: 'Classes',
+              label: 'Klassen',
               onClick: () => navigate({ to: '/classes' }),
             },
             {
               key: 'content',
               icon: <VideoCameraOutlined />,
-              label: 'Content',
+              label: 'Inhalte',
               onClick: () => navigate({ to: '/content' }),
             },
             {
               key: 'upload',
               icon: <UploadOutlined />,
-              label: 'Upload',
+              label: 'Hochladen',
               onClick: () => navigate({ to: '/upload' }),
             },
           ]}
@@ -162,7 +164,7 @@ export function RootLayout() {
         <Footer style={{ textAlign: 'center' }}>
           Notenbank | Commit:{' '}
           <span title={GIT_INFO.commitMessage}>{GIT_INFO.commitHash}</span> |
-          Date: {GIT_INFO.commitDate}
+          Datum: {GIT_INFO.commitDate}
         </Footer>
       </Layout>
     </Layout>

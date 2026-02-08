@@ -18,7 +18,7 @@ export const ClassList: React.FC = () => {
       <Space orientation="vertical" size="large" style={{ width: '100%' }}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <Title level={2} style={{ margin: 0 }}>
-            Classes
+            Klassen
           </Title>
         </div>
 

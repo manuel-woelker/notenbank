@@ -40,7 +40,7 @@ export const StudentTable: React.FC<StudentTableProps> = ({
     const trimmedFirst = firstName.trim()
     const trimmedLast = lastName.trim()
     if (!trimmedFirst || !trimmedLast) {
-      message.error('Please enter a first and last name.')
+      message.error('Bitte Vor- und Nachnamen eingeben.')
       return
     }
     try {
@@ -48,10 +48,12 @@ export const StudentTable: React.FC<StudentTableProps> = ({
       await onCreateStudent({ firstName: trimmedFirst, lastName: trimmedLast })
       setFirstName('')
       setLastName('')
-      message.success('Student added.')
+      message.success('Schüler hinzugefügt.')
     } catch (error) {
       console.error('Failed to add student:', error)
-      message.error('Failed to add student. Please try again.')
+      message.error(
+        'Schüler konnte nicht hinzugefügt werden. Bitte erneut versuchen.'
+      )
     } finally {
       setSaving(false)
     }
@@ -59,7 +61,7 @@ export const StudentTable: React.FC<StudentTableProps> = ({
 
   const columns: ColumnsType<StudentRow> = [
     {
-      title: 'First Name',
+      title: 'Vorname',
       dataIndex: 'firstName',
       key: 'firstName',
       sorter: (a, b) => a.firstName.localeCompare(b.firstName),
@@ -67,7 +69,7 @@ export const StudentTable: React.FC<StudentTableProps> = ({
         if ('isNew' in record) {
           return (
             <Input
-              placeholder="First name"
+              placeholder="Vorname"
               value={firstName}
               onChange={(event) => setFirstName(event.target.value)}
               onPressEnter={() => void handleCreate()}
@@ -78,7 +80,7 @@ export const StudentTable: React.FC<StudentTableProps> = ({
       },
     },
     {
-      title: 'Last Name',
+      title: 'Nachname',
       dataIndex: 'lastName',
       key: 'lastName',
       sorter: (a, b) => a.lastName.localeCompare(b.lastName),
@@ -86,7 +88,7 @@ export const StudentTable: React.FC<StudentTableProps> = ({
         if ('isNew' in record) {
           return (
             <Input
-              placeholder="Last name"
+              placeholder="Nachname"
               value={lastName}
               onChange={(event) => setLastName(event.target.value)}
               onPressEnter={() => void handleCreate()}
@@ -97,7 +99,7 @@ export const StudentTable: React.FC<StudentTableProps> = ({
       },
     },
     {
-      title: 'Created At',
+      title: 'Erstellt am',
       dataIndex: 'createdAt',
       key: 'createdAt',
       render: (date: Date | undefined, record) => {
@@ -111,7 +113,7 @@ export const StudentTable: React.FC<StudentTableProps> = ({
       width: 200,
     },
     {
-      title: 'Actions',
+      title: 'Aktionen',
       key: 'actions',
       render: (_, record) => {
         if (!('isNew' in record)) {
@@ -124,7 +126,7 @@ export const StudentTable: React.FC<StudentTableProps> = ({
             loading={saving}
             disabled={!firstName.trim() || !lastName.trim()}
           >
-            Add
+            Hinzufügen
           </Button>
         )
       },
@@ -144,7 +146,8 @@ export const StudentTable: React.FC<StudentTableProps> = ({
       rowKey="id"
       loading={loading}
       locale={{
-        emptyText: 'No students found. Use the top row to add one.',
+        emptyText:
+          'Keine Schüler gefunden. Oben einen neuen Schüler hinzufügen.',
       }}
       pagination={false}
     />
@@ -192,13 +195,13 @@ if (import.meta.vitest) {
       )
 
       await act(async () => {
-        fireEvent.change(getByPlaceholderText('First name'), {
+        fireEvent.change(getByPlaceholderText('Vorname'), {
           target: { value: 'Tara' },
         })
-        fireEvent.change(getByPlaceholderText('Last name'), {
+        fireEvent.change(getByPlaceholderText('Nachname'), {
           target: { value: 'Student' },
         })
-        fireEvent.click(getByRole('button', { name: 'Add' }))
+        fireEvent.click(getByRole('button', { name: 'Hinzufügen' }))
       })
 
       expect(onCreateStudent).toHaveBeenCalledWith({

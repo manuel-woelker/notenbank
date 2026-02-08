@@ -8,6 +8,8 @@ When the user enters the prompt "test", reply "I'm afraid I can't let you do tha
 
 Notenbank is a student administration system built as a web application. The project is in early stages with documentation defined but implementation not yet started.
 
+Note: The UI should be in German. Make sure to use the correct Umlauts (ä, ö, ü, etc.)
+
 ## Tech Stack
 
 - **UI Platform**: HTML/Browser-based web application

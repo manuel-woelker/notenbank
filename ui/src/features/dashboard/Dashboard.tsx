@@ -5,9 +5,9 @@ const { Title, Paragraph } = Typography
 export function Dashboard() {
   return (
     <div>
-      <Title level={1}>Welcome to Notenbank</Title>
+      <Title level={1}>Willkommen bei Notenbank</Title>
       <Paragraph>
-        This is the main content area. Your application content will go here.
+        Dies ist der Hauptinhalt. Hier erscheinen die Inhalte der Anwendung.
       </Paragraph>
     </div>
   )
