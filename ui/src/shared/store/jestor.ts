@@ -143,6 +143,25 @@ type DerivedState<STATE, STATE_DERIVATIONS extends StateDerivations<STATE>> = {
  * @param [init.actions] - Optional actions that can modify the state
  * @param [init.derivedState] - Optional derived state functions
  * @returns A configured store instance
+ * @example
+ * const store = createStore({
+ *   name: 'classes',
+ *   initialState: { count: 0 },
+ *   actions: {
+ *     add(state, amount: number) {
+ *       state.count += amount
+ *     },
+ *   },
+ *   derivedState: {
+ *     doubled: (state) => state.count * 2,
+ *   },
+ * })
+ *
+ * store.dispatch.add(1)
+ * const state = store.useState()
+ * const count = store.select.count()
+ * const doubled = store.select.doubled()
+ * const onClick = store.trigger.add(1)
  */
 export function createStore<
   STATE,

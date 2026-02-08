@@ -16,6 +16,7 @@ Notenbank is a student administration system built as a web application. The pro
 - **UI Framework**: React
 - **Testing Framework**: Vitest (for unit tests)
 - **UI Component Library**: Ant Design (see https://ant.design/llms.txt for component docs)
+- **State Management**: Jestor (in-repo store helper) + Immer
 
 
 ## Development Commands
@@ -89,6 +90,13 @@ Current use cases:
 ## Development Workflow
 
 When implementing new features, refer to the relevant use case documentation in `docs/use-cases/` for requirements.
+
+## State Management
+
+Use the in-repo Jestor helper at `ui/src/shared/store/jestor.ts` for shared UI state.
+Create stores via `createStore`, read full state with `useState`, and prefer
+`select.<key>()` hooks for per-field subscriptions. Use `dispatch` for direct
+calls and `trigger` to build event handlers.
 
 
 ## Documentation Strategy

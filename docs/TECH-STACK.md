@@ -32,3 +32,9 @@ The application is bundled with **vite**, because it offers a good developer exp
 
 **TanStack Router** is an ergonomic way to handle routing.
 
+## State Management: Jestor + Immer
+
+**Jestor** is a small, in-repo store helper (see `ui/src/shared/store/jestor.ts`) that
+exposes `createStore`, action dispatchers, and selector hooks. It uses **Immer**
+to keep mutation ergonomics while producing immutable updates.
+
