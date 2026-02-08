@@ -10,6 +10,7 @@ import {
 } from '@ant-design/icons'
 import { Outlet, useNavigate, useLocation } from '@tanstack/react-router'
 import { GIT_INFO } from '../../git-info'
+import { useClassStore } from '../../features/administration/classes/ClassStore'
 
 const { Header, Sider, Content, Footer } = Layout
 
@@ -24,6 +25,7 @@ export function RootLayout() {
   const [collapsed, setCollapsed] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
+  const { classes } = useClassStore()
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken()
@@ -48,9 +50,11 @@ export function RootLayout() {
         { title: 'Classes', onClick: () => navigate({ to: '/classes' }) },
       ]
       if (parts.length >= 2) {
+        const classId = parts[1]
+        const className = classes.find((item) => item.id === classId)?.name
         items.push({
-          title: `Class ${parts[1]}`,
-          onClick: () => navigate({ to: `/classes/${parts[1]}/students` }),
+          title: className ?? `Class ${classId}`,
+          onClick: () => navigate({ to: `/classes/${classId}/students` }),
         })
       }
       if (parts[2] === 'students') {
@@ -65,7 +69,7 @@ export function RootLayout() {
       return [{ title: 'Upload', onClick: () => navigate({ to: '/upload' }) }]
     }
     return [{ title: 'Dashboard', onClick: () => navigate({ to: '/' }) }]
-  }, [location.pathname, navigate])
+  }, [location.pathname, navigate, classes])
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -138,9 +142,9 @@ export function RootLayout() {
                 onClick={() => setCollapsed(!collapsed)}
               />
             )}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
               <h2 style={{ margin: 0 }}>Notenbank</h2>
-              <Breadcrumb items={breadcrumbItems} />
+              <Breadcrumb items={breadcrumbItems} style={{ marginTop: 2 }} />
             </div>
           </div>
         </Header>
