@@ -40,37 +40,47 @@ export function RootLayout() {
   }
 
   const breadcrumbItems = useMemo(() => {
+    const clickableCrumb = (label: string, to: string) => ({
+      title: (
+        <span className="nb-breadcrumb-link" onClick={() => navigate({ to })}>
+          {label}
+        </span>
+      ),
+    })
+
     const path = location.pathname
     if (path === '/') {
-      return [{ title: 'Übersicht', onClick: () => navigate({ to: '/' }) }]
+      return [clickableCrumb('Übersicht', '/')]
     }
     if (path.startsWith('/classes')) {
       const parts = path.split('/').filter(Boolean)
-      const items = [
-        { title: 'Klassen', onClick: () => navigate({ to: '/classes' }) },
-      ]
+      const items = [clickableCrumb('Klassen', '/classes')]
       if (parts.length >= 2) {
         const classId = parts[1]
         const className = classes.find((item) => item.id === classId)?.name
         items.push({
-          title: className ?? `Klasse ${classId}`,
-          onClick: () => navigate({ to: `/classes/${classId}/students` }),
+          title: (
+            <span
+              className="nb-breadcrumb-link"
+              onClick={() => navigate({ to: `/classes/${classId}/students` })}
+            >
+              {className ?? `Klasse ${classId}`}
+            </span>
+          ),
         })
       }
       if (parts[2] === 'students') {
-        items.push({ title: 'Schüler', onClick: async () => {} })
+        items.push({ title: <span>Schüler</span> })
       }
       return items
     }
     if (path.startsWith('/content')) {
-      return [{ title: 'Inhalte', onClick: () => navigate({ to: '/content' }) }]
+      return [clickableCrumb('Inhalte', '/content')]
     }
     if (path.startsWith('/upload')) {
-      return [
-        { title: 'Hochladen', onClick: () => navigate({ to: '/upload' }) },
-      ]
+      return [clickableCrumb('Hochladen', '/upload')]
     }
-    return [{ title: 'Übersicht', onClick: () => navigate({ to: '/' }) }]
+    return [clickableCrumb('Übersicht', '/')]
   }, [location.pathname, navigate, classes])
 
   return (
