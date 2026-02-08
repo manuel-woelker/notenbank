@@ -3,6 +3,7 @@ import { Space, Typography } from 'antd'
 import { useClassStore } from './ClassStore'
 import { ClassTable } from './ClassTable'
 import { useNavigate } from '@tanstack/react-router'
+import { buildClassRouteSegment } from '../../../shared/routes/classRoute'
 
 const { Title } = Typography
 
@@ -25,9 +26,10 @@ export const ClassList: React.FC = () => {
         <ClassTable
           classes={classes}
           loading={loading}
-          onSelectClass={(classId) =>
-            navigate({ to: `/classes/${classId}/students` })
-          }
+          onSelectClass={(classId) => {
+            const classSegment = buildClassRouteSegment(classes, classId)
+            navigate({ to: `/classes/${classSegment}/students` })
+          }}
           onCreateClass={async (name) => {
             await createClass({ name })
           }}

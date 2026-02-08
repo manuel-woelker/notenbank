@@ -11,6 +11,10 @@ import {
 import { Outlet, useNavigate, useLocation } from '@tanstack/react-router'
 import { GIT_INFO } from '../../git-info'
 import { useClassStore } from '../../features/administration/classes/ClassStore'
+import {
+  buildClassRouteSegment,
+  findClassByRouteSegment,
+} from '../../shared/routes/classRoute'
 
 const { Header, Sider, Content, Footer } = Layout
 
@@ -56,18 +60,21 @@ export function RootLayout() {
       const parts = path.split('/').filter(Boolean)
       const items = [clickableCrumb('Klassen', '/classes')]
       if (parts.length >= 2) {
-        const classId = parts[1]
-        const className = classes.find((item) => item.id === classId)?.name
-        items.push({
-          title: (
-            <span
-              className="nb-breadcrumb-link"
-              onClick={() => navigate({ to: `/classes/${classId}/students` })}
-            >
-              {className ?? `Klasse ${classId}`}
-            </span>
-          ),
-        })
+        const classSegment = parts[1]
+        const classMatch = classSegment
+          ? findClassByRouteSegment(classes, classSegment)
+          : undefined
+        const classLabel = classMatch?.name ?? decodeURIComponent(classSegment)
+        const classRouteSegment = classMatch
+          ? buildClassRouteSegment(classes, classMatch.id)
+          : classSegment
+        if (classRouteSegment) {
+          items.push(
+            clickableCrumb(classLabel, `/classes/${classRouteSegment}/students`)
+          )
+        } else {
+          items.push({ title: <span>{classLabel}</span> })
+        }
       }
       if (parts[2] === 'students') {
         items.push({ title: <span>Schüler</span> })
