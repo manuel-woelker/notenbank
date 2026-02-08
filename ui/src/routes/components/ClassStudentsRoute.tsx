@@ -1,7 +1,7 @@
 import React from 'react'
 import { useParams } from '@tanstack/react-router'
 import { useClassStore } from '../../features/administration/classes/ClassStore'
-import { ClassStudentsList } from '../../features/administration/students/ClassStudentsList'
+import { ClassOverview } from '../../features/administration/students/ClassOverview'
 import { findClassByRouteSegment } from '../../shared/routes/classRoute'
 
 export const ClassStudentsRoute: React.FC = () => {
@@ -9,5 +9,5 @@ export const ClassStudentsRoute: React.FC = () => {
   const { classes } = useClassStore()
   const selectedClass = findClassByRouteSegment(classes, classKey)
 
-  return <ClassStudentsList classId={selectedClass?.id ?? ''} />
+  return <ClassOverview classId={selectedClass?.id ?? ''} />
 }

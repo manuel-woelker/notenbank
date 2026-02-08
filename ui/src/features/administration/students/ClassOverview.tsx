@@ -1,35 +1,45 @@
 import React, { useMemo } from 'react'
-import { Space, Typography } from 'antd'
+import { Card, Col, Row, Space, Typography } from 'antd'
 import { useClassStore } from '../classes/ClassStore'
 import { useStudentStore } from './StudentStore'
 import { StudentTable } from './StudentTable'
+import { useSubjectStore } from '../subjects/SubjectStore'
+import { SubjectTable } from '../subjects/SubjectTable'
 
 const { Title, Text } = Typography
 
-interface ClassStudentsListProps {
+interface ClassOverviewProps {
   classId: string
 }
 
 /**
  * Page component for listing students in a class
  */
-export const ClassStudentsList: React.FC<ClassStudentsListProps> = ({
-  classId,
-}) => {
+export const ClassOverview: React.FC<ClassOverviewProps> = ({ classId }) => {
   const { classes, loading: classesLoading } = useClassStore()
   const {
     students,
     loading: studentsLoading,
     createStudent,
   } = useStudentStore()
+  const {
+    subjects,
+    loading: subjectsLoading,
+    createSubject,
+  } = useSubjectStore()
 
   const selectedClass = classes.find((item) => item.id === classId)
   const classStudents = useMemo(
     () => students.filter((student) => student.classId === classId),
     [students, classId]
   )
+  const classSubjects = useMemo(
+    () => subjects.filter((subject) => subject.classId === classId),
+    [subjects, classId]
+  )
 
   const isLoading = classesLoading || studentsLoading
+  const subjectsAreLoading = classesLoading || subjectsLoading
 
   return (
     <Space orientation="vertical" size="large" style={{ width: '100%' }}>
@@ -42,11 +52,8 @@ export const ClassStudentsList: React.FC<ClassStudentsListProps> = ({
       >
         <div>
           <Title level={2} style={{ margin: 0 }}>
-            Schüler
+            Klasse {selectedClass?.name ?? '—'}
           </Title>
-          {selectedClass ? (
-            <Text type="secondary">{selectedClass.name}</Text>
-          ) : null}
         </div>
       </div>
 
@@ -55,13 +62,30 @@ export const ClassStudentsList: React.FC<ClassStudentsListProps> = ({
       ) : null}
 
       {selectedClass ? (
-        <StudentTable
-          students={classStudents}
-          loading={isLoading}
-          onCreateStudent={async (input) => {
-            await createStudent({ ...input, classId })
-          }}
-        />
+        <Row gutter={[24, 24]}>
+          <Col xs={24} md={8}>
+            <Card title="Fächer" size="small">
+              <SubjectTable
+                subjects={classSubjects}
+                loading={subjectsAreLoading}
+                onCreateSubject={async (input) => {
+                  await createSubject({ ...input, classId })
+                }}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} md={16}>
+            <Card title="Schüler" size="small">
+              <StudentTable
+                students={classStudents}
+                loading={isLoading}
+                onCreateStudent={async (input) => {
+                  await createStudent({ ...input, classId })
+                }}
+              />
+            </Card>
+          </Col>
+        </Row>
       ) : null}
     </Space>
   )
@@ -73,8 +97,9 @@ if (import.meta.vitest) {
   const { IDBFactory } = await import('fake-indexeddb')
   const { classRepository } = await import('../classes/ClassRepository')
   const { studentRepository } = await import('./StudentRepository')
+  const { subjectRepository } = await import('../subjects/SubjectRepository')
 
-  describe('ClassStudentsList', () => {
+  describe('ClassOverview', () => {
     beforeEach(async () => {
       globalThis.indexedDB = new IDBFactory()
       const existingClasses = await classRepository.findAll()
@@ -89,6 +114,12 @@ if (import.meta.vitest) {
           studentRepository.delete(existingStudent.id)
         )
       )
+      const existingSubjects = await subjectRepository.findAll()
+      await Promise.all(
+        existingSubjects.map((existingSubject) =>
+          subjectRepository.delete(existingSubject.id)
+        )
+      )
     })
 
     it('renders students for the selected class', async () => {
@@ -96,6 +127,10 @@ if (import.meta.vitest) {
       await studentRepository.create({
         firstName: 'Tara',
         lastName: 'Student',
+        classId: newClass.id,
+      })
+      await subjectRepository.create({
+        name: 'Mathe',
         classId: newClass.id,
       })
 
@@ -117,10 +152,14 @@ if (import.meta.vitest) {
           getPropertyValue: () => '',
         }) as unknown as CSSStyleDeclaration
 
-      const { getByText } = render(<ClassStudentsList classId={newClass.id} />)
+      const { getByText } = render(<ClassOverview classId={newClass.id} />)
 
       await waitFor(() => {
         expect(getByText('Tara')).toBeTruthy()
+      })
+
+      await waitFor(() => {
+        expect(getByText('Mathe')).toBeTruthy()
       })
     })
   })
