@@ -142,3 +142,7 @@ Prefer black box testing and try to avoid mocking as much as possible.
 
 When completing a unit of work run `../tool-tool.exe pnpm run format` 
 Also run `../tool-tool.exe pnpm run check` to ensure the tests pass and the code is free of linting errors.
+
+## Commit messages
+
+Commit message should be in the "Conventional Commits" format, e.g. "feat(UI): Add about button to see version and build date"
