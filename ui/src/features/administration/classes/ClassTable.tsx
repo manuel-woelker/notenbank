@@ -82,23 +82,6 @@ export const ClassTable: React.FC<ClassTableProps> = ({
       },
     },
     {
-      title: 'Erstellt am',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
-      render: (date: Date | undefined, record) => {
-        if (isNewRow(record)) {
-          return '-'
-        }
-        return date?.toLocaleString() ?? '-'
-      },
-      sorter: (a, b) => {
-        if (isNewRow(a) && !isNewRow(b)) return -1
-        if (!isNewRow(a) && isNewRow(b)) return 1
-        return (a.createdAt?.getTime() ?? 0) - (b.createdAt?.getTime() ?? 0)
-      },
-      width: 200,
-    },
-    {
       title: 'Aktionen',
       key: 'actions',
       render: (_, record) => {

@@ -99,20 +99,6 @@ export const StudentTable: React.FC<StudentTableProps> = ({
       },
     },
     {
-      title: 'Erstellt am',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
-      render: (date: Date | undefined, record) => {
-        if ('isNew' in record) {
-          return '-'
-        }
-        return date?.toLocaleString() ?? '-'
-      },
-      sorter: (a, b) =>
-        (a.createdAt?.getTime() ?? 0) - (b.createdAt?.getTime() ?? 0),
-      width: 200,
-    },
-    {
       title: 'Aktionen',
       key: 'actions',
       render: (_, record) => {
