@@ -1,5 +1,5 @@
 // Public API for classes entity
-export { ClassStoreProvider, useClassStore } from './ClassStore'
+export { loadClasses, useClassStore } from './ClassStore'
 export { ClassList } from './ClassList'
 export { ClassTable } from './ClassTable'
 export { CreateClassModal } from './CreateClassModal'

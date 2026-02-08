@@ -1,4 +1,3 @@
-import React, { useEffect, ReactNode } from 'react'
 import { createStore } from '../../../shared/store/jestor'
 import { Class, CreateClassInput, ClassStoreValue } from './types'
 import { classRepository } from './ClassRepository'
@@ -11,30 +10,15 @@ interface ClassStoreState {
 const classStore = createStore<ClassStoreState>({
   name: 'classes',
   initialState: { classes: [], loading: true },
-})
-
-interface ClassStoreProviderProps {
-  children: ReactNode
-}
-
-/**
- * Provider component for class store initialization
- */
-export const ClassStoreProvider: React.FC<ClassStoreProviderProps> = ({
-  children,
-}) => {
-  // Load classes on mount
-  useEffect(() => {
+  init: () => {
     void loadClasses()
-  }, [])
-
-  return <>{children}</>
-}
+  },
+})
 
 /**
  * Load all classes from repository
  */
-const loadClasses = async () => {
+export async function loadClasses() {
   classStore.update('classes:load:start', (state) => {
     state.loading = true
   })
@@ -72,7 +56,6 @@ const createClass = async (input: CreateClassInput): Promise<Class> => {
 /**
  * Hook to access class store
  */
-// eslint-disable-next-line react-refresh/only-export-components
 export const useClassStore = (): ClassStoreValue => {
   const classes = classStore.select.classes()
   const loading = classStore.select.loading()
@@ -92,9 +75,15 @@ if (import.meta.vitest) {
   describe('ClassStore', () => {
     let consoleErrorSpy: ReturnType<typeof vi.spyOn>
 
-    beforeEach(() => {
+    beforeEach(async () => {
       // Reset IndexedDB for each test with a fresh instance
       globalThis.indexedDB = new IDBFactory()
+      const existingClasses = await classRepository.findAll()
+      await Promise.all(
+        existingClasses.map((existingClass) =>
+          classRepository.delete(existingClass.id)
+        )
+      )
       classStore.update('classes:reset', (state) => {
         state.classes = []
         state.loading = true
@@ -110,23 +99,16 @@ if (import.meta.vitest) {
       vi.restoreAllMocks()
     })
 
-    describe('ClassStoreProvider', () => {
+    describe('ClassStore', () => {
       it('provides initial state with loading true and empty classes', async () => {
-        const { result } = renderHook(() => useClassStore(), {
-          wrapper: ClassStoreProvider,
-        })
+        const { result } = renderHook(() => useClassStore())
 
         // Initial state should have loading true
         expect(result.current.loading).toBe(true)
         expect(result.current.classes).toEqual([])
-
-        // Wait for initial load to complete
-        await waitFor(() => {
-          expect(result.current.loading).toBe(false)
-        })
       })
 
-      it('loads classes on mount', async () => {
+      it('loadClasses fetches classes', async () => {
         // Pre-populate some classes
         await classRepository.create({
           name: 'Class A',
@@ -135,9 +117,9 @@ if (import.meta.vitest) {
           name: 'Class B',
         })
 
-        const { result } = renderHook(() => useClassStore(), {
-          wrapper: ClassStoreProvider,
-        })
+        const { result } = renderHook(() => useClassStore())
+
+        await loadClasses()
 
         // Wait for classes to load
         await waitFor(() => {
@@ -150,14 +132,9 @@ if (import.meta.vitest) {
       })
 
       it('loadClasses refreshes the classes list', async () => {
-        const { result } = renderHook(() => useClassStore(), {
-          wrapper: ClassStoreProvider,
-        })
+        const { result } = renderHook(() => useClassStore())
 
-        // Wait for initial load
-        await waitFor(() => {
-          expect(result.current.loading).toBe(false)
-        })
+        await loadClasses()
 
         const initialCount = result.current.classes.length
 
@@ -179,14 +156,9 @@ if (import.meta.vitest) {
       })
 
       it('createClass adds new class to state', async () => {
-        const { result } = renderHook(() => useClassStore(), {
-          wrapper: ClassStoreProvider,
-        })
+        const { result } = renderHook(() => useClassStore())
 
-        // Wait for initial load
-        await waitFor(() => {
-          expect(result.current.loading).toBe(false)
-        })
+        await loadClasses()
 
         const initialCount = result.current.classes.length
 
@@ -209,14 +181,7 @@ if (import.meta.vitest) {
       })
 
       it('createClass throws error when repository fails', async () => {
-        const { result } = renderHook(() => useClassStore(), {
-          wrapper: ClassStoreProvider,
-        })
-
-        // Wait for initial load
-        await waitFor(() => {
-          expect(result.current.loading).toBe(false)
-        })
+        const { result } = renderHook(() => useClassStore())
 
         // Mock repository to throw error
         const createSpy = vi
@@ -234,14 +199,9 @@ if (import.meta.vitest) {
       })
 
       it('loadClasses sets loading to false even when repository fails', async () => {
-        const { result } = renderHook(() => useClassStore(), {
-          wrapper: ClassStoreProvider,
-        })
+        const { result } = renderHook(() => useClassStore())
 
-        // Wait for initial load to complete
-        await waitFor(() => {
-          expect(result.current.loading).toBe(false)
-        })
+        await loadClasses()
 
         // Now mock repository to throw error for subsequent calls
         const findAllSpy = vi
@@ -267,14 +227,7 @@ if (import.meta.vitest) {
       })
 
       it('sets loading to false after loadClasses completes', async () => {
-        const { result } = renderHook(() => useClassStore(), {
-          wrapper: ClassStoreProvider,
-        })
-
-        // Wait for initial load
-        await waitFor(() => {
-          expect(result.current.loading).toBe(false)
-        })
+        const { result } = renderHook(() => useClassStore())
 
         // Call loadClasses and wait for it to complete
         await result.current.loadClasses()

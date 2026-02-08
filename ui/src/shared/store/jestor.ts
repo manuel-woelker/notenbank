@@ -25,6 +25,7 @@ interface Jestor<
   ACTIONS extends ActionDefinitions<STATE>,
   STATE_DERIVATIONS extends StateDerivations<STATE>,
 > {
+  init: () => void
   useState: () => CombinedState<STATE, STATE_DERIVATIONS>
   getSnapshot: () => CombinedState<STATE, STATE_DERIVATIONS>
   update: (label: string, fn: (state: STATE) => void) => void
@@ -172,6 +173,7 @@ export function createStore<
   initialState: STATE
   derivedState?: STATE_DERIVATIONS
   actions?: ACTIONS
+  init?: () => void
 }): Jestor<STATE, ACTIONS, STATE_DERIVATIONS> {
   type FullState = CombinedState<STATE, STATE_DERIVATIONS>
   let devTools: ReduxDevTools | null = null
@@ -234,6 +236,19 @@ export function createStore<
     devTools?.send(devInfo, combinedState)
   }
 
+  let hasInitialized = false
+  /* 📖 # Why provide a store init hook?
+  Some stores load data lazily. An init hook lets the store trigger that work
+  the first time a component subscribes, without needing a wrapper provider.
+  */
+  function runInit() {
+    if (hasInitialized) {
+      return
+    }
+    hasInitialized = true
+    init.init?.()
+  }
+
   function applyAction<PARAMETERS extends readonly unknown[]>(
     name: string,
     actionDefinition: ActionDefinition<STATE, PARAMETERS>,
@@ -293,6 +308,9 @@ export function createStore<
   slices they read without custom memoization or selector caches.
   */
   function useState() {
+    React.useEffect(() => {
+      runInit()
+    }, [])
     return React.useSyncExternalStore(subscribe, getSnapshot)
   }
 
@@ -300,6 +318,9 @@ export function createStore<
     selector: (state: FullState) => T
   ): (() => T) => {
     return function useStoreSelector() {
+      React.useEffect(() => {
+        runInit()
+      }, [])
       return React.useSyncExternalStore(subscribe, () =>
         selector(combinedState)
       )
@@ -317,6 +338,7 @@ export function createStore<
   }
 
   return {
+    init: runInit,
     useState,
     getSnapshot,
     update,
