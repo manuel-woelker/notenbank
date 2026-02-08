@@ -41,7 +41,10 @@
       "Bash(../tool-tool.exe pnpm test:ci)",
       "WebFetch(domain:tanstack.com)",
       "Bash(/c/projects/notenbank/tool-tool.exe pnpm list:*)",
-      "Bash(GITHUB_PAGES=true ../tool-tool.exe pnpm build:*)"
+      "Bash(GITHUB_PAGES=true ../tool-tool.exe pnpm build:*)",
+      "Bash(echo:*)",
+      "Bash(git restore:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
