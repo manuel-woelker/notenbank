@@ -48,11 +48,7 @@ export const ClassTable: React.FC<ClassTableProps> = ({
       locale={{
         emptyText: 'No classes found. Click "Add Class" to create one.',
       }}
-      pagination={{
-        pageSize: 10,
-        showSizeChanger: true,
-        showTotal: (total) => `Total ${total} classes`,
-      }}
+      pagination={false}
     />
   )
 }

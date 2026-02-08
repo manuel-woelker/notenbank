@@ -47,11 +47,7 @@ export const StudentTable: React.FC<StudentTableProps> = ({
       locale={{
         emptyText: 'No students found. Click "Add Student" to create one.',
       }}
-      pagination={{
-        pageSize: 10,
-        showSizeChanger: true,
-        showTotal: (total) => `Total ${total} students`,
-      }}
+      pagination={false}
     />
   )
 }
