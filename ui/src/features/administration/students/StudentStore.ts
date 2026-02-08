@@ -1,5 +1,5 @@
 import { createStore } from '../../../shared/store/jestor'
-import { Student, CreateStudentInput, StudentStoreValue } from './types'
+import { Student, CreateStudentInput, StudentStoreValue } from './StudentTypes'
 import { studentRepository } from './StudentRepository'
 
 interface StudentStoreState {

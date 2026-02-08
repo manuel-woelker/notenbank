@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { Student, CreateStudentInput } from './types'
+import { Student, CreateStudentInput } from './StudentTypes'
 import { createRepository } from '../../../shared/repositories/createRepository'
 import type { Repository } from '../../../shared/repositories/Repository'
 import {

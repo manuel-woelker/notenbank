@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { BaseEntity, CreateInput } from './types'
+import { BaseEntity, CreateInput } from './RepositoryTypes'
 import { Repository, RepositorySchemas } from './Repository'
 import { IndexedDBRepository, RepositoryConfig } from './IndexedDBRepository'
 

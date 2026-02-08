@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { expect, within } from '@storybook/test'
 import { ClassTable } from './ClassTable'
-import type { Class } from './types'
+import type { Class } from './ClassTypes'
 
 const sampleClasses: Class[] = [
   {

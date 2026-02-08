@@ -1,5 +1,5 @@
 import type { ZodType } from 'zod'
-import { BaseEntity, CreateInput } from './types'
+import { BaseEntity, CreateInput } from './RepositoryTypes'
 
 export type RepositorySchemas<
   T extends BaseEntity,

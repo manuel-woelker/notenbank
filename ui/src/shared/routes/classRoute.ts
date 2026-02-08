@@ -1,4 +1,4 @@
-import type { Class } from '../../features/administration/classes/types'
+import type { Class } from '../../features/administration/classes/ClassTypes'
 
 const normalizeClassName = (name: string) =>
   name.trim().toLowerCase().replace(/\s+/g, '-')

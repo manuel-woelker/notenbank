@@ -1,4 +1,4 @@
-import { BaseEntity, CreateInput, Serialized } from './types'
+import { BaseEntity, CreateInput, Serialized } from './RepositoryTypes'
 import { Repository, RepositorySchemas } from './Repository'
 
 /**

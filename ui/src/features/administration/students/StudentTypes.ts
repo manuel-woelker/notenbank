@@ -1,4 +1,4 @@
-import { BaseEntity } from '../../../shared/repositories/types'
+import { BaseEntity } from '../../../shared/repositories/RepositoryTypes'
 
 /**
  * Student entity representing a student in the administration system
