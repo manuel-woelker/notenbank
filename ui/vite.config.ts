@@ -10,6 +10,19 @@ export default defineConfig({
   */
   base: './',
   plugins: [react()],
+  /* 📖 # Why force a single JavaScript bundle?
+  The deployment target expects one JS file for simpler hosting and caching.
+  inlineDynamicImports disables code splitting, and clearing manualChunks avoids
+  extra chunks created by Rollup.
+  */
+  build: {
+    rollupOptions: {
+      output: {
+        inlineDynamicImports: true,
+        manualChunks: undefined,
+      },
+    },
+  },
   test: {
     includeSource: ['src/**/!(*.d).{ts,tsx,js,jsx}'],
     globals: true,
