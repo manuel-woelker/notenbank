@@ -156,3 +156,8 @@ Also run `../tool-tool.exe pnpm run check` to ensure the tests pass and the code
 ## Commit messages
 
 Commit message should be in the "Conventional Commits" format, e.g. "feat(UI): Add about button to see version and build date"
+
+## File naming
+
+Choose descriptive names for files. Avoid names like "index.ts" or "types.ts".
+Do not bulk export items using "export * from 'submodule'".
