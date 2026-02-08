@@ -11,6 +11,7 @@ import {
 import { Outlet, useNavigate, useLocation } from '@tanstack/react-router'
 import { GIT_INFO } from '../../git-info'
 import { useClassStore } from '../../features/administration/classes/ClassStore'
+import { useSubjectStore } from '../../features/administration/subjects/SubjectStore'
 import {
   buildClassRouteSegment,
   findClassByRouteSegment,
@@ -30,6 +31,7 @@ export function RootLayout() {
   const navigate = useNavigate()
   const location = useLocation()
   const { classes } = useClassStore()
+  const { subjects } = useSubjectStore()
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken()
@@ -79,6 +81,18 @@ export function RootLayout() {
       if (parts[2] === 'students') {
         items.push({ title: <span>Schüler</span> })
       }
+      if (parts[2] === 'subjects') {
+        items.push({ title: <span>Fächer</span> })
+        if (parts.length >= 4) {
+          const subjectId = parts[3]
+          const subjectMatch = subjects.find(
+            (subject) => subject.id === subjectId
+          )
+          const subjectLabel =
+            subjectMatch?.name ?? decodeURIComponent(subjectId)
+          items.push({ title: <span>{subjectLabel}</span> })
+        }
+      }
       return items
     }
     if (path.startsWith('/content')) {
@@ -88,7 +102,7 @@ export function RootLayout() {
       return [clickableCrumb('Hochladen', '/upload')]
     }
     return [clickableCrumb('Übersicht', '/')]
-  }, [location.pathname, navigate, classes])
+  }, [location.pathname, navigate, classes, subjects])
 
   return (
     <Layout style={{ minHeight: '100vh' }}>

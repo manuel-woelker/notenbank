@@ -1,10 +1,12 @@
 import React, { useMemo } from 'react'
 import { Card, Col, Row, Space, Typography } from 'antd'
+import { useNavigate } from '@tanstack/react-router'
 import { useClassStore } from '../classes/ClassStore'
 import { useStudentStore } from './StudentStore'
 import { StudentTable } from './StudentTable'
 import { useSubjectStore } from '../subjects/SubjectStore'
 import { SubjectTable } from '../subjects/SubjectTable'
+import { buildClassRouteSegment } from '../../../shared/routes/classRoute'
 
 const { Title, Text } = Typography
 
@@ -16,6 +18,7 @@ interface ClassOverviewProps {
  * Page component for listing students in a class
  */
 export const ClassOverview: React.FC<ClassOverviewProps> = ({ classId }) => {
+  const navigate = useNavigate()
   const { classes, loading: classesLoading } = useClassStore()
   const {
     students,
@@ -29,6 +32,7 @@ export const ClassOverview: React.FC<ClassOverviewProps> = ({ classId }) => {
   } = useSubjectStore()
 
   const selectedClass = classes.find((item) => item.id === classId)
+  const classRouteSegment = buildClassRouteSegment(classes, classId)
   const classStudents = useMemo(
     () => students.filter((student) => student.classId === classId),
     [students, classId]
@@ -71,6 +75,14 @@ export const ClassOverview: React.FC<ClassOverviewProps> = ({ classId }) => {
                 onCreateSubject={async (input) => {
                   await createSubject({ ...input, classId })
                 }}
+                onSelectSubject={(subjectId) => {
+                  if (!classRouteSegment) {
+                    return
+                  }
+                  void navigate({
+                    to: `/classes/${classRouteSegment}/subjects/${subjectId}`,
+                  })
+                }}
               />
             </Card>
           </Col>
@@ -92,12 +104,22 @@ export const ClassOverview: React.FC<ClassOverviewProps> = ({ classId }) => {
 }
 
 if (import.meta.vitest) {
-  const { describe, it, expect, beforeEach } = import.meta.vitest
+  const { describe, it, expect, beforeEach, vi } = import.meta.vitest
   const { render, waitFor } = await import('@testing-library/react')
   const { IDBFactory } = await import('fake-indexeddb')
   const { classRepository } = await import('../classes/ClassRepository')
   const { studentRepository } = await import('./StudentRepository')
   const { subjectRepository } = await import('../subjects/SubjectRepository')
+
+  vi.mock('@tanstack/react-router', async () => {
+    const actual = await vi.importActual<
+      typeof import('@tanstack/react-router')
+    >('@tanstack/react-router')
+    return {
+      ...actual,
+      useNavigate: () => () => {},
+    }
+  })
 
   describe('ClassOverview', () => {
     beforeEach(async () => {

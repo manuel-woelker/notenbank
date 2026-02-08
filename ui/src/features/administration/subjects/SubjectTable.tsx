@@ -18,6 +18,7 @@ interface SubjectTableProps {
   subjects: Subject[]
   loading: boolean
   onCreateSubject: (input: { name: string }) => Promise<void>
+  onSelectSubject?: (subjectId: string) => void
 }
 
 /**
@@ -27,6 +28,7 @@ export const SubjectTable: React.FC<SubjectTableProps> = ({
   subjects,
   loading,
   onCreateSubject,
+  onSelectSubject,
 }) => {
   const [name, setName] = useState('')
   const [saving, setSaving] = useState(false)
@@ -105,6 +107,14 @@ export const SubjectTable: React.FC<SubjectTableProps> = ({
       dataSource={dataSource}
       rowKey="id"
       loading={loading}
+      onRow={(record) => {
+        if ('isNew' in record) {
+          return {}
+        }
+        return {
+          onClick: () => onSelectSubject?.(record.id),
+        }
+      }}
       locale={{
         emptyText: 'Keine Fächer gefunden. Oben ein neues Fach hinzufügen.',
       }}
@@ -164,6 +174,51 @@ if (import.meta.vitest) {
       expect(onCreateSubject).toHaveBeenCalledWith({
         name: 'Mathe',
       })
+    })
+
+    it('calls onSelectSubject when a subject row is clicked', async () => {
+      if (!window.matchMedia) {
+        window.matchMedia = () =>
+          ({
+            matches: false,
+            media: '',
+            onchange: null,
+            addListener: () => {},
+            removeListener: () => {},
+            addEventListener: () => {},
+            removeEventListener: () => {},
+            dispatchEvent: () => false,
+          }) as unknown as MediaQueryList
+      }
+      window.getComputedStyle = () =>
+        ({
+          getPropertyValue: () => '',
+        }) as unknown as CSSStyleDeclaration
+
+      const onSelectSubject = vi.fn()
+
+      const { getByText } = render(
+        <SubjectTable
+          subjects={[
+            {
+              id: 'subject-1',
+              name: 'Mathe',
+              classId: 'class-1',
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
+          ]}
+          loading={false}
+          onCreateSubject={vi.fn()}
+          onSelectSubject={onSelectSubject}
+        />
+      )
+
+      await act(async () => {
+        fireEvent.click(getByText('Mathe'))
+      })
+
+      expect(onSelectSubject).toHaveBeenCalledWith('subject-1')
     })
   })
 }

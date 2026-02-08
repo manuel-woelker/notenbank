@@ -3,6 +3,7 @@ import { RootLayout } from './layouts/RootLayout'
 import { Dashboard } from '../features/dashboard/Dashboard'
 import { ClassList } from '../features/administration/classes/ClassList'
 import { ClassStudentsRoute } from './components/ClassStudentsRoute'
+import { SubjectOverviewRoute } from './components/SubjectOverviewRoute'
 import { ContentPage } from '../features/content/ContentPage'
 import { UploadPage } from '../features/upload/UploadPage'
 
@@ -32,6 +33,12 @@ export const classStudentsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/classes/$classKey/students',
   component: ClassStudentsRoute,
+})
+
+export const subjectOverviewRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/classes/$classKey/subjects/$subjectId',
+  component: SubjectOverviewRoute,
 })
 
 export const contentRoute = createRoute({
