@@ -31,7 +31,7 @@ export const ClassList: React.FC = () => {
 
   return (
     <div>
-      <Space direction="vertical" size="large" style={{ width: '100%' }}>
+      <Space orientation="vertical" size="large" style={{ width: '100%' }}>
         <div
           style={{
             display: 'flex',
@@ -73,9 +73,9 @@ export const ClassList: React.FC = () => {
         open={Boolean(selectedClassId)}
         onClose={() => setSelectedClassId(null)}
         title={selectedClass ? `${selectedClass.name} Students` : 'Students'}
-        width={720}
+        size="large"
       >
-        <Space direction="vertical" size="large" style={{ width: '100%' }}>
+        <Space orientation="vertical" size="large" style={{ width: '100%' }}>
           <div
             style={{
               display: 'flex',
