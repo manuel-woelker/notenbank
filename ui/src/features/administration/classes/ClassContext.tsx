@@ -120,11 +120,9 @@ if (import.meta.vitest) {
         // Pre-populate some classes
         await classRepository.create({
           name: 'Class A',
-          description: 'Description A',
         })
         await classRepository.create({
           name: 'Class B',
-          description: 'Description B',
         })
 
         const { result } = renderHook(() => useClassContext(), {
@@ -156,7 +154,6 @@ if (import.meta.vitest) {
         // Create a class directly in repository (bypassing context)
         await classRepository.create({
           name: 'New Class',
-          description: 'Description',
         })
 
         // Reload classes
@@ -186,11 +183,9 @@ if (import.meta.vitest) {
         // Create a class through context
         const newClass = await result.current.createClass({
           name: 'Test Class',
-          description: 'Test Description',
         })
 
         expect(newClass.name).toBe('Test Class')
-        expect(newClass.description).toBe('Test Description')
         expect(newClass.id).toBeDefined()
 
         // Wait for state to update with the new class
@@ -221,7 +216,6 @@ if (import.meta.vitest) {
         await expect(
           result.current.createClass({
             name: 'Test',
-            description: 'Test',
           })
         ).rejects.toThrow('Database error')
 

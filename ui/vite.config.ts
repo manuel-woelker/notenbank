@@ -17,7 +17,7 @@ export default defineConfig(({ mode }) => {
     base,
     plugins: [react()],
     test: {
-      includeSource: ['src/**/*.{js,ts,jsx,tsx}'],
+      includeSource: ['src/**/!(*.d).{ts,tsx,js,jsx}'],
       globals: true,
       environment: 'jsdom',
       coverage: {
@@ -41,9 +41,6 @@ export default defineConfig(({ mode }) => {
           statements: 40,
         },
       },
-    },
-    define: {
-      'import.meta.vitest': 'undefined',
     },
   }
 })

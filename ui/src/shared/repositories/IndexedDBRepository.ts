@@ -133,12 +133,14 @@ export class IndexedDBRepository<
    */
   async create(data: TCreate): Promise<T> {
     const now = new Date()
+    // Type assertion is safe here because we're adding the required BaseEntity fields
+    // (id, createdAt, updatedAt) to TCreate to construct T
     const newEntity = {
-      ...(data as object),
+      ...data,
       id: crypto.randomUUID(),
       createdAt: now,
       updatedAt: now,
-    } as T
+    } as unknown as T
 
     const store = await this.getStore('readwrite')
     return new Promise((resolve, reject) => {
