@@ -1,3 +1,4 @@
+import { z } from 'zod'
 import { Class, CreateClassInput } from './types'
 import { createRepository } from '../../../shared/repositories/createRepository'
 import type { Repository } from '../../../shared/repositories/Repository'
@@ -18,6 +19,21 @@ const STORE_NAME = 'classes'
  */
 export type ClassRepository = Repository<Class, CreateClassInput>
 
+const classSchemas = {
+  entity: z.object({
+    id: z.string(),
+    name: z.string().min(1),
+    createdAt: z.date(),
+    updatedAt: z.date(),
+  }),
+  create: z.object({
+    name: z.string().min(1),
+  }),
+  update: z.object({
+    name: z.string().min(1).optional(),
+  }),
+}
+
 /* 📖 # How to create repositories for future entities
  *
  * This pattern can be replicated for Students, Subjects, and other entities:
@@ -27,6 +43,23 @@ export type ClassRepository = Repository<Class, CreateClassInput>
  *   dbName: 'notenbank',
  *   dbVersion: 2,  // Increment when adding new stores
  *   storeName: 'students',
+ *   schemas: {
+ *     entity: z.object({
+ *       id: z.string(),
+ *       firstName: z.string().min(1),
+ *       lastName: z.string().min(1),
+ *       createdAt: z.date(),
+ *       updatedAt: z.date(),
+ *     }),
+ *     create: z.object({
+ *       firstName: z.string().min(1),
+ *       lastName: z.string().min(1),
+ *     }),
+ *     update: z.object({
+ *       firstName: z.string().min(1).optional(),
+ *       lastName: z.string().min(1).optional(),
+ *     }),
+ *   },
  *   indexes: [
  *     { name: 'classId', keyPath: 'classId' },
  *     { name: 'lastName', keyPath: 'lastName' },
@@ -48,4 +81,5 @@ export const classRepository: ClassRepository = createRepository<
     { name: 'name', keyPath: 'name', options: { unique: false } },
     { name: 'createdAt', keyPath: 'createdAt', options: { unique: false } },
   ],
+  schemas: classSchemas,
 })

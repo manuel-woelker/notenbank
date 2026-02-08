@@ -1,4 +1,14 @@
+import type { ZodType } from 'zod'
 import { BaseEntity, CreateInput } from './types'
+
+export type RepositorySchemas<
+  T extends BaseEntity,
+  TCreate = CreateInput<T>,
+> = {
+  entity: ZodType<T>
+  create: ZodType<TCreate>
+  update?: ZodType<Partial<T>>
+}
 
 /**
  * Generic repository interface for CRUD operations
@@ -7,6 +17,7 @@ import { BaseEntity, CreateInput } from './types'
  * @template TCreate - The creation input type (defaults to CreateInput<T>)
  */
 export interface Repository<T extends BaseEntity, TCreate = CreateInput<T>> {
+  schemas: RepositorySchemas<T, TCreate>
   /**
    * Retrieve all entities
    */

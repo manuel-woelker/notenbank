@@ -1,5 +1,5 @@
 import { BaseEntity, CreateInput, Serialized } from './types'
-import { Repository } from './Repository'
+import { Repository, RepositorySchemas } from './Repository'
 
 /**
  * Index configuration for IndexedDB object stores
@@ -16,15 +16,15 @@ export interface IndexConfig {
  * @template T - The entity type
  * @template _TCreate - Unused type parameter for compatibility (prefixed with _ to indicate intentionally unused)
  */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 export interface RepositoryConfig<
   T extends BaseEntity,
-  _TCreate = CreateInput<T>,
+  TCreate = CreateInput<T>,
 > {
   dbName: string
   dbVersion: number
   storeName: string
   indexes?: IndexConfig[]
+  schemas: RepositorySchemas<T, TCreate>
   /**
    * Custom serializer for entities with additional Date fields beyond createdAt/updatedAt
    */
@@ -34,8 +34,6 @@ export interface RepositoryConfig<
    */
   deserialize?: (data: Serialized<T>) => T
 }
-/* eslint-enable @typescript-eslint/no-unused-vars */
-
 /**
  * Generic IndexedDB repository implementation
  *
@@ -49,11 +47,13 @@ export class IndexedDBRepository<
   T extends BaseEntity,
   TCreate = CreateInput<T>,
 > implements Repository<T, TCreate> {
+  readonly schemas: RepositorySchemas<T, TCreate>
   private dbPromise: Promise<IDBDatabase>
   private config: RepositoryConfig<T, TCreate>
 
-  constructor(config: RepositoryConfig<T, never>) {
+  constructor(config: RepositoryConfig<T, TCreate>) {
     this.config = config
+    this.schemas = config.schemas
     this.dbPromise = this.initDB()
   }
 
@@ -106,7 +106,9 @@ export class IndexedDBRepository<
     return new Promise((resolve, reject) => {
       const request = store.getAll()
       request.onsuccess = () => {
-        const entities = request.result.map((data) => this.deserialize(data))
+        const entities = request.result.map((data) =>
+          this.validateEntity(this.deserialize(data))
+        )
         resolve(entities)
       }
       request.onerror = () => reject(request.error)
@@ -122,7 +124,7 @@ export class IndexedDBRepository<
       const request = store.get(id)
       request.onsuccess = () => {
         const result = request.result
-        resolve(result ? this.deserialize(result) : null)
+        resolve(result ? this.validateEntity(this.deserialize(result)) : null)
       }
       request.onerror = () => reject(request.error)
     })
@@ -132,15 +134,16 @@ export class IndexedDBRepository<
    * Create a new entity
    */
   async create(data: TCreate): Promise<T> {
+    const validatedInput = this.validateCreateInput(data)
     const now = new Date()
     // Type assertion is safe here because we're adding the required BaseEntity fields
     // (id, createdAt, updatedAt) to TCreate to construct T
-    const newEntity = {
-      ...data,
+    const newEntity = this.validateEntity({
+      ...validatedInput,
       id: crypto.randomUUID(),
       createdAt: now,
       updatedAt: now,
-    } as unknown as T
+    } as unknown as T)
 
     const store = await this.getStore('readwrite')
     return new Promise((resolve, reject) => {
@@ -159,12 +162,12 @@ export class IndexedDBRepository<
       throw new Error(`Entity with id ${id} not found`)
     }
 
-    const updated: T = {
+    const updated: T = this.validateEntity({
       ...existing,
-      ...data,
+      ...this.validateUpdateInput(data),
       id: existing.id, // Ensure ID cannot be changed
       updatedAt: new Date(),
-    }
+    })
 
     const store = await this.getStore('readwrite')
     return new Promise((resolve, reject) => {
@@ -226,12 +229,38 @@ export class IndexedDBRepository<
       updatedAt: new Date((data as { updatedAt: string }).updatedAt),
     } as T
   }
+
+  /* 📖 # Why validate data using optional schemas?
+   *
+   * Repository consumers may supply runtime schemas (via zod) to guard against
+   * corrupted storage data and malformed inputs.
+   *
+   * Validation is optional to keep low-friction usage for cases where runtime
+   * checking is unnecessary or already handled elsewhere.
+   */
+  private validateEntity(entity: T): T {
+    return this.config.schemas.entity.parse(entity)
+  }
+
+  private validateCreateInput(data: TCreate): TCreate {
+    return this.config.schemas.create.parse(data)
+  }
+
+  private validateUpdateInput(data: Partial<T>): Partial<T> {
+    const updateSchema = this.config.schemas?.update
+    if (!updateSchema) {
+      return data
+    }
+
+    return updateSchema.parse(data)
+  }
 }
 
 // Tests
 if (import.meta.vitest) {
   const { describe, it, expect, beforeEach } = import.meta.vitest
   const { IDBFactory } = await import('fake-indexeddb')
+  const { z } = await import('zod')
 
   interface TestEntity extends BaseEntity {
     name: string
@@ -242,6 +271,21 @@ if (import.meta.vitest) {
   describe('IndexedDBRepository', () => {
     let repository: IndexedDBRepository<TestEntity, CreateTestEntity>
 
+    const schemas = {
+      entity: z.object({
+        id: z.string(),
+        name: z.string().min(1),
+        createdAt: z.date(),
+        updatedAt: z.date(),
+      }),
+      create: z.object({
+        name: z.string().min(1),
+      }),
+      update: z.object({
+        name: z.string().min(1).optional(),
+      }),
+    }
+
     beforeEach(() => {
       // Reset IndexedDB for each test
       globalThis.indexedDB = new IDBFactory()
@@ -249,6 +293,7 @@ if (import.meta.vitest) {
         dbName: 'test-db',
         dbVersion: 1,
         storeName: 'test-entities',
+        schemas,
         indexes: [
           { name: 'name', keyPath: 'name', options: { unique: false } },
           {
@@ -407,6 +452,62 @@ if (import.meta.vitest) {
 
         expect(retrieved?.createdAt.getTime()).toBe(originalCreatedAt)
         expect(retrieved?.updatedAt.getTime()).toBe(originalUpdatedAt)
+      })
+    })
+
+    describe('schema validation', () => {
+      it('rejects invalid create input when schemas are provided', async () => {
+        repository = new IndexedDBRepository<TestEntity, CreateTestEntity>({
+          dbName: 'test-db',
+          dbVersion: 1,
+          storeName: 'test-entities',
+          schemas: {
+            entity: z.object({
+              id: z.string(),
+              name: z.string().min(2),
+              createdAt: z.date(),
+              updatedAt: z.date(),
+            }),
+            create: z.object({
+              name: z.string().min(2),
+            }),
+            update: z.object({
+              name: z.string().min(2).optional(),
+            }),
+          },
+        })
+
+        await expect(
+          repository.create({ name: '' } as CreateTestEntity)
+        ).rejects.toThrow()
+      })
+
+      it('rejects invalid updates when update schema is provided', async () => {
+        repository = new IndexedDBRepository<TestEntity, CreateTestEntity>({
+          dbName: 'test-db',
+          dbVersion: 1,
+          storeName: 'test-entities',
+          schemas: {
+            entity: z.object({
+              id: z.string(),
+              name: z.string().min(2),
+              createdAt: z.date(),
+              updatedAt: z.date(),
+            }),
+            create: z.object({
+              name: z.string().min(2),
+            }),
+            update: z.object({
+              name: z.string().min(2).optional(),
+            }),
+          },
+        })
+
+        const created = await repository.create({ name: 'Valid' })
+
+        await expect(
+          repository.update(created.id, { name: '' })
+        ).rejects.toThrow()
       })
     })
   })

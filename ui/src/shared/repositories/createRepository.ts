@@ -1,3 +1,4 @@
+import { z } from 'zod'
 import { BaseEntity, CreateInput } from './types'
 import { Repository } from './Repository'
 import { IndexedDBRepository, RepositoryConfig } from './IndexedDBRepository'
@@ -28,6 +29,20 @@ import { IndexedDBRepository, RepositoryConfig } from './IndexedDBRepository'
  *   dbName: 'notenbank',
  *   dbVersion: 1,
  *   storeName: 'classes',
+ *   schemas: {
+ *     entity: z.object({
+ *       id: z.string(),
+ *       name: z.string().min(1),
+ *       createdAt: z.date(),
+ *       updatedAt: z.date(),
+ *     }),
+ *     create: z.object({
+ *       name: z.string().min(1),
+ *     }),
+ *     update: z.object({
+ *       name: z.string().min(1).optional(),
+ *     }),
+ *   },
  *   indexes: [
  *     { name: 'name', keyPath: 'name', options: { unique: false } },
  *   ],
@@ -37,7 +52,7 @@ import { IndexedDBRepository, RepositoryConfig } from './IndexedDBRepository'
 export function createRepository<
   T extends BaseEntity,
   TCreate = CreateInput<T>,
->(config: RepositoryConfig<T, never>): Repository<T, TCreate> {
+>(config: RepositoryConfig<T, TCreate>): Repository<T, TCreate> {
   let instance: IndexedDBRepository<T, TCreate> | null = null
 
   const ensureInstance = () => {
@@ -48,6 +63,7 @@ export function createRepository<
   }
 
   return {
+    schemas: config.schemas,
     get findAll() {
       return ensureInstance().findAll.bind(ensureInstance())
     },
@@ -77,6 +93,21 @@ if (import.meta.vitest) {
   type CreateTestEntity = CreateInput<TestEntity>
 
   describe('createRepository', () => {
+    const schemas = {
+      entity: z.object({
+        id: z.string(),
+        name: z.string().min(1),
+        createdAt: z.date(),
+        updatedAt: z.date(),
+      }),
+      create: z.object({
+        name: z.string().min(1),
+      }),
+      update: z.object({
+        name: z.string().min(1).optional(),
+      }),
+    }
+
     beforeEach(() => {
       // Reset IndexedDB for each test
       globalThis.indexedDB = new IDBFactory()
@@ -87,6 +118,7 @@ if (import.meta.vitest) {
         dbName: 'test-db',
         dbVersion: 1,
         storeName: 'test-entities',
+        schemas,
         indexes: [],
       })
 
@@ -107,6 +139,7 @@ if (import.meta.vitest) {
         dbName: 'test-db',
         dbVersion: 1,
         storeName: 'test-entities',
+        schemas,
         indexes: [],
       })
 
@@ -124,6 +157,7 @@ if (import.meta.vitest) {
         dbName: 'test-db',
         dbVersion: 1,
         storeName: 'test-entities',
+        schemas,
         indexes: [],
       })
 
@@ -141,6 +175,7 @@ if (import.meta.vitest) {
         dbName: 'test-db-1',
         dbVersion: 1,
         storeName: 'entities-1',
+        schemas,
         indexes: [],
       })
 
@@ -148,6 +183,7 @@ if (import.meta.vitest) {
         dbName: 'test-db-2',
         dbVersion: 1,
         storeName: 'entities-2',
+        schemas,
         indexes: [],
       })
 
@@ -165,6 +201,7 @@ if (import.meta.vitest) {
           dbName: 'test-db',
           dbVersion: 1,
           storeName: 'test-entities',
+          schemas,
           indexes: [
             { name: 'name', keyPath: 'name', options: { unique: false } },
           ],
@@ -234,6 +271,7 @@ if (import.meta.vitest) {
           dbName: 'test-db',
           dbVersion: 1,
           storeName: 'test-entities',
+          schemas,
           indexes: [],
         })
 
