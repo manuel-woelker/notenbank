@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { BaseEntity, CreateInput } from './types'
-import { Repository } from './Repository'
+import { Repository, RepositorySchemas } from './Repository'
 import { IndexedDBRepository, RepositoryConfig } from './IndexedDBRepository'
 
 /* 📖 # Why use a lazy getter singleton pattern?
@@ -53,6 +53,7 @@ export function createRepository<
   T extends BaseEntity,
   TCreate = CreateInput<T>,
 >(config: RepositoryConfig<T, TCreate>): Repository<T, TCreate> {
+  const schemas = config.schemas satisfies RepositorySchemas<T, TCreate>
   let instance: IndexedDBRepository<T, TCreate> | null = null
 
   const ensureInstance = () => {
@@ -63,7 +64,7 @@ export function createRepository<
   }
 
   return {
-    schemas: config.schemas,
+    schemas,
     get findAll() {
       return ensureInstance().findAll.bind(ensureInstance())
     },
