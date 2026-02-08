@@ -1,9 +1,8 @@
-import React, { useMemo, useState } from 'react'
-import { Button, Space, Typography } from 'antd'
+import React, { useMemo } from 'react'
+import { Space, Typography } from 'antd'
 import { useClassStore } from '../classes/ClassStore'
 import { useStudentStore } from './StudentStore'
 import { StudentTable } from './StudentTable'
-import { CreateStudentModal } from './CreateStudentModal'
 
 const { Title, Text } = Typography
 
@@ -17,9 +16,12 @@ interface ClassStudentsListProps {
 export const ClassStudentsList: React.FC<ClassStudentsListProps> = ({
   classId,
 }) => {
-  const [isStudentModalOpen, setIsStudentModalOpen] = useState(false)
   const { classes, loading: classesLoading } = useClassStore()
-  const { students, loading: studentsLoading } = useStudentStore()
+  const {
+    students,
+    loading: studentsLoading,
+    createStudent,
+  } = useStudentStore()
 
   const selectedClass = classes.find((item) => item.id === classId)
   const classStudents = useMemo(
@@ -46,26 +48,21 @@ export const ClassStudentsList: React.FC<ClassStudentsListProps> = ({
             <Text type="secondary">{selectedClass.name}</Text>
           ) : null}
         </div>
-        <Button
-          type="primary"
-          onClick={() => setIsStudentModalOpen(true)}
-          disabled={!selectedClass}
-        >
-          Add Student
-        </Button>
       </div>
 
       {!selectedClass && !classesLoading ? (
         <Text type="secondary">Class not found.</Text>
       ) : null}
 
-      <StudentTable students={classStudents} loading={isLoading} />
-
-      <CreateStudentModal
-        open={isStudentModalOpen}
-        onClose={() => setIsStudentModalOpen(false)}
-        classId={classId}
-      />
+      {selectedClass ? (
+        <StudentTable
+          students={classStudents}
+          loading={isLoading}
+          onCreateStudent={async (input) => {
+            await createStudent({ ...input, classId })
+          }}
+        />
+      ) : null}
     </Space>
   )
 }

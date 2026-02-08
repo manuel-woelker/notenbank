@@ -1,9 +1,7 @@
-import React, { useState } from 'react'
-import { Button, Space, Typography } from 'antd'
-import { PlusOutlined } from '@ant-design/icons'
+import React from 'react'
+import { Space, Typography } from 'antd'
 import { useClassStore } from './ClassStore'
 import { ClassTable } from './ClassTable'
-import { CreateClassModal } from './CreateClassModal'
 import { useNavigate } from '@tanstack/react-router'
 
 const { Title } = Typography
@@ -12,30 +10,16 @@ const { Title } = Typography
  * Main page component for class listing and management
  */
 export const ClassList: React.FC = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const { classes, loading } = useClassStore()
+  const { classes, loading, createClass } = useClassStore()
   const navigate = useNavigate()
 
   return (
     <div>
       <Space orientation="vertical" size="large" style={{ width: '100%' }}>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
+        <div style={{ display: 'flex', alignItems: 'center' }}>
           <Title level={2} style={{ margin: 0 }}>
             Classes
           </Title>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => setIsModalOpen(true)}
-          >
-            Add Class
-          </Button>
         </div>
 
         <ClassTable
@@ -44,13 +28,11 @@ export const ClassList: React.FC = () => {
           onSelectClass={(classId) =>
             navigate({ to: `/classes/${classId}/students` })
           }
+          onCreateClass={async (name) => {
+            await createClass({ name })
+          }}
         />
       </Space>
-
-      <CreateClassModal
-        open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      />
     </div>
   )
 }

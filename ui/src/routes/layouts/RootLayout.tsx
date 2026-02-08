@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Layout, Menu, theme } from 'antd'
+import { useMemo, useState } from 'react'
+import { Breadcrumb, Layout, Menu, theme } from 'antd'
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -36,6 +36,36 @@ export function RootLayout() {
     if (path.startsWith('/upload')) return 'upload'
     return 'dashboard'
   }
+
+  const breadcrumbItems = useMemo(() => {
+    const path = location.pathname
+    if (path === '/') {
+      return [{ title: 'Dashboard', onClick: () => navigate({ to: '/' }) }]
+    }
+    if (path.startsWith('/classes')) {
+      const parts = path.split('/').filter(Boolean)
+      const items = [
+        { title: 'Classes', onClick: () => navigate({ to: '/classes' }) },
+      ]
+      if (parts.length >= 2) {
+        items.push({
+          title: `Class ${parts[1]}`,
+          onClick: () => navigate({ to: `/classes/${parts[1]}/students` }),
+        })
+      }
+      if (parts[2] === 'students') {
+        items.push({ title: 'Students', onClick: async () => {} })
+      }
+      return items
+    }
+    if (path.startsWith('/content')) {
+      return [{ title: 'Content', onClick: () => navigate({ to: '/content' }) }]
+    }
+    if (path.startsWith('/upload')) {
+      return [{ title: 'Upload', onClick: () => navigate({ to: '/upload' }) }]
+    }
+    return [{ title: 'Dashboard', onClick: () => navigate({ to: '/' }) }]
+  }, [location.pathname, navigate])
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -108,7 +138,10 @@ export function RootLayout() {
                 onClick={() => setCollapsed(!collapsed)}
               />
             )}
-            <h2 style={{ margin: 0 }}>Notenbank</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <h2 style={{ margin: 0 }}>Notenbank</h2>
+              <Breadcrumb items={breadcrumbItems} />
+            </div>
           </div>
         </Header>
         <Content
