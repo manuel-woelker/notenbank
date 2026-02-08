@@ -3,6 +3,7 @@ import {
   rootRoute,
   dashboardRoute,
   classesRoute,
+  classStudentsRoute,
   contentRoute,
   uploadRoute,
 } from './routes'
@@ -18,6 +19,7 @@ const hashHistory = createHashHistory()
 const routeTree = rootRoute.addChildren([
   dashboardRoute,
   classesRoute,
+  classStudentsRoute,
   contentRoute,
   uploadRoute,
 ])

@@ -2,6 +2,7 @@ import { createRootRoute, createRoute } from '@tanstack/react-router'
 import { RootLayout } from './layouts/RootLayout'
 import { Dashboard } from '../features/dashboard/Dashboard'
 import { ClassList } from '../features/administration/classes/ClassList'
+import { ClassStudentsRoute } from './components/ClassStudentsRoute'
 import { ContentPage } from '../features/content/ContentPage'
 import { UploadPage } from '../features/upload/UploadPage'
 
@@ -25,6 +26,12 @@ export const classesRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/classes',
   component: ClassList,
+})
+
+export const classStudentsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/classes/$classId/students',
+  component: ClassStudentsRoute,
 })
 
 export const contentRoute = createRoute({
