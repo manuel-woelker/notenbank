@@ -25,6 +25,7 @@ export interface RepositoryConfig<
   storeName: string
   indexes?: IndexConfig[]
   schemas: RepositorySchemas<T, TCreate>
+  onUpgrade?: (db: IDBDatabase) => void
   /**
    * Custom serializer for entities with additional Date fields beyond createdAt/updatedAt
    */
@@ -85,6 +86,8 @@ export class IndexedDBRepository<
             )
           })
         }
+
+        this.config.onUpgrade?.(db)
       }
     })
   }

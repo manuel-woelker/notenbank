@@ -2,9 +2,12 @@ import { z } from 'zod'
 import { Class, CreateClassInput } from './types'
 import { createRepository } from '../../../shared/repositories/createRepository'
 import type { Repository } from '../../../shared/repositories/Repository'
+import {
+  ensureNotenbankStores,
+  NOTENBANK_DB_NAME,
+  NOTENBANK_DB_VERSION,
+} from '../../../shared/repositories/notenbankDb'
 
-const DB_NAME = 'notenbank'
-const DB_VERSION = 1
 const STORE_NAME = 'classes'
 
 /* 📖 # Why maintain a ClassRepository type alias?
@@ -74,12 +77,13 @@ export const classRepository: ClassRepository = createRepository<
   Class,
   CreateClassInput
 >({
-  dbName: DB_NAME,
-  dbVersion: DB_VERSION,
+  dbName: NOTENBANK_DB_NAME,
+  dbVersion: NOTENBANK_DB_VERSION,
   storeName: STORE_NAME,
   indexes: [
     { name: 'name', keyPath: 'name', options: { unique: false } },
     { name: 'createdAt', keyPath: 'createdAt', options: { unique: false } },
   ],
   schemas: classSchemas,
+  onUpgrade: ensureNotenbankStores,
 })
