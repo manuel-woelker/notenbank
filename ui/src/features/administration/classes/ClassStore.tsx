@@ -1,81 +1,87 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from 'react'
-import { Class, CreateClassInput, ClassContextValue } from './types'
+import React, { useEffect, ReactNode } from 'react'
+import { createStore } from '../../../shared/store/jestor'
+import { Class, CreateClassInput, ClassStoreValue } from './types'
 import { classRepository } from './ClassRepository'
 
-const ClassContext = createContext<ClassContextValue | undefined>(undefined)
+interface ClassStoreState {
+  classes: Class[]
+  loading: boolean
+}
 
-interface ClassProviderProps {
+const classStore = createStore<ClassStoreState>({
+  name: 'classes',
+  initialState: { classes: [], loading: true },
+})
+
+interface ClassStoreProviderProps {
   children: ReactNode
 }
 
 /**
- * Provider component for class state management
+ * Provider component for class store initialization
  */
-export const ClassProvider: React.FC<ClassProviderProps> = ({ children }) => {
-  const [classes, setClasses] = useState<Class[]>([])
-  const [loading, setLoading] = useState(true)
-
-  /**
-   * Load all classes from repository
-   */
-  const loadClasses = async () => {
-    setLoading(true)
-    try {
-      const data = await classRepository.findAll()
-      setClasses(data)
-    } catch (error) {
-      console.error('Failed to load classes:', error)
-      throw error
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  /**
-   * Create a new class
-   */
-  const createClass = async (input: CreateClassInput): Promise<Class> => {
-    try {
-      const newClass = await classRepository.create(input)
-      setClasses((prev) => [...prev, newClass])
-      return newClass
-    } catch (error) {
-      console.error('Failed to create class:', error)
-      throw error
-    }
-  }
-
+export const ClassStoreProvider: React.FC<ClassStoreProviderProps> = ({
+  children,
+}) => {
   // Load classes on mount
   useEffect(() => {
-    loadClasses()
+    void loadClasses()
   }, [])
 
-  const value: ClassContextValue = {
+  return <>{children}</>
+}
+
+/**
+ * Load all classes from repository
+ */
+const loadClasses = async () => {
+  classStore.update('classes:load:start', (state) => {
+    state.loading = true
+  })
+  try {
+    const data = await classRepository.findAll()
+    classStore.update('classes:load:success', (state) => {
+      state.classes = data
+    })
+  } catch (error) {
+    console.error('Failed to load classes:', error)
+    throw error
+  } finally {
+    classStore.update('classes:load:finally', (state) => {
+      state.loading = false
+    })
+  }
+}
+
+/**
+ * Create a new class
+ */
+const createClass = async (input: CreateClassInput): Promise<Class> => {
+  try {
+    const newClass = await classRepository.create(input)
+    classStore.update('classes:create:success', (state) => {
+      state.classes.push(newClass)
+    })
+    return newClass
+  } catch (error) {
+    console.error('Failed to create class:', error)
+    throw error
+  }
+}
+
+/**
+ * Hook to access class store
+ */
+// eslint-disable-next-line react-refresh/only-export-components
+export const useClassStore = (): ClassStoreValue => {
+  const classes = classStore.select.classes()
+  const loading = classStore.select.loading()
+  return {
     classes,
     loading,
     loadClasses,
     createClass,
   }
-
-  return <ClassContext.Provider value={value}>{children}</ClassContext.Provider>
-}
-
-/**
- * Hook to access class context
- */
-// eslint-disable-next-line react-refresh/only-export-components
-export const useClassContext = (): ClassContextValue => {
-  const context = useContext(ClassContext)
-  if (!context) {
-    throw new Error('useClassContext must be used within a ClassProvider')
-  }
-  return context
 }
 
 if (import.meta.vitest) {
@@ -83,12 +89,16 @@ if (import.meta.vitest) {
   const { renderHook, waitFor } = await import('@testing-library/react')
   const { IDBFactory } = await import('fake-indexeddb')
 
-  describe('ClassContext', () => {
+  describe('ClassStore', () => {
     let consoleErrorSpy: ReturnType<typeof vi.spyOn>
 
     beforeEach(() => {
       // Reset IndexedDB for each test with a fresh instance
       globalThis.indexedDB = new IDBFactory()
+      classStore.update('classes:reset', (state) => {
+        state.classes = []
+        state.loading = true
+      })
       // Clear console.error calls to avoid noise in test output
       consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
     })
@@ -100,10 +110,10 @@ if (import.meta.vitest) {
       vi.restoreAllMocks()
     })
 
-    describe('ClassProvider', () => {
+    describe('ClassStoreProvider', () => {
       it('provides initial state with loading true and empty classes', async () => {
-        const { result } = renderHook(() => useClassContext(), {
-          wrapper: ClassProvider,
+        const { result } = renderHook(() => useClassStore(), {
+          wrapper: ClassStoreProvider,
         })
 
         // Initial state should have loading true
@@ -125,8 +135,8 @@ if (import.meta.vitest) {
           name: 'Class B',
         })
 
-        const { result } = renderHook(() => useClassContext(), {
-          wrapper: ClassProvider,
+        const { result } = renderHook(() => useClassStore(), {
+          wrapper: ClassStoreProvider,
         })
 
         // Wait for classes to load
@@ -140,8 +150,8 @@ if (import.meta.vitest) {
       })
 
       it('loadClasses refreshes the classes list', async () => {
-        const { result } = renderHook(() => useClassContext(), {
-          wrapper: ClassProvider,
+        const { result } = renderHook(() => useClassStore(), {
+          wrapper: ClassStoreProvider,
         })
 
         // Wait for initial load
@@ -169,8 +179,8 @@ if (import.meta.vitest) {
       })
 
       it('createClass adds new class to state', async () => {
-        const { result } = renderHook(() => useClassContext(), {
-          wrapper: ClassProvider,
+        const { result } = renderHook(() => useClassStore(), {
+          wrapper: ClassStoreProvider,
         })
 
         // Wait for initial load
@@ -199,8 +209,8 @@ if (import.meta.vitest) {
       })
 
       it('createClass throws error when repository fails', async () => {
-        const { result } = renderHook(() => useClassContext(), {
-          wrapper: ClassProvider,
+        const { result } = renderHook(() => useClassStore(), {
+          wrapper: ClassStoreProvider,
         })
 
         // Wait for initial load
@@ -224,8 +234,8 @@ if (import.meta.vitest) {
       })
 
       it('loadClasses sets loading to false even when repository fails', async () => {
-        const { result } = renderHook(() => useClassContext(), {
-          wrapper: ClassProvider,
+        const { result } = renderHook(() => useClassStore(), {
+          wrapper: ClassStoreProvider,
         })
 
         // Wait for initial load to complete
@@ -257,8 +267,8 @@ if (import.meta.vitest) {
       })
 
       it('sets loading to false after loadClasses completes', async () => {
-        const { result } = renderHook(() => useClassContext(), {
-          wrapper: ClassProvider,
+        const { result } = renderHook(() => useClassStore(), {
+          wrapper: ClassStoreProvider,
         })
 
         // Wait for initial load
@@ -273,14 +283,6 @@ if (import.meta.vitest) {
         await waitFor(() => {
           expect(result.current.loading).toBe(false)
         })
-      })
-    })
-
-    describe('useClassContext', () => {
-      it('throws error when used outside ClassProvider', () => {
-        expect(() => {
-          renderHook(() => useClassContext())
-        }).toThrow('useClassContext must be used within a ClassProvider')
       })
     })
   })

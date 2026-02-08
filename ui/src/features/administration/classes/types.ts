@@ -17,7 +17,7 @@ export interface CreateClassInput {
 /**
  * Context value provided to components
  */
-export interface ClassContextValue {
+export interface ClassStoreValue {
   classes: Class[]
   loading: boolean
   loadClasses: () => Promise<void>

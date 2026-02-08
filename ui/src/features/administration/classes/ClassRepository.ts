@@ -9,11 +9,11 @@ const STORE_NAME = 'classes'
 /* 📖 # Why maintain a ClassRepository type alias?
  *
  * While the repository is now generic, we maintain the ClassRepository type alias for:
- * 1. Backward compatibility with existing code (ClassContext, tests, etc.)
+ * 1. Backward compatibility with existing code (ClassStore, tests, etc.)
  * 2. Clear documentation of the repository's purpose and entity type
  * 3. Consistent naming pattern across all entity repositories
  *
- * This allows ClassContext and other consumers to continue using the familiar
+ * This allows ClassStore and other consumers to continue using the familiar
  * ClassRepository type without needing to understand the generic implementation details.
  */
 export type ClassRepository = Repository<Class, CreateClassInput>

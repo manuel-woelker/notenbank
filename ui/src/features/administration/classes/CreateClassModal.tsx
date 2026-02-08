@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Modal, Form, Input, message } from 'antd'
-import { useClassContext } from './ClassContext'
+import { useClassStore } from './ClassStore'
 
 interface CreateClassModalProps {
   open: boolean
@@ -16,7 +16,7 @@ export const CreateClassModal: React.FC<CreateClassModalProps> = ({
 }) => {
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
-  const { createClass } = useClassContext()
+  const { createClass } = useClassStore()
 
   const handleSubmit = async () => {
     try {

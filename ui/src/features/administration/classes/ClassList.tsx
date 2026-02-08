@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Button, Space, Typography } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
-import { useClassContext } from './ClassContext'
+import { useClassStore } from './ClassStore'
 import { ClassTable } from './ClassTable'
 import { CreateClassModal } from './CreateClassModal'
 
@@ -12,7 +12,7 @@ const { Title } = Typography
  */
 export const ClassList: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const { classes, loading } = useClassContext()
+  const { classes, loading } = useClassStore()
 
   return (
     <div>
