@@ -18,6 +18,7 @@ interface ClassTableProps {
   loading: boolean
   onSelectClass: (classId: string) => void
   onCreateClass: (name: string) => Promise<void>
+  getClassHref?: (classId: string) => string
 }
 
 /**
@@ -28,6 +29,7 @@ export const ClassTable: React.FC<ClassTableProps> = ({
   loading,
   onSelectClass,
   onCreateClass,
+  getClassHref,
 }) => {
   const [newClassName, setNewClassName] = useState('')
   const [saving, setSaving] = useState(false)
@@ -56,6 +58,13 @@ export const ClassTable: React.FC<ClassTableProps> = ({
     }
   }
 
+  const shouldHandleNavigation = (event: React.MouseEvent) =>
+    !event.metaKey &&
+    !event.ctrlKey &&
+    !event.shiftKey &&
+    event.button !== 1 &&
+    !event.defaultPrevented
+
   const columns: ColumnsType<ClassRow> = [
     {
       title: 'Name',
@@ -78,7 +87,24 @@ export const ClassTable: React.FC<ClassTableProps> = ({
             />
           )
         }
-        return value
+        if (!getClassHref) {
+          return value
+        }
+        const href = getClassHref(record.id)
+        return (
+          <a
+            href={href}
+            onClick={(event) => {
+              if (!shouldHandleNavigation(event)) {
+                return
+              }
+              event.preventDefault()
+              onSelectClass(record.id)
+            }}
+          >
+            {value}
+          </a>
+        )
       },
     },
     {
@@ -115,8 +141,8 @@ export const ClassTable: React.FC<ClassTableProps> = ({
       rowKey="id"
       loading={loading}
       onRow={(record) => ({
-        onClick: () => {
-          if (isNewRow(record)) {
+        onClick: (event) => {
+          if (isNewRow(record) || !shouldHandleNavigation(event)) {
             return
           }
           onSelectClass(record.id)

@@ -19,6 +19,7 @@ interface SubjectTableProps {
   loading: boolean
   onCreateSubject: (input: { name: string }) => Promise<void>
   onSelectSubject?: (subjectId: string) => void
+  getSubjectHref?: (subjectId: string) => string
 }
 
 /**
@@ -29,6 +30,7 @@ export const SubjectTable: React.FC<SubjectTableProps> = ({
   loading,
   onCreateSubject,
   onSelectSubject,
+  getSubjectHref,
 }) => {
   const [name, setName] = useState('')
   const [saving, setSaving] = useState(false)
@@ -54,6 +56,13 @@ export const SubjectTable: React.FC<SubjectTableProps> = ({
     }
   }
 
+  const shouldHandleNavigation = (event: React.MouseEvent) =>
+    !event.metaKey &&
+    !event.ctrlKey &&
+    !event.shiftKey &&
+    event.button !== 1 &&
+    !event.defaultPrevented
+
   const columns: ColumnsType<SubjectRow> = [
     {
       title: 'Fach',
@@ -71,7 +80,24 @@ export const SubjectTable: React.FC<SubjectTableProps> = ({
             />
           )
         }
-        return value
+        if (!getSubjectHref) {
+          return value
+        }
+        const href = getSubjectHref(record.id)
+        return (
+          <a
+            href={href}
+            onClick={(event) => {
+              if (!shouldHandleNavigation(event)) {
+                return
+              }
+              event.preventDefault()
+              onSelectSubject?.(record.id)
+            }}
+          >
+            {value}
+          </a>
+        )
       },
     },
     {
@@ -112,7 +138,13 @@ export const SubjectTable: React.FC<SubjectTableProps> = ({
           return {}
         }
         return {
-          onClick: () => onSelectSubject?.(record.id),
+          onClick: (event) => {
+            if (!shouldHandleNavigation(event)) {
+              return
+            }
+            onSelectSubject?.(record.id)
+          },
+          style: { cursor: 'pointer' },
         }
       }}
       locale={{

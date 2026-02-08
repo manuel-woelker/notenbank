@@ -14,6 +14,14 @@ export const ClassList: React.FC = () => {
   const { classes, loading, createClass } = useClassStore()
   const navigate = useNavigate()
 
+  const getClassHref = (classId: string) => {
+    const classSegment = buildClassRouteSegment(classes, classId)
+    if (!classSegment) {
+      return '#/classes'
+    }
+    return `#/classes/${classSegment}/students`
+  }
+
   return (
     <div>
       <Space orientation="vertical" size="large" style={{ width: '100%' }}>
@@ -33,6 +41,7 @@ export const ClassList: React.FC = () => {
           onCreateClass={async (name) => {
             await createClass({ name })
           }}
+          getClassHref={getClassHref}
         />
       </Space>
     </div>

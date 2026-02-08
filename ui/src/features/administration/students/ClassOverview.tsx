@@ -33,6 +33,12 @@ export const ClassOverview: React.FC<ClassOverviewProps> = ({ classId }) => {
 
   const selectedClass = classes.find((item) => item.id === classId)
   const classRouteSegment = buildClassRouteSegment(classes, classId)
+  const getSubjectHref = (subjectId: string) => {
+    if (!classRouteSegment) {
+      return '#/classes'
+    }
+    return `#/classes/${classRouteSegment}/subjects/${subjectId}`
+  }
   const classStudents = useMemo(
     () => students.filter((student) => student.classId === classId),
     [students, classId]
@@ -83,6 +89,7 @@ export const ClassOverview: React.FC<ClassOverviewProps> = ({ classId }) => {
                     to: `/classes/${classRouteSegment}/subjects/${subjectId}`,
                   })
                 }}
+                getSubjectHref={getSubjectHref}
               />
             </Card>
           </Col>
