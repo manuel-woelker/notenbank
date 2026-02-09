@@ -68,12 +68,65 @@ const seedStudents: SeedStudent[] = [
     lastName: 'Schröder',
   },
   {
+    key: 'mia-wagner',
+    classKey: '5a',
+    firstName: 'Mia',
+    lastName: 'Wagner',
+  },
+  {
+    key: 'noah-richter',
+    classKey: '5a',
+    firstName: 'Noah',
+    lastName: 'Richter',
+  },
+  {
+    key: 'paula-klein',
+    classKey: '5a',
+    firstName: 'Paula',
+    lastName: 'Klein',
+  },
+  {
+    key: 'felix-hoffmann',
+    classKey: '5a',
+    firstName: 'Felix',
+    lastName: 'Hoffmann',
+  },
+  {
+    key: 'leo-schmitt',
+    classKey: '5a',
+    firstName: 'Leo',
+    lastName: 'Schmitt',
+  },
+  {
+    key: 'anna-maier',
+    classKey: '5a',
+    firstName: 'Anna',
+    lastName: 'Maier',
+  },
+  {
+    key: 'nina-schulz',
+    classKey: '5a',
+    firstName: 'Nina',
+    lastName: 'Schulz',
+  },
+  {
+    key: 'max-koenig',
+    classKey: '5a',
+    firstName: 'Max',
+    lastName: 'König',
+  },
+  {
     key: 'marie-schneider',
     classKey: '9b',
     firstName: 'Marie',
     lastName: 'Schneider',
   },
-  { key: 'tim-krueger', classKey: '9b', firstName: 'Tim', lastName: 'Krüger' },
+  {
+    key: 'tim-krueger',
+    classKey: '9b',
+    firstName: 'Tim',
+    lastName: 'Krüger',
+  },
   {
     key: 'paul-hoffmann',
     classKey: '9b',
@@ -85,6 +138,54 @@ const seedStudents: SeedStudent[] = [
     classKey: '9b',
     firstName: 'Alina',
     lastName: 'Fischer',
+  },
+  {
+    key: 'benjamin-wolf',
+    classKey: '9b',
+    firstName: 'Benjamin',
+    lastName: 'Wolf',
+  },
+  {
+    key: 'laura-neumann',
+    classKey: '9b',
+    firstName: 'Laura',
+    lastName: 'Neumann',
+  },
+  {
+    key: 'julian-hartmann',
+    classKey: '9b',
+    firstName: 'Julian',
+    lastName: 'Hartmann',
+  },
+  {
+    key: 'lisa-krause',
+    classKey: '9b',
+    firstName: 'Lisa',
+    lastName: 'Krause',
+  },
+  {
+    key: 'tom-keller',
+    classKey: '9b',
+    firstName: 'Tom',
+    lastName: 'Keller',
+  },
+  {
+    key: 'sarah-meyer',
+    classKey: '9b',
+    firstName: 'Sarah',
+    lastName: 'Meyer',
+  },
+  {
+    key: 'david-lang',
+    classKey: '9b',
+    firstName: 'David',
+    lastName: 'Lang',
+  },
+  {
+    key: 'carla-bergmann',
+    classKey: '9b',
+    firstName: 'Carla',
+    lastName: 'Bergmann',
   },
 ]
 
@@ -99,118 +200,62 @@ const seedSubjects: SeedSubject[] = [
   { key: 'geschichte-9b', classKey: '9b', name: 'Geschichte' },
 ]
 
-const seedAssessments: SeedAssessment[] = [
-  {
-    key: 'mathearbeit-5a-1',
-    classKey: '5a',
-    subjectKey: 'mathe-5a',
-    title: 'Mathearbeit 1',
-    type: 'written',
-    date: new Date('2025-01-14'),
-  },
-  {
-    key: 'diktat-5a-winter',
-    classKey: '5a',
-    subjectKey: 'deutsch-5a',
-    title: 'Diktat: Winter',
-    type: 'written',
-    date: new Date('2025-02-03'),
-  },
-  {
-    key: 'vokabeltest-5a-1',
-    classKey: '5a',
-    subjectKey: 'englisch-5a',
-    title: 'Vokabeltest 1',
-    type: 'written',
-    date: new Date('2025-02-18'),
-  },
-  {
-    key: 'klausur-9b-analysis',
-    classKey: '9b',
-    subjectKey: 'mathe-9b',
-    title: 'Klausur: Analysis',
-    type: 'written',
-    date: new Date('2025-01-20'),
-  },
-  {
-    key: 'muendliche-9b-zellbio',
-    classKey: '9b',
-    subjectKey: 'biologie-9b',
-    title: 'Mündliche Note: Zellbiologie',
-    type: 'oral',
-    date: new Date('2025-02-05'),
-  },
-  {
-    key: 'test-9b-weimar',
-    classKey: '9b',
-    subjectKey: 'geschichte-9b',
-    title: 'Test: Weimarer Republik',
-    type: 'written',
-    date: new Date('2025-03-01'),
-  },
+const buildAssessmentsForSubject = (
+  subject: SeedSubject,
+  subjectIndex: number
+): SeedAssessment[] => {
+  const writtenCount = 6
+  const oralCount = 2
+  const baseDate = new Date(2025, 0, 6 + subjectIndex * 3)
+  const assessments: SeedAssessment[] = []
+
+  for (let i = 0; i < writtenCount; i += 1) {
+    assessments.push({
+      key: `${subject.key}-written-${i + 1}`,
+      classKey: subject.classKey,
+      subjectKey: subject.key,
+      title: `${subject.name} - Schriftlich ${i + 1}`,
+      type: 'written',
+      date: new Date(baseDate.getTime() + i * 14 * 24 * 60 * 60 * 1000),
+    })
+  }
+
+  for (let i = 0; i < oralCount; i += 1) {
+    assessments.push({
+      key: `${subject.key}-oral-${i + 1}`,
+      classKey: subject.classKey,
+      subjectKey: subject.key,
+      title: `${subject.name} - Mündliche Note ${i + 1}`,
+      type: 'oral',
+      date: new Date(
+        baseDate.getTime() + (writtenCount + i) * 14 * 24 * 60 * 60 * 1000
+      ),
+    })
+  }
+
+  return assessments
+}
+
+const seedAssessments: SeedAssessment[] = seedSubjects.flatMap(
+  (subject, index) => buildAssessmentsForSubject(subject, index)
+)
+
+const gradeCycle = [
+  1.0, 1.5, 2.0, 2.25, 2.5, 2.75, 3.0, 3.25, 3.5, 3.75, 4.0, 4.25, 4.5, 5.0,
 ]
 
-const seedAssessmentGrades: SeedAssessmentGrade[] = [
-  { assessmentKey: 'mathearbeit-5a-1', studentKey: 'lena-mueller', grade: 2.0 },
-  { assessmentKey: 'mathearbeit-5a-1', studentKey: 'jonas-becker', grade: 3.0 },
-  { assessmentKey: 'mathearbeit-5a-1', studentKey: 'sophie-weiss', grade: 1.5 },
-  {
-    assessmentKey: 'mathearbeit-5a-1',
-    studentKey: 'emil-schroeder',
-    grade: 2.75,
-  },
-  { assessmentKey: 'diktat-5a-winter', studentKey: 'lena-mueller', grade: 1.5 },
-  { assessmentKey: 'diktat-5a-winter', studentKey: 'jonas-becker', grade: 2.5 },
-  { assessmentKey: 'diktat-5a-winter', studentKey: 'sophie-weiss', grade: 2.0 },
-  {
-    assessmentKey: 'vokabeltest-5a-1',
-    studentKey: 'lena-mueller',
-    grade: 2.25,
-  },
-  { assessmentKey: 'vokabeltest-5a-1', studentKey: 'jonas-becker', grade: 3.5 },
-  {
-    assessmentKey: 'vokabeltest-5a-1',
-    studentKey: 'emil-schroeder',
-    grade: 2.0,
-  },
-  {
-    assessmentKey: 'klausur-9b-analysis',
-    studentKey: 'marie-schneider',
-    grade: 2.0,
-  },
-  {
-    assessmentKey: 'klausur-9b-analysis',
-    studentKey: 'tim-krueger',
-    grade: 3.0,
-  },
-  {
-    assessmentKey: 'klausur-9b-analysis',
-    studentKey: 'paul-hoffmann',
-    grade: 2.5,
-  },
-  {
-    assessmentKey: 'muendliche-9b-zellbio',
-    studentKey: 'marie-schneider',
-    grade: 1.75,
-  },
-  {
-    assessmentKey: 'muendliche-9b-zellbio',
-    studentKey: 'alina-fischer',
-    grade: 2.25,
-  },
-  {
-    assessmentKey: 'muendliche-9b-zellbio',
-    studentKey: 'tim-krueger',
-    grade: 2.5,
-  },
-  { assessmentKey: 'test-9b-weimar', studentKey: 'paul-hoffmann', grade: 2.0 },
-  { assessmentKey: 'test-9b-weimar', studentKey: 'alina-fischer', grade: 1.5 },
-  {
-    assessmentKey: 'test-9b-weimar',
-    studentKey: 'marie-schneider',
-    grade: 2.75,
-  },
-]
+const seedAssessmentGrades: SeedAssessmentGrade[] = seedAssessments.flatMap(
+  (assessment, assessmentIndex) => {
+    const studentsForClass = seedStudents.filter(
+      (student) => student.classKey === assessment.classKey
+    )
+    return studentsForClass.map((student, studentIndex) => ({
+      assessmentKey: assessment.key,
+      studentKey: student.key,
+      grade: gradeCycle[(assessmentIndex + studentIndex) % gradeCycle.length],
+    }))
+  }
+)
 
 /* 📖 # Why seed the example database only when empty?
 Seeding should provide a stable, repeatable dataset without overwriting any
