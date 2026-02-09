@@ -52,6 +52,18 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
     return map
   }, [assessmentGrades, assessmentId])
 
+  const averageGradeLabel = useMemo(() => {
+    const assessmentEntries = assessmentGrades.filter(
+      (entry) => entry.assessmentId === assessmentId
+    )
+    if (assessmentEntries.length === 0) {
+      return '—'
+    }
+    const total = assessmentEntries.reduce((sum, entry) => sum + entry.grade, 0)
+    const average = total / assessmentEntries.length
+    return average.toFixed(2).replace('.', ',')
+  }, [assessmentGrades, assessmentId])
+
   const isLoading =
     classesLoading ||
     subjectsLoading ||
@@ -61,18 +73,33 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
 
   return (
     <Space orientation="vertical" size="large" style={{ width: '100%' }}>
-      <div>
-        <Title level={2} style={{ margin: 0 }}>
-          Leistungsfeststellung {selectedAssessment?.title ?? '—'}
-        </Title>
-        {selectedClass ? (
-          <Text type="secondary">Klasse {selectedClass.name}</Text>
-        ) : null}
-        {selectedSubject ? (
-          <Text type="secondary" style={{ display: 'block' }}>
-            Fach {selectedSubject.name}
-          </Text>
-        ) : null}
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          gap: 16,
+        }}
+      >
+        <div>
+          <Title level={2} style={{ margin: 0 }}>
+            Leistungsfeststellung {selectedAssessment?.title ?? '—'}
+          </Title>
+          {selectedClass ? (
+            <Text type="secondary">Klasse {selectedClass.name}</Text>
+          ) : null}
+          {selectedSubject ? (
+            <Text type="secondary" style={{ display: 'block' }}>
+              Fach {selectedSubject.name}
+            </Text>
+          ) : null}
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <Text type="secondary">Durchschnitt</Text>
+          <Title level={4} style={{ margin: 0 }}>
+            {averageGradeLabel}
+          </Title>
+        </div>
       </div>
 
       {!isLoading && !selectedAssessment ? (
@@ -105,6 +132,7 @@ if (import.meta.vitest) {
   const { assessmentRepository } = await import('./AssessmentRepository')
   const { assessmentGradeRepository } =
     await import('./AssessmentGradeRepository')
+  const { createGrade } = await import('../../../shared/Grade')
 
   describe('AssessmentPage', () => {
     beforeEach(async () => {
@@ -165,7 +193,7 @@ if (import.meta.vitest) {
       )
     })
 
-    it('renders the assessment title and student list', async () => {
+    it('renders the assessment title, student list, and average', async () => {
       const newClass = await classRepository.create({ name: 'Klasse 10A' })
       const subject = await subjectRepository.create({
         name: 'Mathe',
@@ -177,6 +205,16 @@ if (import.meta.vitest) {
         title: 'Klausur 1',
         type: 'written',
         date: new Date('2025-03-10'),
+      })
+      await assessmentGradeRepository.create({
+        assessmentId: assessment.id,
+        studentId: 'student-1',
+        grade: createGrade(2.0),
+      })
+      await assessmentGradeRepository.create({
+        assessmentId: assessment.id,
+        studentId: 'student-2',
+        grade: createGrade(3.0),
       })
       await studentRepository.create({
         firstName: 'Lina',
@@ -194,6 +232,11 @@ if (import.meta.vitest) {
 
       await waitFor(() => {
         expect(getByText('Leistungsfeststellung Klausur 1')).toBeTruthy()
+      })
+
+      await waitFor(() => {
+        expect(getByText('Durchschnitt')).toBeTruthy()
+        expect(getByText('2,50')).toBeTruthy()
       })
 
       await waitFor(() => {
