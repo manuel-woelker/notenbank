@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Breadcrumb, Layout, Menu, theme } from 'antd'
 import {
   MenuFoldOutlined,
@@ -9,7 +9,6 @@ import {
   TeamOutlined,
 } from '@ant-design/icons'
 import { Outlet, useNavigate, useLocation } from '@tanstack/react-router'
-import { GIT_INFO } from '../../git-info'
 import { useClassStore } from '../../features/administration/classes/ClassStore'
 import { useSubjectStore } from '../../features/administration/subjects/SubjectStore'
 import {
@@ -20,6 +19,18 @@ import { findSubjectByRouteSegment } from '../../shared/routes/subjectRoute'
 
 const { Header, Sider, Content, Footer } = Layout
 
+type GitInfo = {
+  commitHash: string
+  commitDate: string
+  commitMessage: string
+}
+
+const fallbackGitInfo: GitInfo = {
+  commitHash: 'dev',
+  commitDate: 'Development',
+  commitMessage: 'Development build',
+}
+
 /* 📖 # Why derive selected menu from URL location instead of state?
 TanStack Router manages navigation via URL changes. By using useLocation() to
 determine which menu item should be highlighted, we ensure the menu state stays
@@ -29,6 +40,7 @@ and allows URLs to be bookmarked and shared.
 
 export function RootLayout() {
   const [collapsed, setCollapsed] = useState(false)
+  const [gitInfo, setGitInfo] = useState<GitInfo>(fallbackGitInfo)
   const navigate = useNavigate()
   const location = useLocation()
   const { classes } = useClassStore()
@@ -36,6 +48,31 @@ export function RootLayout() {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken()
+
+  /* 📖 # Why load git metadata with a dynamic import?
+  The git-info file is generated at build and may be missing in some CI flows.
+  A dynamic import lets the UI render with safe defaults when that file is not
+  available, while still showing real commit data when it exists.
+  */
+  useEffect(() => {
+    let isMounted = true
+    import('../../git-info')
+      .then((module) => {
+        if (!isMounted) return
+        if (module?.GIT_INFO) {
+          setGitInfo(module.GIT_INFO as GitInfo)
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setGitInfo(fallbackGitInfo)
+        }
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   const getSelectedKey = () => {
     const path = location.pathname
@@ -194,8 +231,8 @@ export function RootLayout() {
         </Content>
         <Footer style={{ textAlign: 'center' }}>
           Notenbank | Commit:{' '}
-          <span title={GIT_INFO.commitMessage}>{GIT_INFO.commitHash}</span> |
-          Datum: {GIT_INFO.commitDate}
+          <span title={gitInfo.commitMessage}>{gitInfo.commitHash}</span> |
+          Datum: {gitInfo.commitDate}
         </Footer>
       </Layout>
     </Layout>
