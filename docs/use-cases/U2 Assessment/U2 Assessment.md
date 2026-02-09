@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Assessment use case enables teachers to define, record, and evaluate student performance for a class. It covers written tests and oral performance, combines them into a final grade, and produces an auditable grade overview per class and per student.
+The Assessment use case enables teachers to define, record, and evaluate student performance for a class. It covers written tests and oral performance, combines them into a final grade, and produces a grade overview per class and per student.
 
 ## Data Model Overview
 
@@ -47,9 +47,6 @@ As a teacher, I want the system to calculate a student's final grade per subject
 **Preview calculation**
 As a teacher, I want to preview how the final grade is calculated from written and oral grades, so that I can verify correctness.
 
-**Override final grade**
-As a teacher, I want to override a calculated final grade with a manual value and reason, so that exceptional cases can be handled.
-
 ### Reporting
 
 **View grade overview per class**
@@ -58,22 +55,13 @@ As a teacher, I want to see a class overview of assessments and grades, so that 
 **View student grade history**
 As a teacher, I want to see all assessments and grades for a student in a subject, so that I can explain their final grade.
 
-**Export grades**
-As a teacher, I want to export the grade overview, so that I can use it for official reporting.
-
 ## Additional Considerations
 
 **Terminology**
-- The system should use clear German terms such as "Leistungsnachweis", "Mündliche Note", "Klausur", and "Gesamtnote" in the UI.
+- The system should use the German label "Leistungsfeststellung" in the UI.
 
 **Calculation Rules**
-- Define whether grades are numeric, textual (e.g., "sehr gut"), or both.
-- Specify rounding rules for final grades.
-- Specify how missing results affect calculations.
-
-**Auditability**
-- Store who changed results and when.
-- Keep the reason for manual overrides of final grades.
-
-**Permissions**
-- Define who can edit assessments, results, and final grades.
+- Grades are numeric in 0.25 increments.
+- Weighting is defined per subject as a ratio (e.g., "Written: 2 / Oral: 1").
+- No rounding is applied to final grades.
+- Missing results are excluded from calculations.
