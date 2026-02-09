@@ -12,6 +12,8 @@ interface AssessmentTableProps {
     date: Date
   }) => Promise<void>
   disableCreate?: boolean
+  onSelectAssessment?: (assessmentId: string) => void
+  getAssessmentHref?: (assessmentId: string) => string
 }
 
 type AssessmentRow =
@@ -44,6 +46,8 @@ export const AssessmentTable: React.FC<AssessmentTableProps> = ({
   loading,
   onCreateAssessment,
   disableCreate = false,
+  onSelectAssessment,
+  getAssessmentHref,
 }) => {
   const [title, setTitle] = useState('')
   const [type, setType] = useState<Assessment['type'] | undefined>()
@@ -86,6 +90,13 @@ export const AssessmentTable: React.FC<AssessmentTableProps> = ({
     }
   }
 
+  const shouldHandleNavigation = (event: React.MouseEvent) =>
+    !event.metaKey &&
+    !event.ctrlKey &&
+    !event.shiftKey &&
+    event.button !== 1 &&
+    !event.defaultPrevented
+
   const columns: ColumnsType<AssessmentRow> = [
     {
       title: 'Bezeichnung',
@@ -109,7 +120,24 @@ export const AssessmentTable: React.FC<AssessmentTableProps> = ({
             />
           )
         }
-        return value
+        if (!getAssessmentHref) {
+          return value
+        }
+        const href = getAssessmentHref(record.id)
+        return (
+          <a
+            href={href}
+            onClick={(event) => {
+              if (!shouldHandleNavigation(event)) {
+                return
+              }
+              event.preventDefault()
+              onSelectAssessment?.(record.id)
+            }}
+          >
+            {value}
+          </a>
+        )
       },
     },
     {
@@ -199,6 +227,20 @@ export const AssessmentTable: React.FC<AssessmentTableProps> = ({
       dataSource={dataSource}
       rowKey="id"
       loading={loading}
+      onRow={(record) => {
+        if (isNewRow(record)) {
+          return {}
+        }
+        return {
+          onClick: (event) => {
+            if (!shouldHandleNavigation(event)) {
+              return
+            }
+            onSelectAssessment?.(record.id)
+          },
+          style: { cursor: 'pointer' },
+        }
+      }}
       locale={{
         emptyText:
           'Keine Leistungsfeststellungen vorhanden. Neue Einträge hinzufügen.',
@@ -263,6 +305,54 @@ if (import.meta.vitest) {
 
       expect(getByText('Klausur 1')).toBeTruthy()
       expect(getByText('Schriftlich')).toBeTruthy()
+    })
+
+    it('calls onSelectAssessment when a row is clicked', async () => {
+      if (!window.matchMedia) {
+        window.matchMedia = () =>
+          ({
+            matches: false,
+            media: '',
+            onchange: null,
+            addListener: () => {},
+            removeListener: () => {},
+            addEventListener: () => {},
+            removeEventListener: () => {},
+            dispatchEvent: () => false,
+          }) as unknown as MediaQueryList
+      }
+      window.getComputedStyle = () =>
+        ({
+          getPropertyValue: () => '',
+        }) as unknown as CSSStyleDeclaration
+
+      const onSelectAssessment = vi.fn()
+
+      const { getByText } = render(
+        <AssessmentTable
+          assessments={[
+            {
+              id: 'a-1',
+              classId: 'class-1',
+              subjectId: 'subject-1',
+              title: 'Klausur 1',
+              type: 'written',
+              date: new Date('2025-01-12'),
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
+          ]}
+          loading={false}
+          onCreateAssessment={vi.fn()}
+          onSelectAssessment={onSelectAssessment}
+        />
+      )
+
+      await act(async () => {
+        fireEvent.click(getByText('Klausur 1'))
+      })
+
+      expect(onSelectAssessment).toHaveBeenCalledWith('a-1')
     })
 
     it('calls onCreateAssessment for the new row', async () => {

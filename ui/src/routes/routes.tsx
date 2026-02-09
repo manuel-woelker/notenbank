@@ -4,6 +4,7 @@ import { Dashboard } from '../features/dashboard/Dashboard'
 import { ClassList } from '../features/administration/classes/ClassList'
 import { ClassStudentsRoute } from './components/ClassStudentsRoute'
 import { SubjectOverviewRoute } from './components/SubjectOverviewRoute'
+import { AssessmentRoute } from './components/AssessmentRoute'
 import { ContentPage } from '../features/content/ContentPage'
 import { UploadPage } from '../features/upload/UploadPage'
 
@@ -39,6 +40,12 @@ export const subjectOverviewRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/classes/$classKey/subjects/$subjectKey',
   component: SubjectOverviewRoute,
+})
+
+export const assessmentRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/classes/$classKey/subjects/$subjectKey/assessments/$assessmentKey',
+  component: AssessmentRoute,
 })
 
 export const contentRoute = createRoute({

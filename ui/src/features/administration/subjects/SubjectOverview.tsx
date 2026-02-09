@@ -1,9 +1,13 @@
 import React, { useMemo } from 'react'
 import { Space, Typography, message } from 'antd'
+import { useNavigate } from '@tanstack/react-router'
 import { useClassStore } from '../classes/ClassStore'
 import { useSubjectStore } from './SubjectStore'
 import { useAssessmentStore } from '../../assessment/assessments/AssessmentStore'
 import { AssessmentTable } from '../../assessment/assessments/AssessmentTable'
+import { buildClassRouteSegment } from '../../../shared/routes/classRoute'
+import { buildSubjectRouteSegment } from '../../../shared/routes/subjectRoute'
+import { buildAssessmentRouteSegment } from '../../../shared/routes/assessmentRoute'
 
 const { Title, Text } = Typography
 
@@ -19,6 +23,7 @@ export const SubjectOverview: React.FC<SubjectOverviewProps> = ({
   classId,
   subjectId,
 }) => {
+  const navigate = useNavigate()
   const { classes, loading: classesLoading } = useClassStore()
   const { subjects, loading: subjectsLoading } = useSubjectStore()
   const {
@@ -29,6 +34,24 @@ export const SubjectOverview: React.FC<SubjectOverviewProps> = ({
 
   const selectedClass = classes.find((item) => item.id === classId)
   const selectedSubject = subjects.find((item) => item.id === subjectId)
+  const classRouteSegment = buildClassRouteSegment(classes, classId)
+  const subjectRouteSegment = buildSubjectRouteSegment(
+    subjects,
+    classId,
+    subjectId
+  )
+  const getAssessmentHref = (assessmentId: string) => {
+    if (!classRouteSegment || !subjectRouteSegment) {
+      return '#/classes'
+    }
+    const assessmentSegment = buildAssessmentRouteSegment(
+      assessments,
+      classId,
+      subjectId,
+      assessmentId
+    )
+    return `#/classes/${classRouteSegment}/subjects/${subjectRouteSegment}/assessments/${assessmentSegment}`
+  }
   const subjectAssessments = useMemo(
     () =>
       assessments
@@ -85,6 +108,21 @@ export const SubjectOverview: React.FC<SubjectOverviewProps> = ({
               subjectId,
             })
           }}
+          onSelectAssessment={(assessmentId) => {
+            if (!classRouteSegment || !subjectRouteSegment) {
+              return
+            }
+            const assessmentSegment = buildAssessmentRouteSegment(
+              assessments,
+              classId,
+              subjectId,
+              assessmentId
+            )
+            void navigate({
+              to: `/classes/${classRouteSegment}/subjects/${subjectRouteSegment}/assessments/${assessmentSegment}`,
+            })
+          }}
+          getAssessmentHref={getAssessmentHref}
           disableCreate={!selectedClass || !selectedSubject}
         />
       </div>
@@ -93,13 +131,23 @@ export const SubjectOverview: React.FC<SubjectOverviewProps> = ({
 }
 
 if (import.meta.vitest) {
-  const { describe, it, expect, beforeEach } = import.meta.vitest
+  const { describe, it, expect, beforeEach, vi } = import.meta.vitest
   const { render, waitFor } = await import('@testing-library/react')
   const { IDBFactory } = await import('fake-indexeddb')
   const { classRepository } = await import('../classes/ClassRepository')
   const { subjectRepository } = await import('./SubjectRepository')
   const { assessmentRepository } =
     await import('../../assessment/assessments/AssessmentRepository')
+
+  vi.mock('@tanstack/react-router', async () => {
+    const actual = await vi.importActual<
+      typeof import('@tanstack/react-router')
+    >('@tanstack/react-router')
+    return {
+      ...actual,
+      useNavigate: () => () => {},
+    }
+  })
 
   describe('SubjectOverview', () => {
     beforeEach(async () => {

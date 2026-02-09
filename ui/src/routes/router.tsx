@@ -5,6 +5,7 @@ import {
   classesRoute,
   classStudentsRoute,
   subjectOverviewRoute,
+  assessmentRoute,
   contentRoute,
   uploadRoute,
 } from './routes'
@@ -22,6 +23,7 @@ const routeTree = rootRoute.addChildren([
   classesRoute,
   classStudentsRoute,
   subjectOverviewRoute,
+  assessmentRoute,
   contentRoute,
   uploadRoute,
 ])
