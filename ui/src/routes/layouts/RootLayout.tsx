@@ -164,6 +164,7 @@ export function RootLayout() {
     const nextMode: DatabaseMode = checked ? 'example' : 'primary'
     setDbSwitching(true)
     setDatabaseMode(nextMode)
+    navigate({ to: '/' })
     try {
       if (nextMode === 'example') {
         await ensureExampleDatabaseSeeded()
