@@ -1,11 +1,12 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo } from 'react'
 import { Space, Typography } from 'antd'
 import { useClassStore } from '../../administration/classes/ClassStore'
 import { useStudentStore } from '../../administration/students/StudentStore'
 import { useSubjectStore } from '../../administration/subjects/SubjectStore'
-import { Grade } from '../../../shared/Grade'
 import { useAssessmentStore } from './AssessmentStore'
 import { AssessmentGradeTable } from './AssessmentGradeTable'
+import { useAssessmentGradeStore } from './AssessmentGradeStore'
+import { Grade } from '../../../shared/Grade'
 
 const { Title, Text } = Typography
 
@@ -24,8 +25,11 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
   const { subjects, loading: subjectsLoading } = useSubjectStore()
   const { students, loading: studentsLoading } = useStudentStore()
   const { assessments, loading: assessmentsLoading } = useAssessmentStore()
-
-  const [grades, setGrades] = useState<Record<string, Grade | null>>({})
+  const {
+    assessmentGrades,
+    loading: gradesLoading,
+    setAssessmentGrade,
+  } = useAssessmentGradeStore()
 
   const selectedClass = classes.find((item) => item.id === classId)
   const selectedSubject = subjects.find((item) => item.id === subjectId)
@@ -38,8 +42,22 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
     [students, classId]
   )
 
+  const grades = useMemo(() => {
+    const map: Record<string, Grade | null> = {}
+    assessmentGrades
+      .filter((entry) => entry.assessmentId === assessmentId)
+      .forEach((entry) => {
+        map[entry.studentId] = entry.grade
+      })
+    return map
+  }, [assessmentGrades, assessmentId])
+
   const isLoading =
-    classesLoading || subjectsLoading || studentsLoading || assessmentsLoading
+    classesLoading ||
+    subjectsLoading ||
+    studentsLoading ||
+    assessmentsLoading ||
+    gradesLoading
 
   return (
     <Space orientation="vertical" size="large" style={{ width: '100%' }}>
@@ -66,10 +84,7 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
           students={classStudents}
           grades={grades}
           onGradeChange={(studentId, grade) => {
-            setGrades((current) => ({
-              ...current,
-              [studentId]: grade,
-            }))
+            void setAssessmentGrade(assessmentId, studentId, grade)
           }}
         />
       ) : null}
@@ -88,6 +103,8 @@ if (import.meta.vitest) {
   const { studentRepository } =
     await import('../../administration/students/StudentRepository')
   const { assessmentRepository } = await import('./AssessmentRepository')
+  const { assessmentGradeRepository } =
+    await import('./AssessmentGradeRepository')
 
   describe('AssessmentPage', () => {
     beforeEach(async () => {
@@ -138,6 +155,12 @@ if (import.meta.vitest) {
       await Promise.all(
         existingAssessments.map((existingAssessment) =>
           assessmentRepository.delete(existingAssessment.id)
+        )
+      )
+      const existingGrades = await assessmentGradeRepository.findAll()
+      await Promise.all(
+        existingGrades.map((existingGrade) =>
+          assessmentGradeRepository.delete(existingGrade.id)
         )
       )
     })
