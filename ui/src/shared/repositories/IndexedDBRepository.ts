@@ -1,5 +1,6 @@
 import { BaseEntity, CreateInput, Serialized } from './RepositoryTypes'
 import { Repository, RepositorySchemas } from './Repository'
+import { generateId } from '../generateId'
 
 /**
  * Index configuration for IndexedDB object stores
@@ -143,7 +144,7 @@ export class IndexedDBRepository<
     // (id, createdAt, updatedAt) to TCreate to construct T
     const newEntity = this.validateEntity({
       ...validatedInput,
-      id: crypto.randomUUID(),
+      id: generateId(),
       createdAt: now,
       updatedAt: now,
     } as unknown as T)
