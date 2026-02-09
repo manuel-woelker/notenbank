@@ -16,6 +16,7 @@ import {
   buildClassRouteSegment,
   findClassByRouteSegment,
 } from '../../shared/routes/classRoute'
+import { findSubjectByRouteSegment } from '../../shared/routes/subjectRoute'
 
 const { Header, Sider, Content, Footer } = Layout
 
@@ -61,13 +62,15 @@ export function RootLayout() {
     if (path.startsWith('/classes')) {
       const parts = path.split('/').filter(Boolean)
       const items = [clickableCrumb('Klassen', '/classes')]
+      let classMatch: ReturnType<typeof findClassByRouteSegment>
+      let classRouteSegment: string | undefined
       if (parts.length >= 2) {
         const classSegment = parts[1]
-        const classMatch = classSegment
+        classMatch = classSegment
           ? findClassByRouteSegment(classes, classSegment)
           : undefined
         const classLabel = classMatch?.name ?? decodeURIComponent(classSegment)
-        const classRouteSegment = classMatch
+        classRouteSegment = classMatch
           ? buildClassRouteSegment(classes, classMatch.id)
           : classSegment
         if (classRouteSegment) {
@@ -81,12 +84,12 @@ export function RootLayout() {
       if (parts[2] === 'subjects') {
         items.push({ title: <span>Fächer</span> })
         if (parts.length >= 4) {
-          const subjectId = parts[3]
-          const subjectMatch = subjects.find(
-            (subject) => subject.id === subjectId
-          )
+          const subjectKey = parts[3]
+          const subjectMatch = classMatch
+            ? findSubjectByRouteSegment(subjects, classMatch.id, subjectKey)
+            : undefined
           const subjectLabel =
-            subjectMatch?.name ?? decodeURIComponent(subjectId)
+            subjectMatch?.name ?? decodeURIComponent(subjectKey)
           items.push({ title: <span>{subjectLabel}</span> })
         }
       }

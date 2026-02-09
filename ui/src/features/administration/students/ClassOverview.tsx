@@ -7,6 +7,7 @@ import { StudentTable } from './StudentTable'
 import { useSubjectStore } from '../subjects/SubjectStore'
 import { SubjectTable } from '../subjects/SubjectTable'
 import { buildClassRouteSegment } from '../../../shared/routes/classRoute'
+import { buildSubjectRouteSegment } from '../../../shared/routes/subjectRoute'
 
 const { Title, Text } = Typography
 
@@ -37,7 +38,12 @@ export const ClassOverview: React.FC<ClassOverviewProps> = ({ classId }) => {
     if (!classRouteSegment) {
       return '#/classes'
     }
-    return `#/classes/${classRouteSegment}/subjects/${subjectId}`
+    const subjectSegment = buildSubjectRouteSegment(
+      subjects,
+      classId,
+      subjectId
+    )
+    return `#/classes/${classRouteSegment}/subjects/${subjectSegment}`
   }
   const classStudents = useMemo(
     () => students.filter((student) => student.classId === classId),
@@ -85,8 +91,13 @@ export const ClassOverview: React.FC<ClassOverviewProps> = ({ classId }) => {
                   if (!classRouteSegment) {
                     return
                   }
+                  const subjectSegment = buildSubjectRouteSegment(
+                    subjects,
+                    classId,
+                    subjectId
+                  )
                   void navigate({
-                    to: `/classes/${classRouteSegment}/subjects/${subjectId}`,
+                    to: `/classes/${classRouteSegment}/subjects/${subjectSegment}`,
                   })
                 }}
                 getSubjectHref={getSubjectHref}

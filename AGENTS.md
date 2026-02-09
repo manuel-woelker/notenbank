@@ -157,6 +157,8 @@ Also run `../tool-tool.exe pnpm run check` to ensure the tests pass and the code
 
 Commit message should be in the "Conventional Commits" format, e.g. "feat(UI): Add about button to see version and build date"
 
+Never push code or ask to push code.
+
 ## File naming
 
 Choose descriptive names for files. Avoid names like "index.ts" or "types.ts".

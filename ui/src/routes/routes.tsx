@@ -37,7 +37,7 @@ export const classStudentsRoute = createRoute({
 
 export const subjectOverviewRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/classes/$classKey/subjects/$subjectId',
+  path: '/classes/$classKey/subjects/$subjectKey',
   component: SubjectOverviewRoute,
 })
 
