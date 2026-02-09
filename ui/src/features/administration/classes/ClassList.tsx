@@ -19,7 +19,7 @@ export const ClassList: React.FC = () => {
     if (!classSegment) {
       return '#/classes'
     }
-    return `#/classes/${classSegment}/students`
+    return `#/classes/${classSegment}`
   }
 
   return (
@@ -36,7 +36,7 @@ export const ClassList: React.FC = () => {
           loading={loading}
           onSelectClass={(classId) => {
             const classSegment = buildClassRouteSegment(classes, classId)
-            navigate({ to: `/classes/${classSegment}/students` })
+            navigate({ to: `/classes/${classSegment}` })
           }}
           onCreateClass={async (name) => {
             await createClass({ name })

@@ -72,14 +72,11 @@ export function RootLayout() {
           : classSegment
         if (classRouteSegment) {
           items.push(
-            clickableCrumb(classLabel, `/classes/${classRouteSegment}/students`)
+            clickableCrumb(classLabel, `/classes/${classRouteSegment}`)
           )
         } else {
           items.push({ title: <span>{classLabel}</span> })
         }
-      }
-      if (parts[2] === 'students') {
-        items.push({ title: <span>Schüler</span> })
       }
       if (parts[2] === 'subjects') {
         items.push({ title: <span>Fächer</span> })

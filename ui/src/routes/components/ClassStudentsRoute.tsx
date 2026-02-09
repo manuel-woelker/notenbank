@@ -5,7 +5,7 @@ import { ClassOverview } from '../../features/administration/students/ClassOverv
 import { findClassByRouteSegment } from '../../shared/routes/classRoute'
 
 export const ClassStudentsRoute: React.FC = () => {
-  const { classKey } = useParams({ from: '/classes/$classKey/students' })
+  const { classKey } = useParams({ from: '/classes/$classKey' })
   const { classes } = useClassStore()
   const selectedClass = findClassByRouteSegment(classes, classKey)
 

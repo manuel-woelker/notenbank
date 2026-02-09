@@ -31,7 +31,7 @@ export const classesRoute = createRoute({
 
 export const classStudentsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/classes/$classKey/students',
+  path: '/classes/$classKey',
   component: ClassStudentsRoute,
 })
 
