@@ -1,4 +1,5 @@
 import { createRootRoute, createRoute } from '@tanstack/react-router'
+import { z } from 'zod'
 import { RootLayout } from './layouts/RootLayout'
 import { Dashboard } from '../features/dashboard/Dashboard'
 import { ClassList } from '../features/administration/classes/ClassList'
@@ -16,6 +17,11 @@ and better alignment with our existing architecture.
 
 export const rootRoute = createRootRoute({
   component: RootLayout,
+  validateSearch: z
+    .object({
+      db: z.enum(['example']).optional(),
+    })
+    .passthrough(),
 })
 
 export const dashboardRoute = createRoute({

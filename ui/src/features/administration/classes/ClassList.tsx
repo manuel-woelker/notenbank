@@ -1,6 +1,7 @@
 import React from 'react'
 import { Space, Typography } from 'antd'
 import { useClassStore } from './ClassStore'
+import { useDatabaseStore } from '../../../shared/store/databaseStore'
 import { ClassTable } from './ClassTable'
 import { useNavigate } from '@tanstack/react-router'
 import { buildClassRouteSegment } from '../../../shared/routes/classRoute'
@@ -12,14 +13,17 @@ const { Title } = Typography
  */
 export const ClassList: React.FC = () => {
   const { classes, loading, createClass } = useClassStore()
+  const { isExample } = useDatabaseStore()
   const navigate = useNavigate()
 
   const getClassHref = (classId: string) => {
     const classSegment = buildClassRouteSegment(classes, classId)
     if (!classSegment) {
-      return '#/classes'
+      return isExample ? '#/classes?db=example' : '#/classes'
     }
-    return `#/classes/${classSegment}`
+    return isExample
+      ? `#/classes/${classSegment}?db=example`
+      : `#/classes/${classSegment}`
   }
 
   return (
@@ -36,7 +40,10 @@ export const ClassList: React.FC = () => {
           loading={loading}
           onSelectClass={(classId) => {
             const classSegment = buildClassRouteSegment(classes, classId)
-            navigate({ to: `/classes/${classSegment}` })
+            navigate({
+              to: `/classes/${classSegment}`,
+              search: (prev) => prev,
+            })
           }}
           onCreateClass={async (name) => {
             await createClass({ name })

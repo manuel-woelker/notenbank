@@ -6,6 +6,7 @@ import { useStudentStore } from './StudentStore'
 import { StudentTable } from './StudentTable'
 import { useSubjectStore } from '../subjects/SubjectStore'
 import { SubjectTable } from '../subjects/SubjectTable'
+import { useDatabaseStore } from '../../../shared/store/databaseStore'
 import { buildClassRouteSegment } from '../../../shared/routes/classRoute'
 import { buildSubjectRouteSegment } from '../../../shared/routes/subjectRoute'
 
@@ -31,19 +32,22 @@ export const ClassOverview: React.FC<ClassOverviewProps> = ({ classId }) => {
     loading: subjectsLoading,
     createSubject,
   } = useSubjectStore()
+  const { isExample } = useDatabaseStore()
 
   const selectedClass = classes.find((item) => item.id === classId)
   const classRouteSegment = buildClassRouteSegment(classes, classId)
   const getSubjectHref = (subjectId: string) => {
     if (!classRouteSegment) {
-      return '#/classes'
+      return isExample ? '#/classes?db=example' : '#/classes'
     }
     const subjectSegment = buildSubjectRouteSegment(
       subjects,
       classId,
       subjectId
     )
-    return `#/classes/${classRouteSegment}/subjects/${subjectSegment}`
+    return isExample
+      ? `#/classes/${classRouteSegment}/subjects/${subjectSegment}?db=example`
+      : `#/classes/${classRouteSegment}/subjects/${subjectSegment}`
   }
   const classStudents = useMemo(
     () => students.filter((student) => student.classId === classId),
@@ -98,6 +102,7 @@ export const ClassOverview: React.FC<ClassOverviewProps> = ({ classId }) => {
                   )
                   void navigate({
                     to: `/classes/${classRouteSegment}/subjects/${subjectSegment}`,
+                    search: (prev) => prev,
                   })
                 }}
                 getSubjectHref={getSubjectHref}

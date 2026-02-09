@@ -6,6 +6,7 @@ import { useSubjectStore } from './SubjectStore'
 import { useAssessmentStore } from '../../assessment/assessments/AssessmentStore'
 import { AssessmentTable } from '../../assessment/assessments/AssessmentTable'
 import { useAssessmentGradeStore } from '../../assessment/assessments/AssessmentGradeStore'
+import { useDatabaseStore } from '../../../shared/store/databaseStore'
 import { buildClassRouteSegment } from '../../../shared/routes/classRoute'
 import { buildSubjectRouteSegment } from '../../../shared/routes/subjectRoute'
 import { buildAssessmentRouteSegment } from '../../../shared/routes/assessmentRoute'
@@ -33,6 +34,7 @@ export const SubjectOverview: React.FC<SubjectOverviewProps> = ({
     createAssessment,
   } = useAssessmentStore()
   const { assessmentGrades, loading: gradesLoading } = useAssessmentGradeStore()
+  const { isExample } = useDatabaseStore()
 
   const selectedClass = classes.find((item) => item.id === classId)
   const selectedSubject = subjects.find((item) => item.id === subjectId)
@@ -44,7 +46,7 @@ export const SubjectOverview: React.FC<SubjectOverviewProps> = ({
   )
   const getAssessmentHref = (assessmentId: string) => {
     if (!classRouteSegment || !subjectRouteSegment) {
-      return '#/classes'
+      return isExample ? '#/classes?db=example' : '#/classes'
     }
     const assessmentSegment = buildAssessmentRouteSegment(
       assessments,
@@ -52,7 +54,9 @@ export const SubjectOverview: React.FC<SubjectOverviewProps> = ({
       subjectId,
       assessmentId
     )
-    return `#/classes/${classRouteSegment}/subjects/${subjectRouteSegment}/assessments/${assessmentSegment}`
+    return isExample
+      ? `#/classes/${classRouteSegment}/subjects/${subjectRouteSegment}/assessments/${assessmentSegment}?db=example`
+      : `#/classes/${classRouteSegment}/subjects/${subjectRouteSegment}/assessments/${assessmentSegment}`
   }
   const subjectAssessments = useMemo(
     () =>
@@ -139,6 +143,7 @@ export const SubjectOverview: React.FC<SubjectOverviewProps> = ({
             )
             void navigate({
               to: `/classes/${classRouteSegment}/subjects/${subjectRouteSegment}/assessments/${assessmentSegment}`,
+              search: (prev) => prev,
             })
           }}
           getAssessmentHref={getAssessmentHref}

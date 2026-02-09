@@ -6,6 +6,29 @@ import {
 
 export type DatabaseMode = 'primary' | 'example'
 
+const EXAMPLE_DB_QUERY_PARAM = 'db'
+const EXAMPLE_DB_QUERY_VALUE = 'example'
+
+/* 📖 # Why derive the initial database mode from the URL hash?
+The router uses hash-based URLs, so the example database flag lives in the hash
+query (`#/path?db=example`). Reading it here ensures stores initialize against
+the correct database immediately on reload.
+*/
+const getInitialDatabaseMode = (): DatabaseMode => {
+  if (typeof window === 'undefined') {
+    return 'primary'
+  }
+  const hash = window.location.hash
+  const queryIndex = hash.indexOf('?')
+  if (queryIndex === -1) {
+    return 'primary'
+  }
+  const params = new URLSearchParams(hash.slice(queryIndex + 1))
+  return params.get(EXAMPLE_DB_QUERY_PARAM) === EXAMPLE_DB_QUERY_VALUE
+    ? 'example'
+    : 'primary'
+}
+
 interface DatabaseState {
   mode: DatabaseMode
 }
@@ -20,7 +43,7 @@ const databaseStore = createStore<
 >({
   name: 'database',
   initialState: {
-    mode: 'primary',
+    mode: getInitialDatabaseMode(),
   },
   derivedState: {
     dbName: (state) =>

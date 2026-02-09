@@ -8,7 +8,12 @@ import {
   UploadOutlined,
   TeamOutlined,
 } from '@ant-design/icons'
-import { Outlet, useNavigate, useLocation } from '@tanstack/react-router'
+import {
+  Outlet,
+  useNavigate,
+  useLocation,
+  useSearch,
+} from '@tanstack/react-router'
 import {
   loadClasses,
   useClassStore,
@@ -61,6 +66,7 @@ export function RootLayout() {
   const [gitInfo, setGitInfo] = useState<GitInfo>(fallbackGitInfo)
   const navigate = useNavigate()
   const location = useLocation()
+  const search = useSearch({ from: '__root__' }) as { db?: string }
   const { classes } = useClassStore()
   const { subjects } = useSubjectStore()
   const { isExample, dbName, setDatabaseMode } = useDatabaseStore()
@@ -93,6 +99,18 @@ export function RootLayout() {
     }
   }, [])
 
+  useEffect(() => {
+    const isExampleFromSearch = search?.db === 'example'
+    if (isExampleFromSearch) {
+      if (!isExample) {
+        setDatabaseMode('example')
+      }
+      void ensureExampleDatabaseSeeded()
+    } else if (!isExampleFromSearch && isExample) {
+      setDatabaseMode('primary')
+    }
+  }, [isExample, search, setDatabaseMode])
+
   const getSelectedKey = () => {
     const path = location.pathname
     if (path === '/') return 'dashboard'
@@ -105,7 +123,10 @@ export function RootLayout() {
   const breadcrumbItems = useMemo(() => {
     const clickableCrumb = (label: string, to: string) => ({
       title: (
-        <span className="nb-breadcrumb-link" onClick={() => navigate({ to })}>
+        <span
+          className="nb-breadcrumb-link"
+          onClick={() => navigate({ to, search: (prev) => prev })}
+        >
           {label}
         </span>
       ),
@@ -164,7 +185,13 @@ export function RootLayout() {
     const nextMode: DatabaseMode = checked ? 'example' : 'primary'
     setDbSwitching(true)
     setDatabaseMode(nextMode)
-    navigate({ to: '/' })
+    navigate({
+      to: '/',
+      search: (prev) => ({
+        ...prev,
+        db: nextMode === 'example' ? 'example' : undefined,
+      }),
+    })
     try {
       if (nextMode === 'example') {
         await ensureExampleDatabaseSeeded()
@@ -224,25 +251,28 @@ export function RootLayout() {
               key: 'dashboard',
               icon: <UserOutlined />,
               label: 'Übersicht',
-              onClick: () => navigate({ to: '/' }),
+              onClick: () => navigate({ to: '/', search: (prev) => prev }),
             },
             {
               key: 'classes',
               icon: <TeamOutlined />,
               label: 'Klassen',
-              onClick: () => navigate({ to: '/classes' }),
+              onClick: () =>
+                navigate({ to: '/classes', search: (prev) => prev }),
             },
             {
               key: 'content',
               icon: <VideoCameraOutlined />,
               label: 'Inhalte',
-              onClick: () => navigate({ to: '/content' }),
+              onClick: () =>
+                navigate({ to: '/content', search: (prev) => prev }),
             },
             {
               key: 'upload',
               icon: <UploadOutlined />,
               label: 'Hochladen',
-              onClick: () => navigate({ to: '/upload' }),
+              onClick: () =>
+                navigate({ to: '/upload', search: (prev) => prev }),
             },
           ]}
         />
