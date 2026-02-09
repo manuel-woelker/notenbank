@@ -5,6 +5,7 @@ import { useClassStore } from '../classes/ClassStore'
 import { useSubjectStore } from './SubjectStore'
 import { useAssessmentStore } from '../../assessment/assessments/AssessmentStore'
 import { AssessmentTable } from '../../assessment/assessments/AssessmentTable'
+import { useAssessmentGradeStore } from '../../assessment/assessments/AssessmentGradeStore'
 import { buildClassRouteSegment } from '../../../shared/routes/classRoute'
 import { buildSubjectRouteSegment } from '../../../shared/routes/subjectRoute'
 import { buildAssessmentRouteSegment } from '../../../shared/routes/assessmentRoute'
@@ -31,6 +32,7 @@ export const SubjectOverview: React.FC<SubjectOverviewProps> = ({
     loading: assessmentsLoading,
     createAssessment,
   } = useAssessmentStore()
+  const { assessmentGrades, loading: gradesLoading } = useAssessmentGradeStore()
 
   const selectedClass = classes.find((item) => item.id === classId)
   const selectedSubject = subjects.find((item) => item.id === subjectId)
@@ -63,7 +65,23 @@ export const SubjectOverview: React.FC<SubjectOverviewProps> = ({
     [assessments, classId, subjectId]
   )
 
-  const isLoading = classesLoading || subjectsLoading || assessmentsLoading
+  const averageGradesByAssessmentId = useMemo(() => {
+    const averages: Record<string, number> = {}
+    subjectAssessments.forEach((assessment) => {
+      const entries = assessmentGrades.filter(
+        (grade) => grade.assessmentId === assessment.id
+      )
+      if (entries.length === 0) {
+        return
+      }
+      averages[assessment.id] =
+        entries.reduce((sum, entry) => sum + entry.grade, 0) / entries.length
+    })
+    return averages
+  }, [assessmentGrades, subjectAssessments])
+
+  const isLoading =
+    classesLoading || subjectsLoading || assessmentsLoading || gradesLoading
 
   const handleCreateAssessment = async (
     input: Parameters<typeof createAssessment>[0]
@@ -101,6 +119,7 @@ export const SubjectOverview: React.FC<SubjectOverviewProps> = ({
         <AssessmentTable
           assessments={subjectAssessments}
           loading={isLoading}
+          averageGradesByAssessmentId={averageGradesByAssessmentId}
           onCreateAssessment={async (input) => {
             await handleCreateAssessment({
               ...input,
@@ -138,6 +157,8 @@ if (import.meta.vitest) {
   const { subjectRepository } = await import('./SubjectRepository')
   const { assessmentRepository } =
     await import('../../assessment/assessments/AssessmentRepository')
+  const { assessmentGradeRepository } =
+    await import('../../assessment/assessments/AssessmentGradeRepository')
 
   vi.mock('@tanstack/react-router', async () => {
     const actual = await vi.importActual<
@@ -185,6 +206,12 @@ if (import.meta.vitest) {
       await Promise.all(
         existingAssessments.map((existingAssessment) =>
           assessmentRepository.delete(existingAssessment.id)
+        )
+      )
+      const existingGrades = await assessmentGradeRepository.findAll()
+      await Promise.all(
+        existingGrades.map((existingGrade) =>
+          assessmentGradeRepository.delete(existingGrade.id)
         )
       )
     })

@@ -14,6 +14,7 @@ interface AssessmentTableProps {
   disableCreate?: boolean
   onSelectAssessment?: (assessmentId: string) => void
   getAssessmentHref?: (assessmentId: string) => string
+  averageGradesByAssessmentId?: Record<string, number>
 }
 
 type AssessmentRow =
@@ -48,6 +49,7 @@ export const AssessmentTable: React.FC<AssessmentTableProps> = ({
   disableCreate = false,
   onSelectAssessment,
   getAssessmentHref,
+  averageGradesByAssessmentId = {},
 }) => {
   const [title, setTitle] = useState('')
   const [type, setType] = useState<Assessment['type'] | undefined>()
@@ -193,6 +195,30 @@ export const AssessmentTable: React.FC<AssessmentTableProps> = ({
       width: 180,
     },
     {
+      title: 'Durchschnitt',
+      key: 'average',
+      render: (_, record) => {
+        if (isNewRow(record)) {
+          return <span style={{ color: '#999' }}>-</span>
+        }
+        const average = averageGradesByAssessmentId[record.id]
+        if (average === undefined) {
+          return '—'
+        }
+        return average.toFixed(2).replace('.', ',')
+      },
+      sorter: (a, b) => {
+        if (isNewRow(a) || isNewRow(b)) return 0
+        const averageA = averageGradesByAssessmentId[a.id]
+        const averageB = averageGradesByAssessmentId[b.id]
+        if (averageA === undefined && averageB === undefined) return 0
+        if (averageA === undefined) return -1
+        if (averageB === undefined) return 1
+        return averageA - averageB
+      },
+      width: 140,
+    },
+    {
       title: 'Aktionen',
       key: 'actions',
       render: (_, record) => {
@@ -300,11 +326,13 @@ if (import.meta.vitest) {
           ]}
           loading={false}
           onCreateAssessment={vi.fn()}
+          averageGradesByAssessmentId={{ 'a-1': 2.5 }}
         />
       )
 
       expect(getByText('Klausur 1')).toBeTruthy()
       expect(getByText('Schriftlich')).toBeTruthy()
+      expect(getByText('2,50')).toBeTruthy()
     })
 
     it('calls onSelectAssessment when a row is clicked', async () => {
