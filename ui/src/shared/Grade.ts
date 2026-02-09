@@ -119,9 +119,11 @@ if (import.meta.vitest) {
   })
 
   describe('gradeToString', () => {
-    it('formats every 0.25 increment from 0.75 to 6.0', () => {
+    describe('formats every 0.25 increment from 0.75 to 6.0', () => {
       canonicalGradeCases.forEach(([value, label]) => {
-        expect(gradeToString(createGrade(value))).toBe(label)
+        it(`formats ${value} as ${label}`, () => {
+          expect(gradeToString(createGrade(value))).toBe(label)
+        })
       })
     })
 
@@ -155,9 +157,11 @@ if (import.meta.vitest) {
   })
 
   describe('gradeFromString', () => {
-    it('parses canonical grade strings', () => {
+    describe('parses canonical grade strings', () => {
       canonicalGradeCases.forEach(([expected, value]) => {
-        expect(gradeFromString(value)).toBe(expected)
+        it(`parses ${value} as ${expected}`, () => {
+          expect(gradeFromString(value)).toBe(expected)
+        })
       })
     })
 
