@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Breadcrumb, Layout, Menu, Switch, theme } from 'antd'
+import { Breadcrumb, Button, Layout, Menu, Switch, Tag, theme } from 'antd'
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -29,7 +29,10 @@ import {
   DatabaseMode,
   useDatabaseStore,
 } from '../../shared/store/databaseStore'
-import { ensureExampleDatabaseSeeded } from '../../shared/repositories/exampleDatabaseSeed'
+import {
+  ensureExampleDatabaseSeeded,
+  resetExampleDatabase,
+} from '../../shared/repositories/exampleDatabaseSeed'
 
 const { Header, Sider, Content, Footer } = Layout
 
@@ -60,7 +63,7 @@ export function RootLayout() {
   const location = useLocation()
   const { classes } = useClassStore()
   const { subjects } = useSubjectStore()
-  const { isExample, setDatabaseMode } = useDatabaseStore()
+  const { isExample, dbName, setDatabaseMode } = useDatabaseStore()
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken()
@@ -177,6 +180,25 @@ export function RootLayout() {
     }
   }
 
+  const handleExampleReset = async () => {
+    if (!isExample) {
+      return
+    }
+    setDbSwitching(true)
+    try {
+      await resetExampleDatabase()
+      await Promise.all([
+        loadClasses(),
+        loadStudents(),
+        loadSubjects(),
+        loadAssessments(),
+        loadAssessmentGrades(),
+      ])
+    } finally {
+      setDbSwitching(false)
+    }
+  }
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider trigger={null} collapsible collapsed={collapsed}>
@@ -263,6 +285,16 @@ export function RootLayout() {
               </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <Tag color={isExample ? 'gold' : 'blue'}>DB: {dbName}</Tag>
+              {isExample ? (
+                <Button
+                  size="small"
+                  disabled={dbSwitching}
+                  onClick={() => void handleExampleReset()}
+                >
+                  Tabula Rasa
+                </Button>
+              ) : null}
               <span style={{ fontSize: 14 }}>Beispiel-Datenbank</span>
               <Switch
                 checked={isExample}

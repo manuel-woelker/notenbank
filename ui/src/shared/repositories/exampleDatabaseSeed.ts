@@ -295,6 +295,36 @@ export async function ensureExampleDatabaseSeeded() {
   )
 }
 
+/* 📖 # Why clear the example data via repository deletes instead of deleting the DB?
+Repositories cache their IndexedDB connection. Clearing each store keeps the
+cache intact while guaranteeing a clean slate for reseeding.
+*/
+export async function resetExampleDatabase() {
+  if (getActiveDatabaseName() !== NOTENBANK_EXAMPLE_DB_NAME) {
+    return
+  }
+
+  const [grades, assessments, subjects, students, classes] = await Promise.all([
+    assessmentGradeRepository.findAll(),
+    assessmentRepository.findAll(),
+    subjectRepository.findAll(),
+    studentRepository.findAll(),
+    classRepository.findAll(),
+  ])
+
+  await Promise.all(
+    grades.map((entry) => assessmentGradeRepository.delete(entry.id))
+  )
+  await Promise.all(
+    assessments.map((entry) => assessmentRepository.delete(entry.id))
+  )
+  await Promise.all(subjects.map((entry) => subjectRepository.delete(entry.id)))
+  await Promise.all(students.map((entry) => studentRepository.delete(entry.id)))
+  await Promise.all(classes.map((entry) => classRepository.delete(entry.id)))
+
+  await ensureExampleDatabaseSeeded()
+}
+
 if (import.meta.vitest) {
   const { describe, it, expect, beforeEach, afterEach } = import.meta.vitest
   const { IDBFactory } = await import('fake-indexeddb')
@@ -327,6 +357,24 @@ if (import.meta.vitest) {
       await ensureExampleDatabaseSeeded()
       const classesAfter = await classRepository.findAll()
       expect(classesAfter).toHaveLength(classes.length)
+    })
+
+    it('resets and reseeds the example database', async () => {
+      await ensureExampleDatabaseSeeded()
+
+      await resetExampleDatabase()
+
+      const classes = await classRepository.findAll()
+      const students = await studentRepository.findAll()
+      const subjects = await subjectRepository.findAll()
+      const assessments = await assessmentRepository.findAll()
+      const grades = await assessmentGradeRepository.findAll()
+
+      expect(classes.length).toBeGreaterThan(0)
+      expect(students.length).toBeGreaterThan(0)
+      expect(subjects.length).toBeGreaterThan(0)
+      expect(assessments.length).toBeGreaterThan(0)
+      expect(grades.length).toBeGreaterThan(0)
     })
   })
 }
