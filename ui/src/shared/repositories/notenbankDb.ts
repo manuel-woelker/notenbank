@@ -1,7 +1,7 @@
 import type { IndexConfig } from './IndexedDBRepository'
 
 export const NOTENBANK_DB_NAME = 'notenbank'
-export const NOTENBANK_DB_VERSION = 4
+export const NOTENBANK_DB_VERSION = 5
 
 const classIndexes: IndexConfig[] = [
   { name: 'name', keyPath: 'name', options: { unique: false } },
@@ -20,10 +20,17 @@ const subjectIndexes: IndexConfig[] = [
   { name: 'createdAt', keyPath: 'createdAt', options: { unique: false } },
 ]
 
+const assessmentIndexes: IndexConfig[] = [
+  { name: 'classId', keyPath: 'classId', options: { unique: false } },
+  { name: 'subjectId', keyPath: 'subjectId', options: { unique: false } },
+  { name: 'date', keyPath: 'date', options: { unique: false } },
+]
+
 const notenbankStores = {
   classes: classIndexes,
   students: studentIndexes,
   subjects: subjectIndexes,
+  assessments: assessmentIndexes,
 }
 
 /* 📖 # Why ensure all stores exist on any upgrade?
