@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Breadcrumb, Layout, Menu, theme } from 'antd'
+import { Breadcrumb, Layout, Menu, Switch, theme } from 'antd'
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -9,13 +9,27 @@ import {
   TeamOutlined,
 } from '@ant-design/icons'
 import { Outlet, useNavigate, useLocation } from '@tanstack/react-router'
-import { useClassStore } from '../../features/administration/classes/ClassStore'
-import { useSubjectStore } from '../../features/administration/subjects/SubjectStore'
+import {
+  loadClasses,
+  useClassStore,
+} from '../../features/administration/classes/ClassStore'
+import {
+  loadSubjects,
+  useSubjectStore,
+} from '../../features/administration/subjects/SubjectStore'
+import { loadStudents } from '../../features/administration/students/StudentStore'
+import { loadAssessments } from '../../features/assessment/assessments/AssessmentStore'
+import { loadAssessmentGrades } from '../../features/assessment/assessments/AssessmentGradeStore'
 import {
   buildClassRouteSegment,
   findClassByRouteSegment,
 } from '../../shared/routes/classRoute'
 import { findSubjectByRouteSegment } from '../../shared/routes/subjectRoute'
+import {
+  DatabaseMode,
+  useDatabaseStore,
+} from '../../shared/store/databaseStore'
+import { ensureExampleDatabaseSeeded } from '../../shared/repositories/exampleDatabaseSeed'
 
 const { Header, Sider, Content, Footer } = Layout
 
@@ -40,11 +54,13 @@ and allows URLs to be bookmarked and shared.
 
 export function RootLayout() {
   const [collapsed, setCollapsed] = useState(false)
+  const [dbSwitching, setDbSwitching] = useState(false)
   const [gitInfo, setGitInfo] = useState<GitInfo>(fallbackGitInfo)
   const navigate = useNavigate()
   const location = useLocation()
   const { classes } = useClassStore()
   const { subjects } = useSubjectStore()
+  const { isExample, setDatabaseMode } = useDatabaseStore()
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken()
@@ -141,6 +157,26 @@ export function RootLayout() {
     return [clickableCrumb('Übersicht', '/')]
   }, [location.pathname, navigate, classes, subjects])
 
+  const handleDatabaseToggle = async (checked: boolean) => {
+    const nextMode: DatabaseMode = checked ? 'example' : 'primary'
+    setDbSwitching(true)
+    setDatabaseMode(nextMode)
+    try {
+      if (nextMode === 'example') {
+        await ensureExampleDatabaseSeeded()
+      }
+      await Promise.all([
+        loadClasses(),
+        loadStudents(),
+        loadSubjects(),
+        loadAssessments(),
+        loadAssessmentGrades(),
+      ])
+    } finally {
+      setDbSwitching(false)
+    }
+  }
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider trigger={null} collapsible collapsed={collapsed}>
@@ -191,30 +227,52 @@ export function RootLayout() {
       <Layout>
         <Header style={{ padding: 0, background: colorBgContainer }}>
           <div
-            style={{ display: 'flex', alignItems: 'center', height: '100%' }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              height: '100%',
+              justifyContent: 'space-between',
+              paddingRight: 24,
+            }}
           >
-            {collapsed ? (
-              <MenuUnfoldOutlined
-                style={{
-                  fontSize: '18px',
-                  padding: '0 24px',
-                  cursor: 'pointer',
+            <div
+              style={{ display: 'flex', alignItems: 'center', height: '100%' }}
+            >
+              {collapsed ? (
+                <MenuUnfoldOutlined
+                  style={{
+                    fontSize: '18px',
+                    padding: '0 24px',
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => setCollapsed(!collapsed)}
+                />
+              ) : (
+                <MenuFoldOutlined
+                  style={{
+                    fontSize: '18px',
+                    padding: '0 24px',
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => setCollapsed(!collapsed)}
+                />
+              )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                <h2 style={{ margin: 0 }}>Notenbank</h2>
+                <Breadcrumb items={breadcrumbItems} style={{ marginTop: 2 }} />
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 14 }}>Beispiel-Datenbank</span>
+              <Switch
+                checked={isExample}
+                checkedChildren="An"
+                unCheckedChildren="Aus"
+                disabled={dbSwitching}
+                onChange={(checked) => {
+                  void handleDatabaseToggle(checked)
                 }}
-                onClick={() => setCollapsed(!collapsed)}
               />
-            ) : (
-              <MenuFoldOutlined
-                style={{
-                  fontSize: '18px',
-                  padding: '0 24px',
-                  cursor: 'pointer',
-                }}
-                onClick={() => setCollapsed(!collapsed)}
-              />
-            )}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <h2 style={{ margin: 0 }}>Notenbank</h2>
-              <Breadcrumb items={breadcrumbItems} style={{ marginTop: 2 }} />
             </div>
           </div>
         </Header>

@@ -4,9 +4,9 @@ import { createRepository } from '../../../shared/repositories/createRepository'
 import type { Repository } from '../../../shared/repositories/Repository'
 import {
   ensureNotenbankStores,
-  NOTENBANK_DB_NAME,
   NOTENBANK_DB_VERSION,
 } from '../../../shared/repositories/notenbankDb'
+import { getActiveDatabaseName } from '../../../shared/store/databaseStore'
 
 const STORE_NAME = 'students'
 
@@ -37,7 +37,7 @@ export const studentRepository: StudentRepository = createRepository<
   Student,
   CreateStudentInput
 >({
-  dbName: NOTENBANK_DB_NAME,
+  dbName: getActiveDatabaseName,
   dbVersion: NOTENBANK_DB_VERSION,
   storeName: STORE_NAME,
   indexes: [

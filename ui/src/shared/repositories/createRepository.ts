@@ -3,6 +3,13 @@ import { BaseEntity, CreateInput } from './RepositoryTypes'
 import { Repository, RepositorySchemas } from './Repository'
 import { IndexedDBRepository, RepositoryConfig } from './IndexedDBRepository'
 
+type RepositoryConfigWithDynamicDb<
+  T extends BaseEntity,
+  TCreate = CreateInput<T>,
+> = Omit<RepositoryConfig<T, TCreate>, 'dbName'> & {
+  dbName: string | (() => string)
+}
+
 /* 📖 # Why use a lazy getter singleton pattern?
  *
  * IndexedDB initialization during module import can cause issues in test environments
@@ -52,15 +59,25 @@ import { IndexedDBRepository, RepositoryConfig } from './IndexedDBRepository'
 export function createRepository<
   T extends BaseEntity,
   TCreate = CreateInput<T>,
->(config: RepositoryConfig<T, TCreate>): Repository<T, TCreate> {
+>(config: RepositoryConfigWithDynamicDb<T, TCreate>): Repository<T, TCreate> {
   const schemas = config.schemas satisfies RepositorySchemas<T, TCreate>
-  let instance: IndexedDBRepository<T, TCreate> | null = null
+  const { dbName, ...restConfig } = config
+  const instances = new Map<string, IndexedDBRepository<T, TCreate>>()
+
+  const resolveDbName = () => (typeof dbName === 'function' ? dbName() : dbName)
 
   const ensureInstance = () => {
-    if (!instance) {
-      instance = new IndexedDBRepository<T, TCreate>(config)
+    const resolvedDbName = resolveDbName()
+    const cached = instances.get(resolvedDbName)
+    if (cached) {
+      return cached
     }
-    return instance
+    const created = new IndexedDBRepository<T, TCreate>({
+      ...restConfig,
+      dbName: resolvedDbName,
+    })
+    instances.set(resolvedDbName, created)
+    return created
   }
 
   return {
@@ -191,6 +208,31 @@ if (import.meta.vitest) {
       // These should be different repository objects
       expect(repository1).not.toBe(repository2)
       expect(repository1.findAll).not.toBe(repository2.findAll)
+    })
+
+    it('supports db name resolvers for multi-database access', async () => {
+      let activeDbName = 'test-db-1'
+      const repository = createRepository<TestEntity, CreateTestEntity>({
+        dbName: () => activeDbName,
+        dbVersion: 1,
+        storeName: 'test-entities',
+        schemas,
+        indexes: [],
+      })
+
+      await repository.create({ name: 'DB1 Entity' })
+
+      activeDbName = 'test-db-2'
+      await repository.create({ name: 'DB2 Entity' })
+
+      const db2Entities = await repository.findAll()
+      expect(db2Entities).toHaveLength(1)
+      expect(db2Entities[0].name).toBe('DB2 Entity')
+
+      activeDbName = 'test-db-1'
+      const db1Entities = await repository.findAll()
+      expect(db1Entities).toHaveLength(1)
+      expect(db1Entities[0].name).toBe('DB1 Entity')
     })
 
     describe('CRUD operations work correctly', () => {

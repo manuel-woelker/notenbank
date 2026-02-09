@@ -1,6 +1,7 @@
 import type { IndexConfig } from './IndexedDBRepository'
 
 export const NOTENBANK_DB_NAME = 'notenbank'
+export const NOTENBANK_EXAMPLE_DB_NAME = 'notenbank-example'
 export const NOTENBANK_DB_VERSION = 6
 
 const classIndexes: IndexConfig[] = [
