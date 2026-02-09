@@ -47,8 +47,67 @@ export const gradeToString = (grade: Grade): string => {
   return grade.toFixed(2).replace(/\.00$/, '')
 }
 
+export const gradeFromString = (value: string): Grade | null => {
+  const trimmed = value.trim()
+
+  if (trimmed.length === 0) {
+    return null
+  }
+
+  const plusMatch = trimmed.match(/^(\d+)\+$/)
+  if (plusMatch) {
+    return createGrade(Number(plusMatch[1]) - 0.25)
+  }
+
+  const minusMatch = trimmed.match(/^(\d+)-$/)
+  if (minusMatch) {
+    return createGrade(Number(minusMatch[1]) + 0.25)
+  }
+
+  const rangeMatch = trimmed.match(/^(\d+)-(\d+)$/)
+  if (rangeMatch) {
+    const lower = Number(rangeMatch[1])
+    const upper = Number(rangeMatch[2])
+    if (upper === lower + 1) {
+      return createGrade(lower + 0.5)
+    }
+    return null
+  }
+
+  const normalized = trimmed.replace(',', '.')
+  if (!/^-?\d+(\.\d*)?$/.test(normalized)) {
+    return null
+  }
+
+  return createGrade(Number(normalized))
+}
+
 if (import.meta.vitest) {
   const { describe, it, expect } = import.meta.vitest
+  const canonicalGradeCases: Array<[number, string]> = [
+    [0.75, '1+'],
+    [1.0, '1'],
+    [1.25, '1-'],
+    [1.5, '1-2'],
+    [1.75, '2+'],
+    [2.0, '2'],
+    [2.25, '2-'],
+    [2.5, '2-3'],
+    [2.75, '3+'],
+    [3.0, '3'],
+    [3.25, '3-'],
+    [3.5, '3-4'],
+    [3.75, '4+'],
+    [4.0, '4'],
+    [4.25, '4-'],
+    [4.5, '4-5'],
+    [4.75, '5+'],
+    [5.0, '5'],
+    [5.25, '5-'],
+    [5.5, '5-6'],
+    [5.75, '6+'],
+    [6.0, '6'],
+  ]
 
   describe('createGrade', () => {
     it('returns the numeric value unchanged', () => {
@@ -61,32 +120,7 @@ if (import.meta.vitest) {
 
   describe('gradeToString', () => {
     it('formats every 0.25 increment from 0.75 to 6.0', () => {
-      const cases: Array<[number, string]> = [
-        [0.75, '1+'],
-        [1.0, '1'],
-        [1.25, '1-'],
-        [1.5, '1-2'],
-        [1.75, '2+'],
-        [2.0, '2'],
-        [2.25, '2-'],
-        [2.5, '2-3'],
-        [2.75, '3+'],
-        [3.0, '3'],
-        [3.25, '3-'],
-        [3.5, '3-4'],
-        [3.75, '4+'],
-        [4.0, '4'],
-        [4.25, '4-'],
-        [4.5, '4-5'],
-        [4.75, '5+'],
-        [5.0, '5'],
-        [5.25, '5-'],
-        [5.5, '5-6'],
-        [5.75, '6+'],
-        [6.0, '6'],
-      ]
-
-      cases.forEach(([value, label]) => {
+      canonicalGradeCases.forEach(([value, label]) => {
         expect(gradeToString(createGrade(value))).toBe(label)
       })
     })
@@ -116,6 +150,58 @@ if (import.meta.vitest) {
 
       cases.forEach(([value, label]) => {
         expect(gradeToString(createGrade(value))).toBe(label)
+      })
+    })
+  })
+
+  describe('gradeFromString', () => {
+    it('parses canonical grade strings', () => {
+      canonicalGradeCases.forEach(([expected, value]) => {
+        expect(gradeFromString(value)).toBe(expected)
+      })
+    })
+
+    it('parses decimals with dots or commas', () => {
+      const cases: Array<[string, number]> = [
+        ['0.75', 0.75],
+        ['0,75', 0.75],
+        ['1.00', 1],
+        ['1,00', 1],
+        ['2.5', 2.5],
+        ['2,5', 2.5],
+        [' 2,50 ', 2.5],
+        ['-0.25', -0.25],
+        ['-0,25', -0.25],
+        ['6.75', 6.75],
+        ['1.', 1],
+        ['1,', 1],
+      ]
+
+      cases.forEach(([value, expected]) => {
+        expect(gradeFromString(value)).toBe(expected)
+      })
+    })
+
+    it('returns null for invalid inputs', () => {
+      const cases: string[] = [
+        '',
+        ' ',
+        'abc',
+        '1,2,3',
+        '1.2.3',
+        '1--2',
+        '2++',
+        '2-2',
+        '1-3',
+        '2-4',
+        '+2',
+        '-',
+        ',',
+        '.',
+      ]
+
+      cases.forEach((value) => {
+        expect(gradeFromString(value)).toBeNull()
       })
     })
   })
