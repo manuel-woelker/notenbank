@@ -1,7 +1,14 @@
 /* 📖 # Why centralize id generation in generateId?
 Using a single helper makes it easy to standardize id formats across the app
-and keep a secure fallback when `crypto.randomUUID` is not available.
+and keep sortable, compact identifiers across storage backends.
 */
+const BASE62_ALPHABET =
+  '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+const KSUID_EPOCH = 1400000000
+const KSUID_RANDOM_BYTES = 16
+const KSUID_TOTAL_BYTES = 20
+const KSUID_STRING_LENGTH = 27
+
 const createRandomBytes = (length: number): Uint8Array => {
   const bytes = new Uint8Array(length)
 
@@ -17,21 +24,49 @@ const createRandomBytes = (length: number): Uint8Array => {
   return bytes
 }
 
-const bytesToHex = (bytes: Uint8Array): string =>
-  Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')
+const bytesToBase62 = (bytes: Uint8Array): string => {
+  const digits: number[] = []
 
-const createFallbackId = (): string => {
-  const timePart = Date.now().toString(36)
-  const randomPart = bytesToHex(createRandomBytes(10))
-  return `${timePart}-${randomPart}`
+  for (const byte of bytes) {
+    let carry = byte
+    for (let index = 0; index < digits.length; index += 1) {
+      const value = digits[index] * 256 + carry
+      digits[index] = value % 62
+      carry = Math.floor(value / 62)
+    }
+
+    while (carry > 0) {
+      digits.push(carry % 62)
+      carry = Math.floor(carry / 62)
+    }
+  }
+
+  let encoded = digits
+    .reverse()
+    .map((digit) => BASE62_ALPHABET[digit])
+    .join('')
+
+  while (encoded.length < KSUID_STRING_LENGTH) {
+    encoded = `0${encoded}`
+  }
+
+  return encoded
+}
+
+const createKsuid = (): string => {
+  const timestamp = Math.floor(Date.now() / 1000) - KSUID_EPOCH
+  const bytes = new Uint8Array(KSUID_TOTAL_BYTES)
+  bytes[0] = (timestamp >>> 24) & 0xff
+  bytes[1] = (timestamp >>> 16) & 0xff
+  bytes[2] = (timestamp >>> 8) & 0xff
+  bytes[3] = timestamp & 0xff
+  bytes.set(createRandomBytes(KSUID_RANDOM_BYTES), 4)
+
+  return bytesToBase62(bytes)
 }
 
 export const generateId = (prefix?: string): string => {
-  const baseId =
-    typeof crypto !== 'undefined' && 'randomUUID' in crypto
-      ? crypto.randomUUID()
-      : createFallbackId()
-
+  const baseId = createKsuid()
   return prefix ? `${prefix}-${baseId}` : baseId
 }
 
@@ -52,10 +87,16 @@ if (import.meta.vitest) {
       expect(id.length).toBeGreaterThan('klasse-'.length)
     })
 
-    it('returns lowercase ascii ids', () => {
+    it('returns base62 ids', () => {
       const id = generateId()
 
-      expect(id).toMatch(/^[a-z0-9-]+$/)
+      expect(id).toMatch(/^[0-9A-Za-z]+$/)
+    })
+
+    it('returns ids in ksuid length', () => {
+      const id = generateId()
+
+      expect(id).toHaveLength(KSUID_STRING_LENGTH)
     })
   })
 }
