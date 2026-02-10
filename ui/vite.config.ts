@@ -29,6 +29,7 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     environmentMatchGlobs: [['src/**/*.tsx', 'happy-dom']],
+    isolate: false,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],
