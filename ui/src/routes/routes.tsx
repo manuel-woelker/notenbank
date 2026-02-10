@@ -20,7 +20,7 @@ export const rootRoute = createRootRoute({
   component: RootLayout,
   validateSearch: z
     .object({
-      db: z.enum(['example']).optional(),
+      db: z.string().min(1).optional(),
     })
     .passthrough(),
 })

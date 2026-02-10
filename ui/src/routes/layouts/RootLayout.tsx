@@ -179,7 +179,13 @@ export function RootLayout() {
   const { students } = useStudentStore()
   const { subjects } = useSubjectStore()
   const { assessments } = useAssessmentStore()
-  const { isExample, dbName, setDatabaseMode } = useDatabaseStore()
+  const {
+    isExample,
+    isTemporary,
+    dbName,
+    setDatabaseMode,
+    setTemporaryDatabase,
+  } = useDatabaseStore()
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken()
@@ -244,16 +250,22 @@ export function RootLayout() {
   }, [])
 
   useEffect(() => {
-    const isExampleFromSearch = search?.db === 'example'
-    if (isExampleFromSearch) {
+    const dbParam = search?.db
+    if (dbParam === 'example') {
       if (!isExample) {
         setDatabaseMode('example')
       }
       void ensureExampleDatabaseSeeded()
-    } else if (!isExampleFromSearch && isExample) {
+      return
+    }
+    if (dbParam) {
+      setTemporaryDatabase(dbParam)
+      return
+    }
+    if (isExample || isTemporary) {
       setDatabaseMode('primary')
     }
-  }, [isExample, search, setDatabaseMode])
+  }, [isExample, isTemporary, search, setDatabaseMode, setTemporaryDatabase])
 
   const sidebarContext = useMemo(
     () =>

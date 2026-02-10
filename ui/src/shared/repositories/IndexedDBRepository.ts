@@ -2,6 +2,15 @@ import { BaseEntity, CreateInput, Serialized } from './RepositoryTypes'
 import { Repository, RepositorySchemas } from './Repository'
 import { generateId } from '../generateId'
 
+const DATABASE_METADATA_STORE = 'dbMetadata'
+const DATABASE_CREATED_AT_KEY = 'createdAt'
+
+/* 📖 # Why write a database creation timestamp during upgrades?
+E2E tests create isolated temporary databases via query parameters. Recording
+the creation time once, as ISO8601, makes those databases traceable without
+coupling tests to application data stores.
+*/
+
 /**
  * Index configuration for IndexedDB object stores
  */
@@ -71,6 +80,19 @@ export class IndexedDBRepository<
 
       request.onupgradeneeded = (event) => {
         const db = (event.target as IDBOpenDBRequest).result
+        const transaction = (event.target as IDBOpenDBRequest).transaction
+
+        if (!db.objectStoreNames.contains(DATABASE_METADATA_STORE)) {
+          db.createObjectStore(DATABASE_METADATA_STORE, { keyPath: 'key' })
+        }
+
+        if (event.oldVersion === 0 && transaction) {
+          const metadataStore = transaction.objectStore(DATABASE_METADATA_STORE)
+          metadataStore.add({
+            key: DATABASE_CREATED_AT_KEY,
+            value: new Date().toISOString(),
+          })
+        }
 
         // Create object store if it doesn't exist
         if (!db.objectStoreNames.contains(this.config.storeName)) {
@@ -512,6 +534,46 @@ if (import.meta.vitest) {
         await expect(
           repository.update(created.id, { name: '' })
         ).rejects.toThrow()
+      })
+    })
+
+    describe('database metadata', () => {
+      const openDatabase = (dbName: string) =>
+        new Promise<IDBDatabase>((resolve, reject) => {
+          const request = indexedDB.open(dbName)
+          request.onsuccess = () => resolve(request.result)
+          request.onerror = () => reject(request.error)
+        })
+
+      const loadMetadata = (db: IDBDatabase) =>
+        new Promise<{ key: string; value: string } | undefined>(
+          (resolve, reject) => {
+            const transaction = db.transaction(
+              DATABASE_METADATA_STORE,
+              'readonly'
+            )
+            const store = transaction.objectStore(DATABASE_METADATA_STORE)
+            const request = store.get(DATABASE_CREATED_AT_KEY)
+            request.onsuccess = () =>
+              resolve(
+                request.result as { key: string; value: string } | undefined
+              )
+            request.onerror = () => reject(request.error)
+          }
+        )
+
+      it('stores creation date metadata in ISO8601 format', async () => {
+        await repository.findAll()
+
+        const db = await openDatabase('test-db')
+        const metadata = await loadMetadata(db)
+        db.close()
+
+        expect(metadata?.key).toBe(DATABASE_CREATED_AT_KEY)
+        expect(metadata?.value).toBeDefined()
+        expect(new Date(metadata?.value ?? '').toISOString()).toBe(
+          metadata?.value
+        )
       })
     })
   })
