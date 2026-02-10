@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
-import { ClassListPage } from './pages/ClassListPage'
-import { createE2eRunId } from './support/createE2eRunId'
+import { ClassListPage } from '../../pages/ClassListPage'
+import { createE2eRunId } from '../../support/createE2eRunId'
 
 test('creates a class', async ({ page }) => {
   const runId = createE2eRunId()
