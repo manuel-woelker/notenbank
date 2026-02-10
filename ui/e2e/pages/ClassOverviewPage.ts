@@ -13,4 +13,12 @@ export class ClassOverviewPage {
     await this.page.getByPlaceholder('Fachname').fill(name)
     await this.page.getByPlaceholder('Fachname').press('Enter')
   }
+
+  async openSubject(name: string) {
+    await this.page.getByRole('link', { name }).click()
+  }
+
+  async openStudent(firstName: string) {
+    await this.page.getByRole('link', { name: firstName }).click()
+  }
 }
