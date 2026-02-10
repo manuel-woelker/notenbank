@@ -25,6 +25,7 @@ export default defineConfig({
   },
   test: {
     includeSource: ['src/**/!(*.d).{ts,tsx,js,jsx}'],
+    exclude: ['e2e/**', 'node_modules/**'],
     globals: true,
     environment: 'jsdom',
     coverage: {
