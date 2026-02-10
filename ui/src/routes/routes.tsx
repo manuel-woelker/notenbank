@@ -1,4 +1,4 @@
-import { createRootRoute, createRoute } from '@tanstack/react-router'
+import { createRootRoute, createRoute, redirect } from '@tanstack/react-router'
 import { z } from 'zod'
 import { RootLayout } from './layouts/RootLayout'
 import { Dashboard } from '../features/dashboard/Dashboard'
@@ -27,6 +27,9 @@ export const rootRoute = createRootRoute({
 export const dashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
+  beforeLoad: ({ search }) => {
+    throw redirect({ to: '/classes', search })
+  },
   component: Dashboard,
 })
 
