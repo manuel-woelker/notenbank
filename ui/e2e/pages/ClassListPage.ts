@@ -14,4 +14,8 @@ export class ClassListPage {
     await this.page.getByPlaceholder('Neuer Klassenname').fill(name)
     await this.page.getByRole('button', { name: 'Hinzufügen' }).click()
   }
+
+  async openClass(name: string) {
+    await this.page.getByRole('link', { name }).click()
+  }
 }
