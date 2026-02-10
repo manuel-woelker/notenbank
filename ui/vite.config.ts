@@ -27,7 +27,8 @@ export default defineConfig({
     includeSource: ['src/**/!(*.d).{ts,tsx,js,jsx}'],
     exclude: ['e2e/**', 'node_modules/**'],
     globals: true,
-    environment: 'jsdom',
+    environment: 'node',
+    environmentMatchGlobs: [['src/**/*.tsx', 'jsdom']],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],
