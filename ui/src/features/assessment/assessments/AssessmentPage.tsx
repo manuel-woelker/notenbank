@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { Space, Typography } from 'antd'
+import { Card, InputNumber, Select, Space, Switch, Typography } from 'antd'
 import { useClassStore } from '../../administration/classes/ClassStore'
 import { useStudentStore } from '../../administration/students/StudentStore'
 import { useSubjectStore } from '../../administration/subjects/SubjectStore'
@@ -7,6 +7,7 @@ import { useAssessmentStore } from './AssessmentStore'
 import { AssessmentGradeTable } from './AssessmentGradeTable'
 import { useAssessmentGradeStore } from './AssessmentGradeStore'
 import { Grade } from '../../../shared/Grade'
+import { GradingCurveConfig } from './GradingCurve'
 
 const { Title, Text } = Typography
 
@@ -24,11 +25,16 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
   const { classes, loading: classesLoading } = useClassStore()
   const { subjects, loading: subjectsLoading } = useSubjectStore()
   const { students, loading: studentsLoading } = useStudentStore()
-  const { assessments, loading: assessmentsLoading } = useAssessmentStore()
+  const {
+    assessments,
+    loading: assessmentsLoading,
+    updateAssessment,
+  } = useAssessmentStore()
   const {
     assessmentGrades,
     loading: gradesLoading,
     setAssessmentGrade,
+    setAssessmentResult,
   } = useAssessmentGradeStore()
 
   const selectedClass = classes.find((item) => item.id === classId)
@@ -42,12 +48,19 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
     [students, classId]
   )
 
-  const grades = useMemo(() => {
-    const map: Record<string, Grade | null> = {}
+  const results = useMemo(() => {
+    const map: Record<
+      string,
+      { grade: Grade | null; points?: number | null; errors?: number | null }
+    > = {}
     assessmentGrades
       .filter((entry) => entry.assessmentId === assessmentId)
       .forEach((entry) => {
-        map[entry.studentId] = entry.grade
+        map[entry.studentId] = {
+          grade: entry.grade,
+          points: entry.points ?? null,
+          errors: entry.errors ?? null,
+        }
       })
     return map
   }, [assessmentGrades, assessmentId])
@@ -70,6 +83,23 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
     studentsLoading ||
     assessmentsLoading ||
     gradesLoading
+
+  const gradingCurve = selectedAssessment?.gradingCurve ?? null
+  const gradingCurveEnabled = Boolean(gradingCurve)
+
+  const ensureGradingCurve = (updates: Partial<GradingCurveConfig>) => {
+    if (!selectedAssessment) {
+      return
+    }
+    const baseCurve: GradingCurveConfig = gradingCurve ?? {
+      mode: 'points',
+      grade1Value: 60,
+      grade4Value: 30,
+    }
+    void updateAssessment(selectedAssessment.id, {
+      gradingCurve: { ...baseCurve, ...updates },
+    })
+  }
 
   return (
     <Space orientation="vertical" size="large" style={{ width: '100%' }}>
@@ -107,11 +137,90 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
       ) : null}
 
       {selectedAssessment ? (
+        <Card size="small" title="Notenlinie">
+          <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
+            <Space align="center">
+              <Switch
+                checked={gradingCurveEnabled}
+                onChange={(checked) => {
+                  if (!selectedAssessment) {
+                    return
+                  }
+                  if (!checked) {
+                    void updateAssessment(selectedAssessment.id, {
+                      gradingCurve: null,
+                    })
+                    return
+                  }
+                  ensureGradingCurve({})
+                }}
+              />
+              <Text>Notenlinie verwenden</Text>
+            </Space>
+            <Space wrap>
+              <Space direction="vertical" size={4}>
+                <Text type="secondary">Auswertung</Text>
+                <Select
+                  placeholder="Auswertung"
+                  options={[
+                    { label: 'Punkte', value: 'points' },
+                    { label: 'Fehler', value: 'errors' },
+                  ]}
+                  value={gradingCurve?.mode}
+                  onChange={(value) => {
+                    ensureGradingCurve({ mode: value })
+                  }}
+                  disabled={!gradingCurveEnabled}
+                  style={{ minWidth: 160 }}
+                />
+              </Space>
+              <Space direction="vertical" size={4}>
+                <Text type="secondary">Note 1</Text>
+                <InputNumber
+                  min={0}
+                  step={0.5}
+                  placeholder="Note 1"
+                  value={gradingCurve?.grade1Value ?? null}
+                  onChange={(value) => {
+                    if (typeof value === 'number') {
+                      ensureGradingCurve({ grade1Value: value })
+                    }
+                  }}
+                  disabled={!gradingCurveEnabled}
+                  aria-label="Wert für Note 1"
+                />
+              </Space>
+              <Space direction="vertical" size={4}>
+                <Text type="secondary">Note 4</Text>
+                <InputNumber
+                  min={0}
+                  step={0.5}
+                  placeholder="Note 4"
+                  value={gradingCurve?.grade4Value ?? null}
+                  onChange={(value) => {
+                    if (typeof value === 'number') {
+                      ensureGradingCurve({ grade4Value: value })
+                    }
+                  }}
+                  disabled={!gradingCurveEnabled}
+                  aria-label="Wert für Note 4"
+                />
+              </Space>
+            </Space>
+          </Space>
+        </Card>
+      ) : null}
+
+      {selectedAssessment ? (
         <AssessmentGradeTable
           students={classStudents}
-          grades={grades}
+          results={results}
+          gradingCurve={gradingCurve}
           onGradeChange={(studentId, grade) => {
             void setAssessmentGrade(assessmentId, studentId, grade)
+          }}
+          onScoreChange={(studentId, result) => {
+            void setAssessmentResult(assessmentId, studentId, result)
           }}
         />
       ) : null}

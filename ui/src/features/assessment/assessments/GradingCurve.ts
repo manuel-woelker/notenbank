@@ -5,6 +5,12 @@ export interface GradeCurveAnchors {
   grade4Value: number
 }
 
+export type GradingCurveMode = 'points' | 'errors'
+
+export interface GradingCurveConfig extends GradeCurveAnchors {
+  mode: GradingCurveMode
+}
+
 export interface GradingTableEntry {
   grade: Grade
   minimumPoints: number
@@ -41,6 +47,20 @@ export const calculateLinearGradeFromAnchors = (
   const finalGrade = Math.min(6, Math.max(0.75, rounded))
 
   return createGrade(finalGrade)
+}
+
+export const calculateGradeFromCurve = (
+  value: number,
+  curve: GradingCurveConfig
+): Grade => {
+  if (curve.mode === 'errors') {
+    return calculateLinearGradeFromAnchors(-value, {
+      grade1Value: -curve.grade1Value,
+      grade4Value: -curve.grade4Value,
+    })
+  }
+
+  return calculateLinearGradeFromAnchors(value, curve)
 }
 
 /* 📖 # Why derive grade thresholds from the rounding boundaries?
@@ -262,6 +282,20 @@ if (import.meta.vitest) {
           grade4Value: 5,
         })
       ).toThrow('Grade curve anchors must use distinct values.')
+    })
+  })
+
+  describe('calculateGradeFromCurve', () => {
+    it('maps error counts to grades by inverting the curve', () => {
+      const curve: GradingCurveConfig = {
+        mode: 'errors',
+        grade1Value: 2,
+        grade4Value: 12,
+      }
+
+      expect(calculateGradeFromCurve(2, curve)).toBeCloseTo(1, 10)
+      expect(calculateGradeFromCurve(12, curve)).toBeCloseTo(4, 10)
+      expect(calculateGradeFromCurve(7, curve)).toBeCloseTo(2.5, 10)
     })
   })
 

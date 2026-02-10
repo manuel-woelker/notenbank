@@ -51,13 +51,27 @@ const setAssessmentGrade = async (
   studentId: string,
   grade: Grade | null
 ): Promise<void> => {
+  return setAssessmentResult(assessmentId, studentId, { grade })
+}
+
+const setAssessmentResult = async (
+  assessmentId: string,
+  studentId: string,
+  result: {
+    grade: Grade | null
+    points?: number | null
+    errors?: number | null
+  }
+): Promise<void> => {
   const { assessmentGrades } = assessmentGradeStore.getSnapshot()
   const existing = assessmentGrades.find(
     (entry) =>
       entry.assessmentId === assessmentId && entry.studentId === studentId
   )
+  const hasValue =
+    result.grade !== null || result.points != null || result.errors != null
 
-  if (grade === null) {
+  if (!hasValue || result.grade === null) {
     if (!existing) {
       return
     }
@@ -72,7 +86,9 @@ const setAssessmentGrade = async (
 
   if (existing) {
     const updated = await assessmentGradeRepository.update(existing.id, {
-      grade,
+      grade: result.grade,
+      points: result.points ?? null,
+      errors: result.errors ?? null,
     })
     assessmentGradeStore.update('assessmentGrades:update:success', (state) => {
       const index = state.assessmentGrades.findIndex(
@@ -88,7 +104,9 @@ const setAssessmentGrade = async (
   const created = await assessmentGradeRepository.create({
     assessmentId,
     studentId,
-    grade,
+    grade: result.grade,
+    points: result.points ?? null,
+    errors: result.errors ?? null,
   })
   assessmentGradeStore.update('assessmentGrades:create:success', (state) => {
     state.assessmentGrades.push(created)
@@ -103,6 +121,7 @@ export const useAssessmentGradeStore = (): AssessmentGradeStoreValue => {
     loading,
     loadAssessmentGrades,
     setAssessmentGrade,
+    setAssessmentResult,
   }
 }
 
@@ -172,6 +191,22 @@ if (import.meta.vitest) {
       )
       expect(result.current.assessmentGrades).toHaveLength(1)
       expect(result.current.assessmentGrades[0]?.grade).toBe(3.0)
+    })
+
+    it('stores points or errors via setAssessmentResult', async () => {
+      const { result } = renderHook(() => useAssessmentGradeStore())
+
+      await loadAssessmentGrades()
+
+      await result.current.setAssessmentResult('assessment-1', 'student-1', {
+        grade: createGrade(2.25),
+        points: 42.5,
+      })
+
+      expect(result.current.assessmentGrades).toHaveLength(1)
+      expect(result.current.assessmentGrades[0]?.grade).toBe(2.25)
+      expect(result.current.assessmentGrades[0]?.points).toBe(42.5)
+      expect(result.current.assessmentGrades[0]?.errors).toBeNull()
     })
 
     it('removes grades when setAssessmentGrade receives null', async () => {

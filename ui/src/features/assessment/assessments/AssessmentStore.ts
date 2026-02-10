@@ -60,6 +60,30 @@ const createAssessment = async (
 }
 
 /**
+ * Update an existing assessment
+ */
+const updateAssessment = async (
+  assessmentId: string,
+  updates: Partial<Assessment>
+): Promise<Assessment> => {
+  try {
+    const updated = await assessmentRepository.update(assessmentId, updates)
+    assessmentStore.update('assessments:update:success', (state) => {
+      const index = state.assessments.findIndex(
+        (assessment) => assessment.id === assessmentId
+      )
+      if (index >= 0) {
+        state.assessments[index] = updated
+      }
+    })
+    return updated
+  } catch (error) {
+    console.error('Failed to update assessment:', error)
+    throw error
+  }
+}
+
+/**
  * Hook to access assessment store
  */
 export const useAssessmentStore = (): AssessmentStoreValue => {
@@ -70,6 +94,7 @@ export const useAssessmentStore = (): AssessmentStoreValue => {
     loading,
     loadAssessments,
     createAssessment,
+    updateAssessment,
   }
 }
 
@@ -165,6 +190,40 @@ if (import.meta.vitest) {
           (assessment) => assessment.id === newAssessment.id
         )
       ).toEqual(newAssessment)
+    })
+
+    it('updateAssessment updates assessment data', async () => {
+      const { result } = renderHook(() => useAssessmentStore())
+
+      await loadAssessments()
+
+      const newAssessment = await result.current.createAssessment({
+        classId: 'class-a',
+        subjectId: 'subject-a',
+        title: 'Test 1',
+        type: 'written',
+        date: new Date('2025-04-10'),
+      })
+
+      await result.current.updateAssessment(newAssessment.id, {
+        title: 'Test 1 (neu)',
+        gradingCurve: {
+          mode: 'points',
+          grade1Value: 60,
+          grade4Value: 30,
+        },
+      })
+
+      const updated = result.current.assessments.find(
+        (assessment) => assessment.id === newAssessment.id
+      )
+
+      expect(updated?.title).toBe('Test 1 (neu)')
+      expect(updated?.gradingCurve).toEqual({
+        mode: 'points',
+        grade1Value: 60,
+        grade4Value: 30,
+      })
     })
 
     it('loadAssessments sets loading to false even when repository fails', async () => {

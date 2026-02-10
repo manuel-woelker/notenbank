@@ -17,6 +17,12 @@ const STORE_NAME = 'assessments'
 export type AssessmentRepository = Repository<Assessment, CreateAssessmentInput>
 
 const assessmentTypeSchema = z.enum(['written', 'oral'])
+const gradingCurveModeSchema = z.enum(['points', 'errors'])
+const gradingCurveSchema = z.object({
+  mode: gradingCurveModeSchema,
+  grade1Value: z.number(),
+  grade4Value: z.number(),
+})
 
 const assessmentSchemas = {
   entity: z.object({
@@ -26,6 +32,7 @@ const assessmentSchemas = {
     title: z.string().min(1),
     type: assessmentTypeSchema,
     date: z.date(),
+    gradingCurve: gradingCurveSchema.nullable().optional(),
     createdAt: z.date(),
     updatedAt: z.date(),
   }),
@@ -35,6 +42,7 @@ const assessmentSchemas = {
     title: z.string().min(1),
     type: assessmentTypeSchema,
     date: z.date(),
+    gradingCurve: gradingCurveSchema.nullable().optional(),
   }),
   update: z.object({
     classId: z.string().min(1).optional(),
@@ -42,6 +50,7 @@ const assessmentSchemas = {
     title: z.string().min(1).optional(),
     type: assessmentTypeSchema.optional(),
     date: z.date().optional(),
+    gradingCurve: gradingCurveSchema.nullable().optional(),
   }),
 }
 

@@ -1,20 +1,40 @@
 import React, { useMemo } from 'react'
-import { Table } from 'antd'
+import { InputNumber, Table, Typography } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
-import { Grade } from '../../../shared/Grade'
+import { Grade, gradeToString } from '../../../shared/Grade'
 import { GradeInputComponent } from '../../../shared/GradeInputComponent'
 import { Student } from '../../administration/students/StudentTypes'
+import { GradingCurveConfig, calculateGradeFromCurve } from './GradingCurve'
+
+const { Text } = Typography
+
+interface AssessmentGradeResult {
+  grade: Grade | null
+  points?: number | null
+  errors?: number | null
+}
 
 interface AssessmentGradeTableProps {
   students: Student[]
-  grades: Record<string, Grade | null>
+  results: Record<string, AssessmentGradeResult | null>
+  gradingCurve: GradingCurveConfig | null
   onGradeChange: (studentId: string, grade: Grade | null) => void
+  onScoreChange: (
+    studentId: string,
+    result: {
+      grade: Grade | null
+      points?: number | null
+      errors?: number | null
+    }
+  ) => void
 }
 
 export const AssessmentGradeTable: React.FC<AssessmentGradeTableProps> = ({
   students,
-  grades,
+  results,
+  gradingCurve,
   onGradeChange,
+  onScoreChange,
 }) => {
   const sortedStudents = useMemo(
     () =>
@@ -26,24 +46,88 @@ export const AssessmentGradeTable: React.FC<AssessmentGradeTableProps> = ({
     [students]
   )
 
+  const isCurveEnabled = gradingCurve !== null
+  const modeLabel = gradingCurve?.mode === 'errors' ? 'Fehler' : 'Punkte'
+
   const columns: ColumnsType<Student> = [
     {
       title: 'Schüler',
       key: 'student',
       render: (_, student) => `${student.lastName}, ${student.firstName}`,
     },
-    {
-      title: 'Note',
-      key: 'grade',
-      render: (_, student) => (
-        <GradeInputComponent
-          value={grades[student.id] ?? null}
-          onChange={(value) => onGradeChange(student.id, value)}
-          ariaLabel={`Note für ${student.firstName} ${student.lastName}`}
-        />
-      ),
-      width: 180,
-    },
+    ...(isCurveEnabled
+      ? ([
+          {
+            title: modeLabel,
+            key: 'score',
+            render: (_, student) => {
+              const result = results[student.id]
+              const scoreValue =
+                gradingCurve?.mode === 'errors'
+                  ? (result?.errors ?? null)
+                  : (result?.points ?? null)
+              return (
+                <InputNumber
+                  min={0}
+                  step={0.5}
+                  value={scoreValue ?? null}
+                  onChange={(value) => {
+                    if (!gradingCurve) {
+                      return
+                    }
+                    const nextValue = typeof value === 'number' ? value : null
+                    if (nextValue === null) {
+                      onScoreChange(student.id, {
+                        grade: null,
+                        points: null,
+                        errors: null,
+                      })
+                      return
+                    }
+                    const computedGrade = calculateGradeFromCurve(
+                      nextValue,
+                      gradingCurve
+                    )
+                    onScoreChange(student.id, {
+                      grade: computedGrade,
+                      points: gradingCurve.mode === 'points' ? nextValue : null,
+                      errors: gradingCurve.mode === 'errors' ? nextValue : null,
+                    })
+                  }}
+                  aria-label={`${modeLabel} für ${student.firstName} ${student.lastName}`}
+                />
+              )
+            },
+            width: 160,
+          },
+          {
+            title: 'Note',
+            key: 'grade',
+            render: (_, student) => {
+              const grade = results[student.id]?.grade ?? null
+              return grade ? (
+                <Text>{gradeToString(grade)}</Text>
+              ) : (
+                <Text type="secondary">—</Text>
+              )
+            },
+            width: 140,
+          },
+        ] as ColumnsType<Student>)
+      : ([
+          {
+            title: 'Note',
+            key: 'grade',
+            render: (_, student) => (
+              <GradeInputComponent
+                value={results[student.id]?.grade ?? null}
+                onChange={(value) => onGradeChange(student.id, value)}
+                ariaLabel={`Note für ${student.firstName} ${student.lastName}`}
+              />
+            ),
+            width: 180,
+          },
+        ] as ColumnsType<Student>)),
   ]
 
   return (
@@ -109,8 +193,10 @@ if (import.meta.vitest) {
               updatedAt: new Date(),
             },
           ]}
-          grades={{}}
+          results={{}}
+          gradingCurve={null}
           onGradeChange={vi.fn()}
+          onScoreChange={vi.fn()}
         />
       )
 
@@ -132,8 +218,10 @@ if (import.meta.vitest) {
               updatedAt: new Date(),
             },
           ]}
-          grades={{}}
+          results={{}}
+          gradingCurve={null}
           onGradeChange={onGradeChange}
+          onScoreChange={vi.fn()}
         />
       )
 
@@ -144,6 +232,45 @@ if (import.meta.vitest) {
       })
 
       expect(onGradeChange).toHaveBeenCalledWith('student-1', 2.25)
+    })
+
+    it('emits score changes when grading curve is enabled', async () => {
+      const onScoreChange = vi.fn()
+
+      const { getByLabelText } = render(
+        <AssessmentGradeTable
+          students={[
+            {
+              id: 'student-1',
+              firstName: 'Lina',
+              lastName: 'Meyer',
+              classId: 'class-1',
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
+          ]}
+          results={{}}
+          gradingCurve={{
+            mode: 'points',
+            grade1Value: 60,
+            grade4Value: 30,
+          }}
+          onGradeChange={vi.fn()}
+          onScoreChange={onScoreChange}
+        />
+      )
+
+      await act(async () => {
+        fireEvent.change(getByLabelText('Punkte für Lina Meyer'), {
+          target: { value: '60' },
+        })
+      })
+
+      expect(onScoreChange).toHaveBeenCalledWith('student-1', {
+        grade: 1,
+        points: 60,
+        errors: null,
+      })
     })
   })
 }

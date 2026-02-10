@@ -27,6 +27,8 @@ const assessmentGradeSchemas = {
     assessmentId: z.string().min(1),
     studentId: z.string().min(1),
     grade: gradeSchema,
+    points: z.number().nullable().optional(),
+    errors: z.number().nullable().optional(),
     createdAt: z.date(),
     updatedAt: z.date(),
   }),
@@ -34,11 +36,15 @@ const assessmentGradeSchemas = {
     assessmentId: z.string().min(1),
     studentId: z.string().min(1),
     grade: gradeSchema,
+    points: z.number().nullable().optional(),
+    errors: z.number().nullable().optional(),
   }),
   update: z.object({
     assessmentId: z.string().min(1).optional(),
     studentId: z.string().min(1).optional(),
     grade: gradeSchema.optional(),
+    points: z.number().nullable().optional(),
+    errors: z.number().nullable().optional(),
   }),
 }
 
@@ -78,6 +84,7 @@ if (import.meta.vitest) {
         assessmentId: 'assessment-1',
         studentId: 'student-1',
         grade: createGrade(2.0),
+        points: 42.5,
       })
 
       const found = await assessmentGradeRepository.findById(created.id)
@@ -87,6 +94,7 @@ if (import.meta.vitest) {
         assessmentId: 'assessment-1',
         studentId: 'student-1',
         grade: 2.0,
+        points: 42.5,
       })
     })
   })
