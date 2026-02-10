@@ -16,6 +16,8 @@ import {
   VideoCameraOutlined,
   UploadOutlined,
   TeamOutlined,
+  BookOutlined,
+  FileTextOutlined,
 } from '@ant-design/icons'
 import {
   Outlet,
@@ -284,6 +286,7 @@ export function RootLayout() {
                           )
                           return {
                             key: `assessment:${assessment.id}`,
+                            icon: <FileTextOutlined />,
                             label: assessment.title,
                             onClick: () =>
                               navigate({
@@ -297,6 +300,7 @@ export function RootLayout() {
                     isCurrentSubject && assessmentChildren.length > 0
                   return {
                     key: `subject:${subject.id}`,
+                    icon: <BookOutlined />,
                     label: subject.name,
                     ...(hasAssessments
                       ? {
@@ -320,6 +324,7 @@ export function RootLayout() {
           const hasSubjects = isCurrentClass && subjectChildren.length > 0
           return {
             key: `class:${classItem.id}`,
+            icon: <TeamOutlined />,
             label: classItem.name,
             ...(hasSubjects
               ? {
@@ -504,6 +509,7 @@ export function RootLayout() {
         <Menu
           theme="dark"
           mode="inline"
+          inlineIndent={12}
           selectedKeys={[sidebarContext.selectedKey]}
           openKeys={sidebarContext.openKeys}
           items={menuItems}
