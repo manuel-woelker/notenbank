@@ -28,7 +28,7 @@ export default defineConfig({
     exclude: ['e2e/**', 'node_modules/**'],
     globals: true,
     environment: 'node',
-    environmentMatchGlobs: [['src/**/*.tsx', 'jsdom']],
+    environmentMatchGlobs: [['src/**/*.tsx', 'happy-dom']],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],
