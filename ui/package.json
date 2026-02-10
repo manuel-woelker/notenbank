@@ -21,6 +21,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:ci": "vitest run --coverage --reporter=verbose --reporter=json --outputFile=test-results.json",
+    "test:e2e": "playwright test",
     "prepare": "cd .. && husky ui/.husky"
   },
   "dependencies": {
@@ -34,6 +35,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
+    "@playwright/test": "^1.58.2",
     "@storybook/addon-a11y": "^8.6.14",
     "@storybook/addon-essentials": "^8.6.14",
     "@storybook/addon-interactions": "^8.6.14",
