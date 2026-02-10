@@ -74,6 +74,37 @@ export function RootLayout() {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken()
 
+  /* 📖 # Why map "Up" targets to known routes instead of trimming segments?
+  Some intermediate segments (like "subjects" or "assessments") are not
+  navigable pages. Mapping to known parent routes prevents the link from
+  landing on a non-existent view while still respecting deep links.
+  */
+  const parentPath = useMemo(() => {
+    const path = location.pathname
+    const segments = path.split('/').filter(Boolean)
+    if (segments.length === 0) return null
+
+    if (segments[0] === 'classes') {
+      if (segments.length === 1) return '/'
+      if (segments.length === 2) return '/classes'
+      if (segments[2] === 'subjects') {
+        if (segments.length === 4) {
+          return `/classes/${segments[1]}`
+        }
+        if (segments.length >= 6 && segments[4] === 'assessments') {
+          return `/classes/${segments[1]}/subjects/${segments[3]}`
+        }
+      }
+      return `/${segments.slice(0, -1).join('/')}`
+    }
+
+    if (segments[0] === 'content' || segments[0] === 'upload') {
+      return '/'
+    }
+
+    return segments.length === 1 ? '/' : `/${segments.slice(0, -1).join('/')}`
+  }, [location.pathname])
+
   /* 📖 # Why load git metadata with a dynamic import?
   The git-info file is generated at build and may be missing in some CI flows.
   A dynamic import lets the UI render with safe defaults when that file is not
@@ -312,6 +343,16 @@ export function RootLayout() {
               )}
               <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                 <h2 style={{ margin: 0 }}>Notenbank</h2>
+                <Button
+                  type="link"
+                  disabled={!parentPath}
+                  onClick={() => {
+                    if (!parentPath) return
+                    navigate({ to: parentPath, search: (prev) => prev })
+                  }}
+                >
+                  Nach oben
+                </Button>
                 <Breadcrumb items={breadcrumbItems} style={{ marginTop: 2 }} />
               </div>
             </div>
