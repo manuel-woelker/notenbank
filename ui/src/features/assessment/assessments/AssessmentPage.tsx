@@ -158,7 +158,7 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
               <Text>Notenlinie verwenden</Text>
             </Space>
             <Space wrap>
-              <Space direction="vertical" size={4}>
+              <Space orientation="vertical" size={4}>
                 <Text type="secondary">Auswertung</Text>
                 <Select
                   placeholder="Auswertung"
@@ -174,7 +174,7 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
                   style={{ minWidth: 160 }}
                 />
               </Space>
-              <Space direction="vertical" size={4}>
+              <Space orientation="vertical" size={4}>
                 <Text type="secondary">Note 1</Text>
                 <InputNumber
                   min={0}
@@ -190,7 +190,7 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
                   aria-label="Wert für Note 1"
                 />
               </Space>
-              <Space direction="vertical" size={4}>
+              <Space orientation="vertical" size={4}>
                 <Text type="secondary">Note 4</Text>
                 <InputNumber
                   min={0}
