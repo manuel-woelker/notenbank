@@ -1,5 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Breadcrumb, Button, Layout, Menu, Switch, Tag, theme } from 'antd'
+import {
+  Breadcrumb,
+  Button,
+  Layout,
+  Menu,
+  Switch,
+  Tag,
+  theme,
+  type MenuProps,
+} from 'antd'
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -22,14 +31,27 @@ import {
   loadSubjects,
   useSubjectStore,
 } from '../../features/administration/subjects/SubjectStore'
+import type { Subject } from '../../features/administration/subjects/SubjectTypes'
 import { loadStudents } from '../../features/administration/students/StudentStore'
-import { loadAssessments } from '../../features/assessment/assessments/AssessmentStore'
+import type { Class } from '../../features/administration/classes/ClassTypes'
 import { loadAssessmentGrades } from '../../features/assessment/assessments/AssessmentGradeStore'
+import {
+  loadAssessments,
+  useAssessmentStore,
+} from '../../features/assessment/assessments/AssessmentStore'
+import type { Assessment } from '../../features/assessment/assessments/AssessmentTypes'
 import {
   buildClassRouteSegment,
   findClassByRouteSegment,
 } from '../../shared/routes/classRoute'
-import { findSubjectByRouteSegment } from '../../shared/routes/subjectRoute'
+import {
+  buildSubjectRouteSegment,
+  findSubjectByRouteSegment,
+} from '../../shared/routes/subjectRoute'
+import {
+  buildAssessmentRouteSegment,
+  findAssessmentByRouteSegment,
+} from '../../shared/routes/assessmentRoute'
 import {
   DatabaseMode,
   useDatabaseStore,
@@ -53,6 +75,86 @@ const fallbackGitInfo: GitInfo = {
   commitMessage: 'Development build',
 }
 
+type SidebarContext = {
+  showClassTree: boolean
+  selectedKey: string
+  openKeys: string[]
+  currentClass?: Class
+  currentSubject?: Subject
+  currentAssessment?: Assessment
+}
+
+/* 📖 # Why resolve the sidebar context from the URL?
+The navigation tree mirrors routes that are driven by class, subject, and
+assessment identifiers. Deriving the active selection from the URL keeps the
+sidebar aligned with deep links and refreshes without extra state.
+*/
+const resolveSidebarContext = (
+  pathname: string,
+  classes: Class[],
+  subjects: Subject[],
+  assessments: Assessment[]
+): SidebarContext => {
+  const segments = pathname.split('/').filter(Boolean)
+  const showClassTree = segments[0] === 'classes'
+  let currentClass: Class | undefined
+  let currentSubject: Subject | undefined
+  let currentAssessment: Assessment | undefined
+
+  if (showClassTree && segments[1]) {
+    currentClass = findClassByRouteSegment(classes, segments[1])
+    if (currentClass && segments[2] === 'subjects' && segments[3]) {
+      currentSubject = findSubjectByRouteSegment(
+        subjects,
+        currentClass.id,
+        segments[3]
+      )
+      if (currentSubject && segments[4] === 'assessments' && segments[5]) {
+        currentAssessment = findAssessmentByRouteSegment(
+          assessments,
+          currentClass.id,
+          currentSubject.id,
+          segments[5]
+        )
+      }
+    }
+  }
+
+  const selectedKey = currentAssessment
+    ? `assessment:${currentAssessment.id}`
+    : currentSubject
+      ? `subject:${currentSubject.id}`
+      : currentClass
+        ? `class:${currentClass.id}`
+        : showClassTree
+          ? 'classes'
+          : segments[0] === 'content'
+            ? 'content'
+            : segments[0] === 'upload'
+              ? 'upload'
+              : 'dashboard'
+
+  const openKeys: string[] = []
+  if (showClassTree) {
+    openKeys.push('classes')
+    if (currentClass) {
+      openKeys.push(`class:${currentClass.id}`)
+    }
+    if (currentSubject) {
+      openKeys.push(`subject:${currentSubject.id}`)
+    }
+  }
+
+  return {
+    showClassTree,
+    selectedKey,
+    openKeys,
+    currentClass,
+    currentSubject,
+    currentAssessment,
+  }
+}
+
 /* 📖 # Why derive selected menu from URL location instead of state?
 TanStack Router manages navigation via URL changes. By using useLocation() to
 determine which menu item should be highlighted, we ensure the menu state stays
@@ -69,6 +171,7 @@ export function RootLayout() {
   const search = useSearch({ from: '__root__' }) as { db?: string }
   const { classes } = useClassStore()
   const { subjects } = useSubjectStore()
+  const { assessments } = useAssessmentStore()
   const { isExample, dbName, setDatabaseMode } = useDatabaseStore()
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -142,14 +245,139 @@ export function RootLayout() {
     }
   }, [isExample, search, setDatabaseMode])
 
-  const getSelectedKey = () => {
-    const path = location.pathname
-    if (path === '/') return 'dashboard'
-    if (path.startsWith('/classes')) return 'classes'
-    if (path.startsWith('/content')) return 'content'
-    if (path.startsWith('/upload')) return 'upload'
-    return 'dashboard'
-  }
+  const sidebarContext = useMemo(
+    () =>
+      resolveSidebarContext(location.pathname, classes, subjects, assessments),
+    [location.pathname, classes, subjects, assessments]
+  )
+
+  const menuItems = useMemo<MenuProps['items']>(() => {
+    const classChildren = sidebarContext.showClassTree
+      ? classes.map((classItem) => {
+          const classSegment = buildClassRouteSegment(classes, classItem.id)
+          const isCurrentClass =
+            sidebarContext.currentClass?.id === classItem.id
+          const subjectChildren = isCurrentClass
+            ? subjects
+                .filter((subject) => subject.classId === classItem.id)
+                .map((subject) => {
+                  const subjectSegment = buildSubjectRouteSegment(
+                    subjects,
+                    classItem.id,
+                    subject.id
+                  )
+                  const isCurrentSubject =
+                    sidebarContext.currentSubject?.id === subject.id
+                  const assessmentChildren = isCurrentSubject
+                    ? assessments
+                        .filter(
+                          (assessment) =>
+                            assessment.classId === classItem.id &&
+                            assessment.subjectId === subject.id
+                        )
+                        .map((assessment) => {
+                          const assessmentSegment = buildAssessmentRouteSegment(
+                            assessments,
+                            classItem.id,
+                            subject.id,
+                            assessment.id
+                          )
+                          return {
+                            key: `assessment:${assessment.id}`,
+                            label: assessment.title,
+                            onClick: () =>
+                              navigate({
+                                to: `/classes/${classSegment}/subjects/${subjectSegment}/assessments/${assessmentSegment}`,
+                                search: (prev) => prev,
+                              }),
+                          }
+                        })
+                    : []
+                  const hasAssessments =
+                    isCurrentSubject && assessmentChildren.length > 0
+                  return {
+                    key: `subject:${subject.id}`,
+                    label: subject.name,
+                    ...(hasAssessments
+                      ? {
+                          onTitleClick: () =>
+                            navigate({
+                              to: `/classes/${classSegment}/subjects/${subjectSegment}`,
+                              search: (prev) => prev,
+                            }),
+                          children: assessmentChildren,
+                        }
+                      : {
+                          onClick: () =>
+                            navigate({
+                              to: `/classes/${classSegment}/subjects/${subjectSegment}`,
+                              search: (prev) => prev,
+                            }),
+                        }),
+                  }
+                })
+            : []
+          const hasSubjects = isCurrentClass && subjectChildren.length > 0
+          return {
+            key: `class:${classItem.id}`,
+            label: classItem.name,
+            ...(hasSubjects
+              ? {
+                  onTitleClick: () =>
+                    navigate({
+                      to: `/classes/${classSegment}`,
+                      search: (prev) => prev,
+                    }),
+                  children: subjectChildren,
+                }
+              : {
+                  onClick: () =>
+                    navigate({
+                      to: `/classes/${classSegment}`,
+                      search: (prev) => prev,
+                    }),
+                }),
+          }
+        })
+      : undefined
+    const hasClassChildren = (classChildren?.length ?? 0) > 0
+
+    return [
+      {
+        key: 'dashboard',
+        icon: <UserOutlined />,
+        label: 'Übersicht',
+        onClick: () => navigate({ to: '/', search: (prev) => prev }),
+      },
+      {
+        key: 'classes',
+        icon: <TeamOutlined />,
+        label: 'Klassen',
+        ...(hasClassChildren
+          ? {
+              onTitleClick: () =>
+                navigate({ to: '/classes', search: (prev) => prev }),
+              children: classChildren,
+            }
+          : {
+              onClick: () =>
+                navigate({ to: '/classes', search: (prev) => prev }),
+            }),
+      },
+      {
+        key: 'content',
+        icon: <VideoCameraOutlined />,
+        label: 'Inhalte',
+        onClick: () => navigate({ to: '/content', search: (prev) => prev }),
+      },
+      {
+        key: 'upload',
+        icon: <UploadOutlined />,
+        label: 'Hochladen',
+        onClick: () => navigate({ to: '/upload', search: (prev) => prev }),
+      },
+    ]
+  }, [sidebarContext, classes, subjects, assessments, navigate])
 
   const breadcrumbItems = useMemo(() => {
     const clickableCrumb = (label: string, to: string) => ({
@@ -276,36 +504,9 @@ export function RootLayout() {
         <Menu
           theme="dark"
           mode="inline"
-          selectedKeys={[getSelectedKey()]}
-          items={[
-            {
-              key: 'dashboard',
-              icon: <UserOutlined />,
-              label: 'Übersicht',
-              onClick: () => navigate({ to: '/', search: (prev) => prev }),
-            },
-            {
-              key: 'classes',
-              icon: <TeamOutlined />,
-              label: 'Klassen',
-              onClick: () =>
-                navigate({ to: '/classes', search: (prev) => prev }),
-            },
-            {
-              key: 'content',
-              icon: <VideoCameraOutlined />,
-              label: 'Inhalte',
-              onClick: () =>
-                navigate({ to: '/content', search: (prev) => prev }),
-            },
-            {
-              key: 'upload',
-              icon: <UploadOutlined />,
-              label: 'Hochladen',
-              onClick: () =>
-                navigate({ to: '/upload', search: (prev) => prev }),
-            },
-          ]}
+          selectedKeys={[sidebarContext.selectedKey]}
+          openKeys={sidebarContext.openKeys}
+          items={menuItems}
         />
       </Sider>
       <Layout>
@@ -342,7 +543,6 @@ export function RootLayout() {
                 />
               )}
               <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                <h2 style={{ margin: 0 }}>Notenbank</h2>
                 <Button
                   type="link"
                   disabled={!parentPath}
@@ -399,4 +599,108 @@ export function RootLayout() {
       </Layout>
     </Layout>
   )
+}
+
+if (import.meta.vitest) {
+  const { describe, it, expect } = import.meta.vitest
+
+  describe('resolveSidebarContext', () => {
+    const timestamp = new Date('2025-01-01T00:00:00.000Z')
+    const classes: Class[] = [
+      {
+        id: 'c-1',
+        name: 'Klasse A',
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      },
+      {
+        id: 'c-2',
+        name: 'Klasse B',
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      },
+    ]
+    const subjects: Subject[] = [
+      {
+        id: 's-1',
+        classId: 'c-1',
+        name: 'Deutsch',
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      },
+    ]
+    const assessments: Assessment[] = [
+      {
+        id: 'a-1',
+        classId: 'c-1',
+        subjectId: 's-1',
+        title: 'Klausur 1',
+        type: 'written',
+        date: timestamp,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      },
+    ]
+
+    it('selects class context for class routes', () => {
+      const classSegment = buildClassRouteSegment(classes, 'c-1')
+      const context = resolveSidebarContext(
+        `/classes/${classSegment}`,
+        classes,
+        subjects,
+        assessments
+      )
+
+      expect(context.showClassTree).toBe(true)
+      expect(context.selectedKey).toBe('class:c-1')
+      expect(context.openKeys).toEqual(['classes', 'class:c-1'])
+    })
+
+    it('selects subject context for subject routes', () => {
+      const classSegment = buildClassRouteSegment(classes, 'c-1')
+      const subjectSegment = buildSubjectRouteSegment(subjects, 'c-1', 's-1')
+      const context = resolveSidebarContext(
+        `/classes/${classSegment}/subjects/${subjectSegment}`,
+        classes,
+        subjects,
+        assessments
+      )
+
+      expect(context.selectedKey).toBe('subject:s-1')
+      expect(context.openKeys).toEqual(['classes', 'class:c-1', 'subject:s-1'])
+    })
+
+    it('selects assessment context for assessment routes', () => {
+      const classSegment = buildClassRouteSegment(classes, 'c-1')
+      const subjectSegment = buildSubjectRouteSegment(subjects, 'c-1', 's-1')
+      const assessmentSegment = buildAssessmentRouteSegment(
+        assessments,
+        'c-1',
+        's-1',
+        'a-1'
+      )
+      const context = resolveSidebarContext(
+        `/classes/${classSegment}/subjects/${subjectSegment}/assessments/${assessmentSegment}`,
+        classes,
+        subjects,
+        assessments
+      )
+
+      expect(context.selectedKey).toBe('assessment:a-1')
+      expect(context.openKeys).toEqual(['classes', 'class:c-1', 'subject:s-1'])
+    })
+
+    it('falls back to top-level selection outside class routes', () => {
+      const context = resolveSidebarContext(
+        '/content',
+        classes,
+        subjects,
+        assessments
+      )
+
+      expect(context.showClassTree).toBe(false)
+      expect(context.selectedKey).toBe('content')
+      expect(context.openKeys).toEqual([])
+    })
+  })
 }
