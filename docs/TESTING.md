@@ -33,6 +33,9 @@ This project uses a layered testing strategy with a focus on deterministic, repr
   - Example: `http://localhost:5173/?db=e2e-<run-id>`
   - Each test run uses a unique `db` identifier
   - This keeps tests deterministic and prevents cross-test interference
+- Use the shared E2E run id utility and page objects to keep tests consistent
+  - Run id helper: `ui/e2e/support/createE2eRunId.ts`
+  - Page objects live in `ui/e2e/pages/`
 
 ## Running Tests
 
