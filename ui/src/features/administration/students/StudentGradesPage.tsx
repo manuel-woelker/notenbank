@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react'
-import { Space, Table, Typography } from 'antd'
+import React, { useMemo, useState } from 'react'
+import { Col, Row, Space, Table, Typography } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import type { Grade } from '../../../shared/Grade'
 import { gradeToString } from '../../../shared/Grade'
@@ -7,7 +7,10 @@ import { useClassStore } from '../classes/ClassStore'
 import { useStudentStore } from './StudentStore'
 import { useSubjectStore } from '../subjects/SubjectStore'
 import { useAssessmentStore } from '../../assessment/assessments/AssessmentStore'
-import type { AssessmentType } from '../../assessment/assessments/AssessmentTypes'
+import type {
+  Assessment,
+  AssessmentType,
+} from '../../assessment/assessments/AssessmentTypes'
 import { useAssessmentGradeStore } from '../../assessment/assessments/AssessmentGradeStore'
 
 const { Title, Text } = Typography
@@ -17,6 +20,16 @@ const dateFormatter = new Intl.DateTimeFormat('de-DE')
 const assessmentTypeLabels: Record<AssessmentType, string> = {
   written: 'Schriftlich',
   oral: 'Mündlich',
+}
+
+/* 📖 # Why use default weights for assessment types?
+The UI needs weighted averages but per-subject weight configuration is not yet
+modeled. Using a conventional 2:1 written-to-oral ratio keeps the calculation
+transparent and provides stable results until configurable weights land.
+*/
+const assessmentTypeWeights: Record<AssessmentType, number> = {
+  written: 2,
+  oral: 1,
 }
 
 type StudentGradeRow = {
@@ -33,6 +46,13 @@ interface StudentGradesPageProps {
   studentId: string
 }
 
+type SubjectGradeRow = {
+  id: string
+  name: string
+  averageLabel: string
+  weightedLabel: string
+}
+
 export const StudentGradesPage: React.FC<StudentGradesPageProps> = ({
   classId,
   studentId,
@@ -42,36 +62,109 @@ export const StudentGradesPage: React.FC<StudentGradesPageProps> = ({
   const { subjects, loading: subjectsLoading } = useSubjectStore()
   const { assessments, loading: assessmentsLoading } = useAssessmentStore()
   const { assessmentGrades, loading: gradesLoading } = useAssessmentGradeStore()
+  const [userSelectedSubjectId, setUserSelectedSubjectId] = useState<
+    string | null
+  >(null)
 
   const selectedClass = classes.find((item) => item.id === classId)
   const selectedStudent = students.find((item) => item.id === studentId)
 
-  const studentGrades = useMemo(() => {
-    return assessmentGrades
-      .filter((entry) => entry.studentId === studentId)
-      .map((entry) => {
-        const assessment = assessments.find(
-          (item) => item.id === entry.assessmentId
-        )
-        const subject = assessment
-          ? subjects.find((item) => item.id === assessment.subjectId)
-          : undefined
-        return {
-          id: entry.id,
-          assessmentTitle:
-            assessment?.title ?? 'Unbekannte Leistungsfeststellung',
-          subjectName: subject?.name ?? 'Unbekanntes Fach',
-          assessmentType: assessment?.type ?? null,
-          date: assessment?.date ?? null,
-          grade: entry.grade,
-        }
-      })
-      .sort((a, b) => {
-        const left = a.date ? a.date.getTime() : 0
-        const right = b.date ? b.date.getTime() : 0
-        return right - left
-      })
-  }, [assessmentGrades, assessments, subjects, studentId])
+  const classSubjects = useMemo(
+    () => subjects.filter((subject) => subject.classId === classId),
+    [subjects, classId]
+  )
+
+  const assessmentById = useMemo(
+    () => new Map(assessments.map((assessment) => [assessment.id, assessment])),
+    [assessments]
+  )
+
+  const studentGradesBySubject = useMemo(() => {
+    const result = new Map<
+      string,
+      Array<{ grade: Grade; assessment: Assessment }>
+    >()
+    assessmentGrades.forEach((entry) => {
+      if (entry.studentId !== studentId) {
+        return
+      }
+      const assessment = assessmentById.get(entry.assessmentId)
+      if (!assessment || assessment.classId !== classId) {
+        return
+      }
+      const entries = result.get(assessment.subjectId) ?? []
+      entries.push({ grade: entry.grade, assessment })
+      result.set(assessment.subjectId, entries)
+    })
+    return result
+  }, [assessmentGrades, assessmentById, studentId, classId])
+
+  const formatAverage = (value: number | null) =>
+    value === null ? '—' : value.toFixed(2).replace('.', ',')
+
+  const subjectRows = useMemo<SubjectGradeRow[]>(() => {
+    return classSubjects.map((subject) => {
+      const entries = studentGradesBySubject.get(subject.id) ?? []
+      const average =
+        entries.length === 0
+          ? null
+          : entries.reduce((sum, entry) => sum + entry.grade, 0) /
+            entries.length
+      const weighted =
+        entries.length === 0
+          ? null
+          : entries.reduce((sum, entry) => {
+              const weight = assessmentTypeWeights[entry.assessment.type]
+              return sum + entry.grade * weight
+            }, 0) /
+            entries.reduce((sum, entry) => {
+              const weight = assessmentTypeWeights[entry.assessment.type]
+              return sum + weight
+            }, 0)
+      return {
+        id: subject.id,
+        name: subject.name,
+        averageLabel: formatAverage(average),
+        weightedLabel: formatAverage(weighted),
+      }
+    })
+  }, [classSubjects, studentGradesBySubject])
+
+  const resolvedSubjectId = useMemo(() => {
+    if (userSelectedSubjectId) {
+      const exists = subjectRows.some(
+        (subject) => subject.id === userSelectedSubjectId
+      )
+      if (exists) {
+        return userSelectedSubjectId
+      }
+    }
+    const subjectWithGrades = subjectRows.find(
+      (subject) => subject.averageLabel !== '—'
+    )
+    return subjectWithGrades?.id ?? subjectRows[0]?.id ?? ''
+  }, [userSelectedSubjectId, subjectRows])
+
+  const selectedSubject = classSubjects.find(
+    (subject) => subject.id === resolvedSubjectId
+  )
+
+  const detailRows = useMemo<StudentGradeRow[]>(() => {
+    if (!resolvedSubjectId) {
+      return []
+    }
+    const entries = studentGradesBySubject.get(resolvedSubjectId) ?? []
+    return entries
+      .map((entry) => ({
+        id: entry.assessment.id,
+        assessmentTitle: entry.assessment.title,
+        subjectName: selectedSubject?.name ?? 'Unbekanntes Fach',
+        assessmentType: entry.assessment.type,
+        date: entry.assessment.date,
+        grade: entry.grade,
+      }))
+      .sort((a, b) => b.date.getTime() - a.date.getTime())
+  }, [studentGradesBySubject, resolvedSubjectId, selectedSubject])
 
   const isLoading =
     classesLoading ||
@@ -80,7 +173,27 @@ export const StudentGradesPage: React.FC<StudentGradesPageProps> = ({
     assessmentsLoading ||
     gradesLoading
 
-  const columns: ColumnsType<StudentGradeRow> = [
+  const subjectColumns: ColumnsType<SubjectGradeRow> = [
+    {
+      title: 'Fach',
+      dataIndex: 'name',
+      key: 'name',
+    },
+    {
+      title: 'Durchschnitt',
+      dataIndex: 'averageLabel',
+      key: 'averageLabel',
+      width: 130,
+    },
+    {
+      title: 'Gewichtet',
+      dataIndex: 'weightedLabel',
+      key: 'weightedLabel',
+      width: 110,
+    },
+  ]
+
+  const detailColumns: ColumnsType<StudentGradeRow> = [
     {
       title: 'Leistungsfeststellung',
       dataIndex: 'assessmentTitle',
@@ -137,27 +250,52 @@ export const StudentGradesPage: React.FC<StudentGradesPageProps> = ({
         <Text type="secondary">Schüler nicht gefunden.</Text>
       ) : null}
 
-      <div>
-        <Title level={4} style={{ marginTop: 0 }}>
-          Noten
-        </Title>
-        <Table
-          columns={columns}
-          dataSource={studentGrades}
-          rowKey="id"
-          loading={isLoading}
-          pagination={false}
-          locale={{ emptyText: 'Keine Noten vorhanden.' }}
-          size="small"
-        />
-      </div>
+      <Row gutter={[24, 24]}>
+        <Col xs={24} md={10}>
+          <Title level={4} style={{ marginTop: 0 }}>
+            Fächer
+          </Title>
+          <Table
+            columns={subjectColumns}
+            dataSource={subjectRows}
+            rowKey="id"
+            loading={isLoading}
+            pagination={false}
+            locale={{ emptyText: 'Keine Fächer vorhanden.' }}
+            size="small"
+            onRow={(record) => ({
+              onClick: () => setUserSelectedSubjectId(record.id),
+              style: {
+                cursor: 'pointer',
+                backgroundColor:
+                  record.id === resolvedSubjectId ? '#e6f4ff' : undefined,
+              },
+            })}
+          />
+        </Col>
+        <Col xs={24} md={14}>
+          <Title level={4} style={{ marginTop: 0 }}>
+            Noten {selectedSubject ? `(${selectedSubject.name})` : ''}
+          </Title>
+          <Table
+            columns={detailColumns}
+            dataSource={detailRows}
+            rowKey="id"
+            loading={isLoading}
+            pagination={false}
+            locale={{ emptyText: 'Keine Noten vorhanden.' }}
+            size="small"
+          />
+        </Col>
+      </Row>
     </Space>
   )
 }
 
 if (import.meta.vitest) {
   const { describe, it, expect, beforeEach } = import.meta.vitest
-  const { render, waitFor } = await import('@testing-library/react')
+  const { render, waitFor, fireEvent, act } =
+    await import('@testing-library/react')
   const { IDBFactory } = await import('fake-indexeddb')
   const { classRepository } = await import('../classes/ClassRepository')
   const { studentRepository } = await import('./StudentRepository')
@@ -231,7 +369,7 @@ if (import.meta.vitest) {
       )
     })
 
-    it('renders student details and grade rows', async () => {
+    it('renders subject list and detail grades', async () => {
       const newClass = await classRepository.create({ name: 'Klasse 9B' })
       const student = await studentRepository.create({
         firstName: 'Lina',
@@ -255,7 +393,7 @@ if (import.meta.vitest) {
         grade: createGrade(2.25),
       })
 
-      const { getByText } = render(
+      const { getByText, getAllByText } = render(
         <StudentGradesPage classId={newClass.id} studentId={student.id} />
       )
 
@@ -264,7 +402,15 @@ if (import.meta.vitest) {
       })
 
       await waitFor(() => {
-        expect(getByText('Mathe')).toBeTruthy()
+        expect(getAllByText('Mathe').length).toBeGreaterThan(0)
+        expect(getAllByText('2,25').length).toBeGreaterThan(1)
+      })
+
+      await act(async () => {
+        fireEvent.click(getAllByText('Mathe')[0])
+      })
+
+      await waitFor(() => {
         expect(getByText('Klausur 1')).toBeTruthy()
         expect(getByText('2-')).toBeTruthy()
       })
