@@ -38,8 +38,8 @@ const requireId = (map: Map<string, string>, key: string, label: string) => {
 }
 
 const seedClasses: SeedClass[] = [
-  { key: '5a', name: 'Klasse 5a' },
-  { key: '9b', name: 'Klasse 9b' },
+  { key: '5a', name: '5a' },
+  { key: '9b', name: '9b' },
 ]
 
 const seedStudents: SeedStudent[] = [
