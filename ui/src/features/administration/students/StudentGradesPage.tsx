@@ -49,7 +49,6 @@ interface StudentGradesPageProps {
 type SubjectGradeRow = {
   id: string
   name: string
-  averageLabel: string
   weightedLabel: string
 }
 
@@ -105,11 +104,6 @@ export const StudentGradesPage: React.FC<StudentGradesPageProps> = ({
   const subjectRows = useMemo<SubjectGradeRow[]>(() => {
     return classSubjects.map((subject) => {
       const entries = studentGradesBySubject.get(subject.id) ?? []
-      const average =
-        entries.length === 0
-          ? null
-          : entries.reduce((sum, entry) => sum + entry.grade, 0) /
-            entries.length
       const weighted =
         entries.length === 0
           ? null
@@ -124,7 +118,6 @@ export const StudentGradesPage: React.FC<StudentGradesPageProps> = ({
       return {
         id: subject.id,
         name: subject.name,
-        averageLabel: formatAverage(average),
         weightedLabel: formatAverage(weighted),
       }
     })
@@ -140,7 +133,7 @@ export const StudentGradesPage: React.FC<StudentGradesPageProps> = ({
       }
     }
     const subjectWithGrades = subjectRows.find(
-      (subject) => subject.averageLabel !== '—'
+      (subject) => subject.weightedLabel !== '—'
     )
     return subjectWithGrades?.id ?? subjectRows[0]?.id ?? ''
   }, [userSelectedSubjectId, subjectRows])
@@ -180,16 +173,10 @@ export const StudentGradesPage: React.FC<StudentGradesPageProps> = ({
       key: 'name',
     },
     {
-      title: 'Durchschnitt',
-      dataIndex: 'averageLabel',
-      key: 'averageLabel',
-      width: 130,
-    },
-    {
-      title: 'Gewichtet',
+      title: 'Durchschnittsnote',
       dataIndex: 'weightedLabel',
       key: 'weightedLabel',
-      width: 110,
+      width: 160,
     },
   ]
 
@@ -403,7 +390,7 @@ if (import.meta.vitest) {
 
       await waitFor(() => {
         expect(getAllByText('Mathe').length).toBeGreaterThan(0)
-        expect(getAllByText('2,25').length).toBeGreaterThan(1)
+        expect(getAllByText('2,25').length).toBeGreaterThan(0)
       })
 
       await act(async () => {
