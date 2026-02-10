@@ -24,11 +24,10 @@ export default defineConfig({
     },
   },
   test: {
-    includeSource: ['src/**/!(*.d).{ts,tsx,js,jsx}'],
+    include: ['src/**/*.{test,spec}.{ts,tsx,js,jsx}'],
     exclude: ['e2e/**', 'node_modules/**'],
     globals: true,
-    environment: 'node',
-    environmentMatchGlobs: [['src/**/*.tsx', 'happy-dom']],
+    environment: 'happy-dom',
     isolate: false,
     coverage: {
       provider: 'v8',

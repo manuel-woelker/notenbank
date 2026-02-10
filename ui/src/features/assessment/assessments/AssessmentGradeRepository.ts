@@ -3,7 +3,7 @@ import {
   AssessmentGrade,
   CreateAssessmentGradeInput,
 } from './AssessmentGradeTypes'
-import { Grade, createGrade } from '../../../shared/Grade'
+import { Grade } from '../../../shared/Grade'
 import { createRepository } from '../../../shared/repositories/createRepository'
 import type { Repository } from '../../../shared/repositories/Repository'
 import {
@@ -69,33 +69,3 @@ export const assessmentGradeRepository: AssessmentGradeRepository =
     schemas: assessmentGradeSchemas,
     onUpgrade: ensureNotenbankStores,
   })
-
-if (import.meta.vitest) {
-  const { describe, it, expect, beforeAll } = import.meta.vitest
-  const { IDBFactory } = await import('fake-indexeddb')
-
-  describe('assessmentGradeRepository', () => {
-    beforeAll(() => {
-      globalThis.indexedDB = new IDBFactory()
-    })
-
-    it('creates and retrieves grades for an assessment', async () => {
-      const created = await assessmentGradeRepository.create({
-        assessmentId: 'assessment-1',
-        studentId: 'student-1',
-        grade: createGrade(2.0),
-        points: 42.5,
-      })
-
-      const found = await assessmentGradeRepository.findById(created.id)
-
-      expect(found).toMatchObject({
-        id: created.id,
-        assessmentId: 'assessment-1',
-        studentId: 'student-1',
-        grade: 2.0,
-        points: 42.5,
-      })
-    })
-  })
-}

@@ -45,29 +45,3 @@ export const subjectRepository: SubjectRepository = createRepository<
   schemas: subjectSchemas,
   onUpgrade: ensureNotenbankStores,
 })
-
-if (import.meta.vitest) {
-  const { describe, it, expect, beforeAll } = import.meta.vitest
-  const { IDBFactory } = await import('fake-indexeddb')
-
-  describe('subjectRepository', () => {
-    beforeAll(() => {
-      globalThis.indexedDB = new IDBFactory()
-    })
-
-    it('creates and retrieves subjects for a class', async () => {
-      const created = await subjectRepository.create({
-        name: 'Mathe',
-        classId: 'class-1',
-      })
-
-      const found = await subjectRepository.findById(created.id)
-
-      expect(found).toMatchObject({
-        id: created.id,
-        name: 'Mathe',
-        classId: 'class-1',
-      })
-    })
-  })
-}

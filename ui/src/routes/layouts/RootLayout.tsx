@@ -33,18 +33,15 @@ import {
   loadSubjects,
   useSubjectStore,
 } from '../../features/administration/subjects/SubjectStore'
-import type { Subject } from '../../features/administration/subjects/SubjectTypes'
 import {
   loadStudents,
   useStudentStore,
 } from '../../features/administration/students/StudentStore'
-import type { Class } from '../../features/administration/classes/ClassTypes'
 import { loadAssessmentGrades } from '../../features/assessment/assessments/AssessmentGradeStore'
 import {
   loadAssessments,
   useAssessmentStore,
 } from '../../features/assessment/assessments/AssessmentStore'
-import type { Assessment } from '../../features/assessment/assessments/AssessmentTypes'
 import {
   buildClassRouteSegment,
   findClassByRouteSegment,
@@ -53,10 +50,7 @@ import {
   buildSubjectRouteSegment,
   findSubjectByRouteSegment,
 } from '../../shared/routes/subjectRoute'
-import {
-  buildAssessmentRouteSegment,
-  findAssessmentByRouteSegment,
-} from '../../shared/routes/assessmentRoute'
+import { buildAssessmentRouteSegment } from '../../shared/routes/assessmentRoute'
 import { findStudentByRouteSegment } from '../../shared/routes/studentRoute'
 import {
   DatabaseMode,
@@ -66,6 +60,7 @@ import {
   ensureExampleDatabaseSeeded,
   resetExampleDatabase,
 } from '../../shared/repositories/exampleDatabaseSeed'
+import { resolveSidebarContext } from './resolveSidebarContext'
 
 const { Header, Sider, Content, Footer } = Layout
 
@@ -79,86 +74,6 @@ const fallbackGitInfo: GitInfo = {
   commitHash: 'dev',
   commitDate: 'Development',
   commitMessage: 'Development build',
-}
-
-type SidebarContext = {
-  showClassTree: boolean
-  selectedKey: string
-  openKeys: string[]
-  currentClass?: Class
-  currentSubject?: Subject
-  currentAssessment?: Assessment
-}
-
-/* 📖 # Why resolve the sidebar context from the URL?
-The navigation tree mirrors routes that are driven by class, subject, and
-assessment identifiers. Deriving the active selection from the URL keeps the
-sidebar aligned with deep links and refreshes without extra state.
-*/
-const resolveSidebarContext = (
-  pathname: string,
-  classes: Class[],
-  subjects: Subject[],
-  assessments: Assessment[]
-): SidebarContext => {
-  const segments = pathname.split('/').filter(Boolean)
-  const showClassTree = segments[0] === 'classes'
-  let currentClass: Class | undefined
-  let currentSubject: Subject | undefined
-  let currentAssessment: Assessment | undefined
-
-  if (showClassTree && segments[1]) {
-    currentClass = findClassByRouteSegment(classes, segments[1])
-    if (currentClass && segments[2] === 'subjects' && segments[3]) {
-      currentSubject = findSubjectByRouteSegment(
-        subjects,
-        currentClass.id,
-        segments[3]
-      )
-      if (currentSubject && segments[4] === 'assessments' && segments[5]) {
-        currentAssessment = findAssessmentByRouteSegment(
-          assessments,
-          currentClass.id,
-          currentSubject.id,
-          segments[5]
-        )
-      }
-    }
-  }
-
-  const selectedKey = currentAssessment
-    ? `assessment:${currentAssessment.id}`
-    : currentSubject
-      ? `subject:${currentSubject.id}`
-      : currentClass
-        ? `class:${currentClass.id}`
-        : showClassTree
-          ? 'classes'
-          : segments[0] === 'content'
-            ? 'content'
-            : segments[0] === 'upload'
-              ? 'upload'
-              : 'dashboard'
-
-  const openKeys: string[] = []
-  if (showClassTree) {
-    openKeys.push('classes')
-    if (currentClass) {
-      openKeys.push(`class:${currentClass.id}`)
-    }
-    if (currentSubject) {
-      openKeys.push(`subject:${currentSubject.id}`)
-    }
-  }
-
-  return {
-    showClassTree,
-    selectedKey,
-    openKeys,
-    currentClass,
-    currentSubject,
-    currentAssessment,
-  }
 }
 
 /* 📖 # Why derive selected menu from URL location instead of state?
@@ -638,108 +553,4 @@ export function RootLayout() {
       </Layout>
     </Layout>
   )
-}
-
-if (import.meta.vitest) {
-  const { describe, it, expect } = import.meta.vitest
-
-  describe('resolveSidebarContext', () => {
-    const timestamp = new Date('2025-01-01T00:00:00.000Z')
-    const classes: Class[] = [
-      {
-        id: 'c-1',
-        name: 'Klasse A',
-        createdAt: timestamp,
-        updatedAt: timestamp,
-      },
-      {
-        id: 'c-2',
-        name: 'Klasse B',
-        createdAt: timestamp,
-        updatedAt: timestamp,
-      },
-    ]
-    const subjects: Subject[] = [
-      {
-        id: 's-1',
-        classId: 'c-1',
-        name: 'Deutsch',
-        createdAt: timestamp,
-        updatedAt: timestamp,
-      },
-    ]
-    const assessments: Assessment[] = [
-      {
-        id: 'a-1',
-        classId: 'c-1',
-        subjectId: 's-1',
-        title: 'Klausur 1',
-        type: 'written',
-        date: timestamp,
-        createdAt: timestamp,
-        updatedAt: timestamp,
-      },
-    ]
-
-    it('selects class context for class routes', () => {
-      const classSegment = buildClassRouteSegment(classes, 'c-1')
-      const context = resolveSidebarContext(
-        `/classes/${classSegment}`,
-        classes,
-        subjects,
-        assessments
-      )
-
-      expect(context.showClassTree).toBe(true)
-      expect(context.selectedKey).toBe('class:c-1')
-      expect(context.openKeys).toEqual(['classes', 'class:c-1'])
-    })
-
-    it('selects subject context for subject routes', () => {
-      const classSegment = buildClassRouteSegment(classes, 'c-1')
-      const subjectSegment = buildSubjectRouteSegment(subjects, 'c-1', 's-1')
-      const context = resolveSidebarContext(
-        `/classes/${classSegment}/subjects/${subjectSegment}`,
-        classes,
-        subjects,
-        assessments
-      )
-
-      expect(context.selectedKey).toBe('subject:s-1')
-      expect(context.openKeys).toEqual(['classes', 'class:c-1', 'subject:s-1'])
-    })
-
-    it('selects assessment context for assessment routes', () => {
-      const classSegment = buildClassRouteSegment(classes, 'c-1')
-      const subjectSegment = buildSubjectRouteSegment(subjects, 'c-1', 's-1')
-      const assessmentSegment = buildAssessmentRouteSegment(
-        assessments,
-        'c-1',
-        's-1',
-        'a-1'
-      )
-      const context = resolveSidebarContext(
-        `/classes/${classSegment}/subjects/${subjectSegment}/assessments/${assessmentSegment}`,
-        classes,
-        subjects,
-        assessments
-      )
-
-      expect(context.selectedKey).toBe('assessment:a-1')
-      expect(context.openKeys).toEqual(['classes', 'class:c-1', 'subject:s-1'])
-    })
-
-    it('falls back to top-level selection outside class routes', () => {
-      const context = resolveSidebarContext(
-        '/content',
-        classes,
-        subjects,
-        assessments
-      )
-
-      expect(context.showClassTree).toBe(false)
-      expect(context.selectedKey).toBe('content')
-      expect(context.openKeys).toEqual([])
-    })
-  })
 }
