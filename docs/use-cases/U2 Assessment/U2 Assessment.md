@@ -47,6 +47,10 @@ As a teacher, I want the system to calculate a student's final grade per subject
 **Preview calculation**
 As a teacher, I want to preview how the final grade is calculated from written and oral grades, so that I can verify correctness.
 
+### Scenario: Grading Curve with Points and Errors
+
+A teacher creates an assessment that uses both points and errors to derive grades. The teacher defines the points/errors thresholds for grade 1 and grade 4. The system computes the grading curve as a linear interpolation between these two anchor grades and applies it to each student's points/errors to determine their grade.
+
 ### Reporting
 
 **View grade overview per class**
