@@ -34,7 +34,10 @@ import {
   useSubjectStore,
 } from '../../features/administration/subjects/SubjectStore'
 import type { Subject } from '../../features/administration/subjects/SubjectTypes'
-import { loadStudents } from '../../features/administration/students/StudentStore'
+import {
+  loadStudents,
+  useStudentStore,
+} from '../../features/administration/students/StudentStore'
 import type { Class } from '../../features/administration/classes/ClassTypes'
 import { loadAssessmentGrades } from '../../features/assessment/assessments/AssessmentGradeStore'
 import {
@@ -54,6 +57,7 @@ import {
   buildAssessmentRouteSegment,
   findAssessmentByRouteSegment,
 } from '../../shared/routes/assessmentRoute'
+import { findStudentByRouteSegment } from '../../shared/routes/studentRoute'
 import {
   DatabaseMode,
   useDatabaseStore,
@@ -172,6 +176,7 @@ export function RootLayout() {
   const location = useLocation()
   const search = useSearch({ from: '__root__' }) as { db?: string }
   const { classes } = useClassStore()
+  const { students } = useStudentStore()
   const { subjects } = useSubjectStore()
   const { assessments } = useAssessmentStore()
   const { isExample, dbName, setDatabaseMode } = useDatabaseStore()
@@ -192,6 +197,9 @@ export function RootLayout() {
     if (segments[0] === 'classes') {
       if (segments.length === 1) return '/'
       if (segments.length === 2) return '/classes'
+      if (segments[2] === 'students') {
+        return `/classes/${segments[1]}`
+      }
       if (segments[2] === 'subjects') {
         if (segments.length === 4) {
           return `/classes/${segments[1]}`
@@ -422,6 +430,19 @@ export function RootLayout() {
           items.push({ title: <span>{classLabel}</span> })
         }
       }
+      if (parts[2] === 'students') {
+        items.push({ title: <span>Schüler</span> })
+        if (parts.length >= 4) {
+          const studentKey = parts[3]
+          const studentMatch = classMatch
+            ? findStudentByRouteSegment(students, classMatch.id, studentKey)
+            : undefined
+          const studentLabel = studentMatch
+            ? `${studentMatch.firstName} ${studentMatch.lastName}`
+            : decodeURIComponent(studentKey)
+          items.push({ title: <span>{studentLabel}</span> })
+        }
+      }
       if (parts[2] === 'subjects') {
         items.push({ title: <span>Fächer</span> })
         if (parts.length >= 4) {
@@ -443,7 +464,7 @@ export function RootLayout() {
       return [clickableCrumb('Hochladen', '/upload')]
     }
     return [clickableCrumb('Übersicht', '/')]
-  }, [location.pathname, navigate, classes, subjects])
+  }, [location.pathname, navigate, classes, subjects, students])
 
   const handleDatabaseToggle = async (checked: boolean) => {
     const nextMode: DatabaseMode = checked ? 'example' : 'primary'

@@ -9,6 +9,7 @@ import { SubjectTable } from '../subjects/SubjectTable'
 import { useDatabaseStore } from '../../../shared/store/databaseStore'
 import { buildClassRouteSegment } from '../../../shared/routes/classRoute'
 import { buildSubjectRouteSegment } from '../../../shared/routes/subjectRoute'
+import { buildStudentRouteSegment } from '../../../shared/routes/studentRoute'
 
 const { Title, Text } = Typography
 
@@ -48,6 +49,19 @@ export const ClassOverview: React.FC<ClassOverviewProps> = ({ classId }) => {
     return isExample
       ? `#/classes/${classRouteSegment}/subjects/${subjectSegment}?db=example`
       : `#/classes/${classRouteSegment}/subjects/${subjectSegment}`
+  }
+  const getStudentHref = (studentId: string) => {
+    if (!classRouteSegment) {
+      return isExample ? '#/classes?db=example' : '#/classes'
+    }
+    const studentSegment = buildStudentRouteSegment(
+      students,
+      classId,
+      studentId
+    )
+    return isExample
+      ? `#/classes/${classRouteSegment}/students/${studentSegment}?db=example`
+      : `#/classes/${classRouteSegment}/students/${studentSegment}`
   }
   const classStudents = useMemo(
     () => students.filter((student) => student.classId === classId),
@@ -117,6 +131,21 @@ export const ClassOverview: React.FC<ClassOverviewProps> = ({ classId }) => {
                 onCreateStudent={async (input) => {
                   await createStudent({ ...input, classId })
                 }}
+                onSelectStudent={(studentId) => {
+                  if (!classRouteSegment) {
+                    return
+                  }
+                  const studentSegment = buildStudentRouteSegment(
+                    students,
+                    classId,
+                    studentId
+                  )
+                  void navigate({
+                    to: `/classes/${classRouteSegment}/students/${studentSegment}`,
+                    search: (prev) => prev,
+                  })
+                }}
+                getStudentHref={getStudentHref}
               />
             </Card>
           </Col>

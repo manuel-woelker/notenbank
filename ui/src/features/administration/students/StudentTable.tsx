@@ -22,6 +22,8 @@ interface StudentTableProps {
     firstName: string
     lastName: string
   }) => Promise<void>
+  onSelectStudent?: (studentId: string) => void
+  getStudentHref?: (studentId: string) => string
 }
 
 /**
@@ -31,6 +33,8 @@ export const StudentTable: React.FC<StudentTableProps> = ({
   students,
   loading,
   onCreateStudent,
+  onSelectStudent,
+  getStudentHref,
 }) => {
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
@@ -59,6 +63,13 @@ export const StudentTable: React.FC<StudentTableProps> = ({
     }
   }
 
+  const shouldHandleNavigation = (event: React.MouseEvent) =>
+    !event.metaKey &&
+    !event.ctrlKey &&
+    !event.shiftKey &&
+    event.button !== 1 &&
+    !event.defaultPrevented
+
   const columns: ColumnsType<StudentRow> = [
     {
       title: 'Vorname',
@@ -76,7 +87,24 @@ export const StudentTable: React.FC<StudentTableProps> = ({
             />
           )
         }
-        return value
+        if (!getStudentHref) {
+          return value
+        }
+        const href = getStudentHref(record.id)
+        return (
+          <a
+            href={href}
+            onClick={(event) => {
+              if (!shouldHandleNavigation(event)) {
+                return
+              }
+              event.preventDefault()
+              onSelectStudent?.(record.id)
+            }}
+          >
+            {value}
+          </a>
+        )
       },
     },
     {
@@ -95,7 +123,24 @@ export const StudentTable: React.FC<StudentTableProps> = ({
             />
           )
         }
-        return value
+        if (!getStudentHref) {
+          return value
+        }
+        const href = getStudentHref(record.id)
+        return (
+          <a
+            href={href}
+            onClick={(event) => {
+              if (!shouldHandleNavigation(event)) {
+                return
+              }
+              event.preventDefault()
+              onSelectStudent?.(record.id)
+            }}
+          >
+            {value}
+          </a>
+        )
       },
     },
     {
@@ -131,6 +176,20 @@ export const StudentTable: React.FC<StudentTableProps> = ({
       dataSource={dataSource}
       rowKey="id"
       loading={loading}
+      onRow={(record) => {
+        if ('isNew' in record) {
+          return {}
+        }
+        return {
+          onClick: (event) => {
+            if (!shouldHandleNavigation(event)) {
+              return
+            }
+            onSelectStudent?.(record.id)
+          },
+          style: { cursor: 'pointer' },
+        }
+      }}
       locale={{
         emptyText:
           'Keine Schüler gefunden. Oben einen neuen Schüler hinzufügen.',
@@ -194,6 +253,52 @@ if (import.meta.vitest) {
         firstName: 'Tara',
         lastName: 'Student',
       })
+    })
+
+    it('calls onSelectStudent when a student row is clicked', async () => {
+      if (!window.matchMedia) {
+        window.matchMedia = () =>
+          ({
+            matches: false,
+            media: '',
+            onchange: null,
+            addListener: () => {},
+            removeListener: () => {},
+            addEventListener: () => {},
+            removeEventListener: () => {},
+            dispatchEvent: () => false,
+          }) as unknown as MediaQueryList
+      }
+      window.getComputedStyle = () =>
+        ({
+          getPropertyValue: () => '',
+        }) as unknown as CSSStyleDeclaration
+
+      const onSelectStudent = vi.fn()
+
+      const { getByText } = render(
+        <StudentTable
+          students={[
+            {
+              id: 'student-1',
+              firstName: 'Lina',
+              lastName: 'Meyer',
+              classId: 'class-1',
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
+          ]}
+          loading={false}
+          onCreateStudent={vi.fn()}
+          onSelectStudent={onSelectStudent}
+        />
+      )
+
+      await act(async () => {
+        fireEvent.click(getByText('Lina'))
+      })
+
+      expect(onSelectStudent).toHaveBeenCalledWith('student-1')
     })
   })
 }
