@@ -214,7 +214,7 @@ const buildAssessmentsForSubject = (
       key: `${subject.key}-written-${i + 1}`,
       classKey: subject.classKey,
       subjectKey: subject.key,
-      title: `${subject.name} - Schriftlich ${i + 1}`,
+      title: `Schriftlich ${i + 1}`,
       type: 'written',
       date: new Date(baseDate.getTime() + i * 14 * 24 * 60 * 60 * 1000),
     })
@@ -225,7 +225,7 @@ const buildAssessmentsForSubject = (
       key: `${subject.key}-oral-${i + 1}`,
       classKey: subject.classKey,
       subjectKey: subject.key,
-      title: `${subject.name} - Mündliche Note ${i + 1}`,
+      title: `Mündliche Note ${i + 1}`,
       type: 'oral',
       date: new Date(
         baseDate.getTime() + (writtenCount + i) * 14 * 24 * 60 * 60 * 1000
