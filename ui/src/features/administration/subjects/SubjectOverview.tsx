@@ -116,7 +116,7 @@ export const SubjectOverview: React.FC<SubjectOverviewProps> = ({
         <Text type="secondary">Fach nicht gefunden.</Text>
       ) : null}
 
-      <div>
+      <div data-tour="subject-assessments">
         <Title level={4} style={{ marginTop: 0 }}>
           Leistungsfeststellungen
         </Title>

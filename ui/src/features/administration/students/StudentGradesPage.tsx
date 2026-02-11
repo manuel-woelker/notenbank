@@ -242,37 +242,41 @@ export const StudentGradesPage: React.FC<StudentGradesPageProps> = ({
           <Title level={4} style={{ marginTop: 0 }}>
             Fächer
           </Title>
-          <Table
-            columns={subjectColumns}
-            dataSource={subjectRows}
-            rowKey="id"
-            loading={isLoading}
-            pagination={false}
-            locale={{ emptyText: 'Keine Fächer vorhanden.' }}
-            size="small"
-            onRow={(record) => ({
-              onClick: () => setUserSelectedSubjectId(record.id),
-              style: {
-                cursor: 'pointer',
-                backgroundColor:
-                  record.id === resolvedSubjectId ? '#e6f4ff' : undefined,
-              },
-            })}
-          />
+          <div data-tour="student-subjects">
+            <Table
+              columns={subjectColumns}
+              dataSource={subjectRows}
+              rowKey="id"
+              loading={isLoading}
+              pagination={false}
+              locale={{ emptyText: 'Keine Fächer vorhanden.' }}
+              size="small"
+              onRow={(record) => ({
+                onClick: () => setUserSelectedSubjectId(record.id),
+                style: {
+                  cursor: 'pointer',
+                  backgroundColor:
+                    record.id === resolvedSubjectId ? '#e6f4ff' : undefined,
+                },
+              })}
+            />
+          </div>
         </Col>
         <Col xs={24} md={14}>
           <Title level={4} style={{ marginTop: 0 }}>
             Noten {selectedSubject ? `(${selectedSubject.name})` : ''}
           </Title>
-          <Table
-            columns={detailColumns}
-            dataSource={detailRows}
-            rowKey="id"
-            loading={isLoading}
-            pagination={false}
-            locale={{ emptyText: 'Keine Noten vorhanden.' }}
-            size="small"
-          />
+          <div data-tour="student-grades">
+            <Table
+              columns={detailColumns}
+              dataSource={detailRows}
+              rowKey="id"
+              loading={isLoading}
+              pagination={false}
+              locale={{ emptyText: 'Keine Noten vorhanden.' }}
+              size="small"
+            />
+          </div>
         </Col>
       </Row>
     </Space>

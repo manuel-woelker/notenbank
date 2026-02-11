@@ -137,7 +137,7 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
       ) : null}
 
       {selectedAssessment ? (
-        <Card size="small" title="Notenlinie">
+        <Card size="small" title="Notenlinie" data-tour="assessment-curve">
           <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
             <Space align="center">
               <Switch
@@ -212,17 +212,19 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
       ) : null}
 
       {selectedAssessment ? (
-        <AssessmentGradeTable
-          students={classStudents}
-          results={results}
-          gradingCurve={gradingCurve}
-          onGradeChange={(studentId, grade) => {
-            void setAssessmentGrade(assessmentId, studentId, grade)
-          }}
-          onScoreChange={(studentId, result) => {
-            void setAssessmentResult(assessmentId, studentId, result)
-          }}
-        />
+        <div data-tour="assessment-grades">
+          <AssessmentGradeTable
+            students={classStudents}
+            results={results}
+            gradingCurve={gradingCurve}
+            onGradeChange={(studentId, grade) => {
+              void setAssessmentGrade(assessmentId, studentId, grade)
+            }}
+            onScoreChange={(studentId, result) => {
+              void setAssessmentResult(assessmentId, studentId, result)
+            }}
+          />
+        </div>
       ) : null}
     </Space>
   )

@@ -98,7 +98,7 @@ export const ClassOverview: React.FC<ClassOverviewProps> = ({ classId }) => {
       {selectedClass ? (
         <Row gutter={[24, 24]}>
           <Col xs={24} md={8}>
-            <Card title="Fächer" size="small">
+            <Card title="Fächer" size="small" data-tour="class-subjects">
               <SubjectTable
                 subjects={classSubjects}
                 loading={subjectsAreLoading}
@@ -124,7 +124,7 @@ export const ClassOverview: React.FC<ClassOverviewProps> = ({ classId }) => {
             </Card>
           </Col>
           <Col xs={24} md={16}>
-            <Card title="Schüler" size="small">
+            <Card title="Schüler" size="small" data-tour="class-students">
               <StudentTable
                 students={classStudents}
                 loading={isLoading}

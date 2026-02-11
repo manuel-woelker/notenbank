@@ -35,21 +35,23 @@ export const ClassList: React.FC = () => {
           </Title>
         </div>
 
-        <ClassTable
-          classes={classes}
-          loading={loading}
-          onSelectClass={(classId) => {
-            const classSegment = buildClassRouteSegment(classes, classId)
-            navigate({
-              to: `/classes/${classSegment}`,
-              search: (prev) => prev,
-            })
-          }}
-          onCreateClass={async (name) => {
-            await createClass({ name })
-          }}
-          getClassHref={getClassHref}
-        />
+        <div data-tour="class-table">
+          <ClassTable
+            classes={classes}
+            loading={loading}
+            onSelectClass={(classId) => {
+              const classSegment = buildClassRouteSegment(classes, classId)
+              navigate({
+                to: `/classes/${classSegment}`,
+                search: (prev) => prev,
+              })
+            }}
+            onCreateClass={async (name) => {
+              await createClass({ name })
+            }}
+            getClassHref={getClassHref}
+          />
+        </div>
       </Space>
     </div>
   )

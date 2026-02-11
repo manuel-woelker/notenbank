@@ -6,6 +6,7 @@ import {
   Menu,
   Switch,
   Tag,
+  Tour,
   theme,
   type MenuProps,
 } from 'antd'
@@ -51,7 +52,10 @@ import {
   findSubjectByRouteSegment,
 } from '../../shared/routes/subjectRoute'
 import { buildAssessmentRouteSegment } from '../../shared/routes/assessmentRoute'
-import { findStudentByRouteSegment } from '../../shared/routes/studentRoute'
+import {
+  buildStudentRouteSegment,
+  findStudentByRouteSegment,
+} from '../../shared/routes/studentRoute'
 import {
   DatabaseMode,
   useDatabaseStore,
@@ -61,6 +65,10 @@ import {
   resetExampleDatabase,
 } from '../../shared/repositories/exampleDatabaseSeed'
 import { resolveSidebarContext } from './resolveSidebarContext'
+import {
+  buildProductTourSteps,
+  type ProductTourStep,
+} from '../../shared/onboarding/productTour'
 
 const { Header, Sider, Content, Footer } = Layout
 
@@ -87,6 +95,8 @@ export function RootLayout() {
   const [collapsed, setCollapsed] = useState(false)
   const [dbSwitching, setDbSwitching] = useState(false)
   const [gitInfo, setGitInfo] = useState<GitInfo>(fallbackGitInfo)
+  const [tourOpen, setTourOpen] = useState(false)
+  const [tourCurrent, setTourCurrent] = useState(0)
   const navigate = useNavigate()
   const location = useLocation()
   const search = useSearch({ from: '__root__' }) as { db?: string }
@@ -187,6 +197,85 @@ export function RootLayout() {
       resolveSidebarContext(location.pathname, classes, subjects, assessments),
     [location.pathname, classes, subjects, assessments]
   )
+
+  const tourRoutes = useMemo(() => {
+    const classList = '/classes'
+    const primaryClass = classes[0]
+    const classSegment = primaryClass
+      ? buildClassRouteSegment(classes, primaryClass.id)
+      : undefined
+    const classOverview = classSegment ? `/classes/${classSegment}` : classList
+    const classSubjects = primaryClass
+      ? subjects.filter((subject) => subject.classId === primaryClass.id)
+      : []
+    const primarySubject = classSubjects[0]
+    const subjectSegment =
+      primaryClass && primarySubject
+        ? buildSubjectRouteSegment(subjects, primaryClass.id, primarySubject.id)
+        : undefined
+    const subjectOverview =
+      classSegment && subjectSegment
+        ? `/classes/${classSegment}/subjects/${subjectSegment}`
+        : classOverview
+    const subjectAssessments =
+      primaryClass && primarySubject
+        ? assessments.filter(
+            (assessment) =>
+              assessment.classId === primaryClass.id &&
+              assessment.subjectId === primarySubject.id
+          )
+        : []
+    const primaryAssessment = subjectAssessments[0]
+    const assessmentSegment =
+      primaryClass && primarySubject && primaryAssessment
+        ? buildAssessmentRouteSegment(
+            assessments,
+            primaryClass.id,
+            primarySubject.id,
+            primaryAssessment.id
+          )
+        : undefined
+    const assessmentRoute =
+      classSegment && subjectSegment && assessmentSegment
+        ? `/classes/${classSegment}/subjects/${subjectSegment}/assessments/${assessmentSegment}`
+        : subjectOverview
+    const classStudents = primaryClass
+      ? students.filter((student) => student.classId === primaryClass.id)
+      : []
+    const primaryStudent = classStudents[0]
+    const studentSegment =
+      primaryClass && primaryStudent
+        ? buildStudentRouteSegment(students, primaryClass.id, primaryStudent.id)
+        : undefined
+    const studentRoute =
+      classSegment && studentSegment
+        ? `/classes/${classSegment}/students/${studentSegment}`
+        : classOverview
+
+    return {
+      classList,
+      classOverview,
+      subjectOverview,
+      assessmentRoute,
+      studentRoute,
+    }
+  }, [classes, subjects, assessments, students])
+
+  const tourSteps = useMemo<ProductTourStep[]>(
+    () => buildProductTourSteps(tourRoutes),
+    [tourRoutes]
+  )
+
+  useEffect(() => {
+    if (!tourOpen) {
+      return
+    }
+    const stepRoute = tourSteps[tourCurrent]?.route
+    if (!stepRoute || location.pathname === stepRoute) {
+      return
+    }
+    navigate({ to: stepRoute, search: (prev) => prev })
+  }, [location.pathname, navigate, tourCurrent, tourOpen, tourSteps])
 
   const menuItems = useMemo<MenuProps['items']>(() => {
     const classChildren = sidebarContext.showClassTree
@@ -292,7 +381,7 @@ export function RootLayout() {
       {
         key: 'classes',
         icon: <TeamOutlined />,
-        label: 'Klassen',
+        label: <span data-tour="menu-classes">Klassen</span>,
         ...(hasClassChildren
           ? {
               onTitleClick: () =>
@@ -439,8 +528,44 @@ export function RootLayout() {
     }
   }
 
+  /* 📖 # Why force the example database when starting the tour?
+  The onboarding walkthrough assumes stable demo data so each step has
+  predictable content to point at. Switching to the example database keeps the
+  tour consistent without touching the user's primary data.
+  */
+  const handleStartTour = async () => {
+    if (!isExample) {
+      await handleDatabaseToggle(true)
+    } else {
+      await ensureExampleDatabaseSeeded()
+      await Promise.all([
+        loadClasses(),
+        loadStudents(),
+        loadSubjects(),
+        loadAssessments(),
+        loadAssessmentGrades(),
+      ])
+    }
+    setTourCurrent(0)
+    setTourOpen(true)
+  }
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
+      <Tour
+        open={tourOpen}
+        current={tourCurrent}
+        onChange={(current) => setTourCurrent(current)}
+        onClose={() => {
+          setTourOpen(false)
+          setTourCurrent(0)
+        }}
+        onFinish={() => {
+          setTourOpen(false)
+          setTourCurrent(0)
+        }}
+        steps={tourSteps}
+      />
       <Sider trigger={null} collapsible collapsed={collapsed}>
         <div
           style={{
@@ -511,26 +636,39 @@ export function RootLayout() {
               </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <Tag color={isExample ? 'gold' : 'blue'}>DB: {dbName}</Tag>
-              {isExample ? (
-                <Button
-                  size="small"
+              <div
+                data-tour="db-switch"
+                style={{ display: 'flex', alignItems: 'center', gap: 10 }}
+              >
+                <Tag color={isExample ? 'gold' : 'blue'}>DB: {dbName}</Tag>
+                {isExample ? (
+                  <Button
+                    size="small"
+                    disabled={dbSwitching}
+                    data-tour="example-reset"
+                    onClick={() => void handleExampleReset()}
+                  >
+                    Tabula Rasa
+                  </Button>
+                ) : null}
+                <span style={{ fontSize: 14 }}>Beispiel-Datenbank</span>
+                <Switch
+                  checked={isExample}
+                  checkedChildren="An"
+                  unCheckedChildren="Aus"
                   disabled={dbSwitching}
-                  onClick={() => void handleExampleReset()}
-                >
-                  Tabula Rasa
-                </Button>
-              ) : null}
-              <span style={{ fontSize: 14 }}>Beispiel-Datenbank</span>
-              <Switch
-                checked={isExample}
-                checkedChildren="An"
-                unCheckedChildren="Aus"
-                disabled={dbSwitching}
-                onChange={(checked) => {
-                  void handleDatabaseToggle(checked)
-                }}
-              />
+                  onChange={(checked) => {
+                    void handleDatabaseToggle(checked)
+                  }}
+                />
+              </div>
+              <Button
+                size="small"
+                type="default"
+                onClick={() => void handleStartTour()}
+              >
+                Tour starten
+              </Button>
             </div>
           </div>
         </Header>
