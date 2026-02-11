@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import {
   Card,
   Col,
@@ -19,6 +19,7 @@ import { AssessmentGradeTable } from './AssessmentGradeTable'
 import { useAssessmentGradeStore } from './AssessmentGradeStore'
 import { Grade, gradeToString } from '../../../shared/Grade'
 import { GradingCurveConfig, generateGradingTable } from './GradingCurve'
+import { trackAssessmentUsage } from '../../dashboard/recentAssessments/RecentAssessmentStore'
 
 const { Title, Text } = Typography
 
@@ -53,6 +54,19 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
   const selectedAssessment = assessments.find(
     (item) => item.id === assessmentId
   )
+
+  useEffect(() => {
+    if (selectedAssessment && !assessmentsLoading) {
+      void trackAssessmentUsage({
+        assessmentId: selectedAssessment.id,
+        classId: selectedAssessment.classId,
+        subjectId: selectedAssessment.subjectId,
+        title: selectedAssessment.title,
+        type: selectedAssessment.type,
+        date: selectedAssessment.date,
+      })
+    }
+  }, [selectedAssessment, assessmentsLoading])
 
   const classStudents = useMemo(
     () => students.filter((student) => student.classId === classId),

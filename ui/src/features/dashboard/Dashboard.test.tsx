@@ -1,7 +1,16 @@
 // @vitest-environment happy-dom
-import { render } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { render, waitFor } from '@testing-library/react'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { IDBFactory } from 'fake-indexeddb'
 import { Dashboard } from './Dashboard'
+
+vi.mock('@tanstack/react-router', () => ({
+  Link: ({ children, ...props }: { children: React.ReactNode }) => (
+    <a {...props}>{children}</a>
+  ),
+  useNavigate: () => vi.fn(),
+  useSearch: () => ({}),
+}))
 
 if (!window.matchMedia) {
   window.matchMedia = () =>
@@ -22,8 +31,14 @@ window.getComputedStyle = () =>
   }) as unknown as CSSStyleDeclaration
 
 describe('Dashboard', () => {
-  it('renders the welcome heading', () => {
+  beforeEach(() => {
+    globalThis.indexedDB = new IDBFactory()
+  })
+
+  it('renders the welcome heading', async () => {
     const { getByText } = render(<Dashboard />)
-    expect(getByText('Willkommen bei Notenbank')).toBeTruthy()
+    await waitFor(() => {
+      expect(getByText('Willkommen bei Notenbank')).toBeTruthy()
+    })
   })
 })
