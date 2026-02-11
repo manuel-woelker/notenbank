@@ -1,13 +1,24 @@
 import React, { useMemo } from 'react'
-import { Card, InputNumber, Select, Space, Switch, Typography } from 'antd'
+import {
+  Card,
+  Col,
+  InputNumber,
+  Row,
+  Select,
+  Space,
+  Switch,
+  Table,
+  Typography,
+} from 'antd'
+import type { ColumnsType } from 'antd/es/table'
 import { useClassStore } from '../../administration/classes/ClassStore'
 import { useStudentStore } from '../../administration/students/StudentStore'
 import { useSubjectStore } from '../../administration/subjects/SubjectStore'
 import { useAssessmentStore } from './AssessmentStore'
 import { AssessmentGradeTable } from './AssessmentGradeTable'
 import { useAssessmentGradeStore } from './AssessmentGradeStore'
-import { Grade } from '../../../shared/Grade'
-import { GradingCurveConfig } from './GradingCurve'
+import { Grade, gradeToString } from '../../../shared/Grade'
+import { GradingCurveConfig, generateGradingTable } from './GradingCurve'
 
 const { Title, Text } = Typography
 
@@ -86,6 +97,54 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
 
   const gradingCurve = selectedAssessment?.gradingCurve ?? null
   const gradingCurveEnabled = Boolean(gradingCurve)
+  const gradingTableData = useMemo(() => {
+    if (!gradingCurve) {
+      return []
+    }
+    const table =
+      gradingCurve.mode === 'errors'
+        ? generateGradingTable({
+            grade1Value: -gradingCurve.grade1Value,
+            grade4Value: -gradingCurve.grade4Value,
+          }).map((entry) => ({
+            grade: entry.grade,
+            threshold: -entry.minimumPoints,
+          }))
+        : generateGradingTable(gradingCurve).map((entry) => ({
+            grade: entry.grade,
+            threshold: entry.minimumPoints,
+          }))
+
+    return table.map((entry) => ({
+      key: `${entry.grade}`,
+      ...entry,
+    }))
+  }, [gradingCurve])
+
+  const formatThresholdValue = (value: number) =>
+    value.toLocaleString('de-DE', {
+      minimumFractionDigits: value % 1 === 0 ? 0 : 1,
+      maximumFractionDigits: 1,
+    })
+
+  const gradingTableColumns: ColumnsType<{
+    grade: Grade
+    threshold: number
+  }> = [
+    {
+      title: 'Note',
+      dataIndex: 'grade',
+      key: 'grade',
+      render: (value: Grade) => gradeToString(value),
+      width: 120,
+    },
+    {
+      title: gradingCurve?.mode === 'errors' ? 'Max. Fehler' : 'Min. Punkte',
+      dataIndex: 'threshold',
+      key: 'threshold',
+      render: (value: number) => formatThresholdValue(value),
+    },
+  ]
 
   const ensureGradingCurve = (updates: Partial<GradingCurveConfig>) => {
     if (!selectedAssessment) {
@@ -137,94 +196,122 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
       ) : null}
 
       {selectedAssessment ? (
-        <Card size="small" title="Notenlinie" data-tour="assessment-curve">
-          <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
-            <Space align="center">
-              <Switch
-                checked={gradingCurveEnabled}
-                onChange={(checked) => {
-                  if (!selectedAssessment) {
-                    return
-                  }
-                  if (!checked) {
-                    void updateAssessment(selectedAssessment.id, {
-                      gradingCurve: null,
-                    })
-                    return
-                  }
-                  ensureGradingCurve({})
+        <Row gutter={[16, 16]} align="top">
+          <Col xs={24} lg={14}>
+            <div data-tour="assessment-grades">
+              <AssessmentGradeTable
+                students={classStudents}
+                results={results}
+                gradingCurve={gradingCurve}
+                onGradeChange={(studentId, grade) => {
+                  void setAssessmentGrade(assessmentId, studentId, grade)
+                }}
+                onScoreChange={(studentId, result) => {
+                  void setAssessmentResult(assessmentId, studentId, result)
                 }}
               />
-              <Text>Notenlinie verwenden</Text>
+            </div>
+          </Col>
+          <Col xs={24} lg={10}>
+            <Space
+              orientation="vertical"
+              size="middle"
+              style={{ width: '100%' }}
+            >
+              <Card
+                size="small"
+                title="Notenlinie"
+                data-tour="assessment-curve"
+              >
+                <Space
+                  orientation="vertical"
+                  size="middle"
+                  style={{ width: '100%' }}
+                >
+                  <Space align="center">
+                    <Switch
+                      checked={gradingCurveEnabled}
+                      onChange={(checked) => {
+                        if (!selectedAssessment) {
+                          return
+                        }
+                        if (!checked) {
+                          void updateAssessment(selectedAssessment.id, {
+                            gradingCurve: null,
+                          })
+                          return
+                        }
+                        ensureGradingCurve({})
+                      }}
+                    />
+                    <Text>Notenlinie verwenden</Text>
+                  </Space>
+                  <Space wrap>
+                    <Space orientation="vertical" size={4}>
+                      <Text type="secondary">Auswertung</Text>
+                      <Select
+                        placeholder="Auswertung"
+                        options={[
+                          { label: 'Punkte', value: 'points' },
+                          { label: 'Fehler', value: 'errors' },
+                        ]}
+                        value={gradingCurve?.mode}
+                        onChange={(value) => {
+                          ensureGradingCurve({ mode: value })
+                        }}
+                        disabled={!gradingCurveEnabled}
+                        style={{ minWidth: 160 }}
+                      />
+                    </Space>
+                    <Space orientation="vertical" size={4}>
+                      <Text type="secondary">Note 1</Text>
+                      <InputNumber
+                        min={0}
+                        step={0.5}
+                        placeholder="Note 1"
+                        value={gradingCurve?.grade1Value ?? null}
+                        onChange={(value) => {
+                          if (typeof value === 'number') {
+                            ensureGradingCurve({ grade1Value: value })
+                          }
+                        }}
+                        disabled={!gradingCurveEnabled}
+                        aria-label="Wert für Note 1"
+                      />
+                    </Space>
+                    <Space orientation="vertical" size={4}>
+                      <Text type="secondary">Note 4</Text>
+                      <InputNumber
+                        min={0}
+                        step={0.5}
+                        placeholder="Note 4"
+                        value={gradingCurve?.grade4Value ?? null}
+                        onChange={(value) => {
+                          if (typeof value === 'number') {
+                            ensureGradingCurve({ grade4Value: value })
+                          }
+                        }}
+                        disabled={!gradingCurveEnabled}
+                        aria-label="Wert für Note 4"
+                      />
+                    </Space>
+                  </Space>
+                </Space>
+              </Card>
+              {gradingCurveEnabled ? (
+                <Card size="small" title="Notentabelle">
+                  <Table
+                    columns={gradingTableColumns}
+                    dataSource={gradingTableData}
+                    rowKey="key"
+                    pagination={false}
+                    size="small"
+                  />
+                </Card>
+              ) : null}
             </Space>
-            <Space wrap>
-              <Space orientation="vertical" size={4}>
-                <Text type="secondary">Auswertung</Text>
-                <Select
-                  placeholder="Auswertung"
-                  options={[
-                    { label: 'Punkte', value: 'points' },
-                    { label: 'Fehler', value: 'errors' },
-                  ]}
-                  value={gradingCurve?.mode}
-                  onChange={(value) => {
-                    ensureGradingCurve({ mode: value })
-                  }}
-                  disabled={!gradingCurveEnabled}
-                  style={{ minWidth: 160 }}
-                />
-              </Space>
-              <Space orientation="vertical" size={4}>
-                <Text type="secondary">Note 1</Text>
-                <InputNumber
-                  min={0}
-                  step={0.5}
-                  placeholder="Note 1"
-                  value={gradingCurve?.grade1Value ?? null}
-                  onChange={(value) => {
-                    if (typeof value === 'number') {
-                      ensureGradingCurve({ grade1Value: value })
-                    }
-                  }}
-                  disabled={!gradingCurveEnabled}
-                  aria-label="Wert für Note 1"
-                />
-              </Space>
-              <Space orientation="vertical" size={4}>
-                <Text type="secondary">Note 4</Text>
-                <InputNumber
-                  min={0}
-                  step={0.5}
-                  placeholder="Note 4"
-                  value={gradingCurve?.grade4Value ?? null}
-                  onChange={(value) => {
-                    if (typeof value === 'number') {
-                      ensureGradingCurve({ grade4Value: value })
-                    }
-                  }}
-                  disabled={!gradingCurveEnabled}
-                  aria-label="Wert für Note 4"
-                />
-              </Space>
-            </Space>
-          </Space>
-        </Card>
-      ) : null}
-
-      {selectedAssessment ? (
-        <div data-tour="assessment-grades">
-          <AssessmentGradeTable
-            students={classStudents}
-            results={results}
-            gradingCurve={gradingCurve}
-            onGradeChange={(studentId, grade) => {
-              void setAssessmentGrade(assessmentId, studentId, grade)
-            }}
-            onScoreChange={(studentId, result) => {
-              void setAssessmentResult(assessmentId, studentId, result)
-            }}
-          />
-        </div>
+          </Col>
+        </Row>
       ) : null}
     </Space>
   )
