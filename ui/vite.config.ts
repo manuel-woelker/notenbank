@@ -44,10 +44,10 @@ export default defineConfig({
       // These thresholds should be gradually increased as test coverage improves.
       // Target: 80% for all metrics once the codebase matures.
       thresholds: {
-        lines: 40,
-        functions: 40,
-        branches: 20,
-        statements: 40,
+        lines: 55,
+        functions: 55,
+        branches: 35,
+        statements: 55,
       },
     },
   },
