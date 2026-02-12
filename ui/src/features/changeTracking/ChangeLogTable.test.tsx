@@ -88,7 +88,7 @@ describe('ChangeLogTable', () => {
 
   it('calls onViewDetails when Details button is clicked', () => {
     const onViewDetails = vi.fn()
-    const { getAllByText } = render(
+    const { container } = render(
       <ChangeLogTable
         changeLogs={mockChangeLogs}
         loading={false}
@@ -96,7 +96,9 @@ describe('ChangeLogTable', () => {
       />
     )
 
-    const detailsButtons = getAllByText('Details')
+    // Use container query to find the button within the rendered component
+    // This avoids issues with multiple elements from other tests when isolate: false
+    const detailsButtons = container.querySelectorAll('button.ant-btn-link')
     fireEvent.click(detailsButtons[0])
 
     expect(onViewDetails).toHaveBeenCalledWith('log-1')
@@ -104,7 +106,7 @@ describe('ChangeLogTable', () => {
 
   it('displays German labels for entity types', () => {
     const onViewDetails = vi.fn()
-    const { getByText } = render(
+    const { container } = render(
       <ChangeLogTable
         changeLogs={mockChangeLogs}
         loading={false}
@@ -112,9 +114,11 @@ describe('ChangeLogTable', () => {
       />
     )
 
-    getByText('Klasse')
-    getByText('Schüler')
-    getByText('Note')
+    // Use container query to avoid issues with multiple elements from other tests when isolate: false
+    const tableText = container.textContent || ''
+    expect(tableText).toContain('Klasse')
+    expect(tableText).toContain('Schüler')
+    expect(tableText).toContain('Note')
   })
 
   it('displays German labels for operations', () => {
@@ -164,7 +168,7 @@ describe('ChangeLogTable', () => {
 
   it('displays empty state when no change logs', () => {
     const onViewDetails = vi.fn()
-    const { getByText } = render(
+    const { container } = render(
       <ChangeLogTable
         changeLogs={[]}
         loading={false}
@@ -172,6 +176,8 @@ describe('ChangeLogTable', () => {
       />
     )
 
-    getByText('Keine Änderungen gefunden.')
+    // Use container query to avoid issues with multiple elements from other tests when isolate: false
+    const tableText = container.textContent || ''
+    expect(tableText).toContain('Keine Änderungen gefunden.')
   })
 })

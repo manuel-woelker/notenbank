@@ -80,7 +80,7 @@ describe('AssessmentTable', () => {
 
     const onSelectAssessment = vi.fn()
 
-    const { getByText } = render(
+    const { container } = render(
       <AssessmentTable
         assessments={[
           {
@@ -100,8 +100,18 @@ describe('AssessmentTable', () => {
       />
     )
 
+    // Use container query to find the table cell within the rendered component
+    // This avoids issues with multiple elements from other tests when isolate: false
+    const titleCell = Array.from(
+      container.querySelectorAll('td.ant-table-cell')
+    ).find((td) => td.textContent === 'Klausur 1')
+
+    if (!titleCell) {
+      throw new Error('Title cell not found')
+    }
+
     await act(async () => {
-      fireEvent.click(getByText('Klausur 1'))
+      fireEvent.click(titleCell)
     })
 
     expect(onSelectAssessment).toHaveBeenCalledWith('a-1')
