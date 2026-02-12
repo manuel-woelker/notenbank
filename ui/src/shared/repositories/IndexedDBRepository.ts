@@ -5,6 +5,107 @@ import { generateId } from '../generateId'
 const DATABASE_METADATA_STORE = 'dbMetadata'
 const DATABASE_CREATED_AT_KEY = 'createdAt'
 
+/* 📖 # Why use a stack-based approach for transaction context?
+ *
+ * We need a way to share a single IndexedDB transaction across multiple
+ * repository calls without passing it through every function parameter.
+ *
+ * A transaction stack allows:
+ * 1. Nested transactions (outer transaction remains active)
+ * 2. Automatic cleanup when the transaction completes
+ * 3. Browser compatibility without Node.js-specific APIs
+ *
+ * This significantly improves performance for bulk operations by reducing
+ * transaction overhead from O(n) to O(1).
+ */
+
+/**
+ * Context for storing the current IndexedDB transaction
+ */
+interface TransactionContext {
+  transaction: IDBTransaction
+  db: IDBDatabase
+}
+
+/**
+ * Stack of active transactions. Supports nested transactions where
+ * the most recent (innermost) transaction is used.
+ */
+const transactionStack: TransactionContext[] = []
+
+/**
+ * Get the current active transaction if any
+ */
+function getCurrentTransaction(): IDBTransaction | undefined {
+  return transactionStack[transactionStack.length - 1]?.transaction
+}
+
+/**
+ * Execute a function within a single IndexedDB transaction
+ *
+ * All repository operations within the callback will share the same transaction,
+ * significantly improving performance for bulk operations.
+ *
+ * @param dbName - The database name
+ * @param storeNames - Array of store names to include in the transaction
+ * @param mode - Transaction mode ('readonly' or 'readwrite')
+ * @param fn - The function to execute within the transaction
+ * @returns The result of the function
+ *
+ * @example
+ * ```typescript
+ * const results = await inTransaction('mydb', ['students', 'classes'], 'readwrite', async () => {
+ *   const student = await studentRepository.create({ name: 'John' })
+ *   await classRepository.update(classId, { studentCount: 1 })
+ *   return student
+ * })
+ * ```
+ */
+export async function inTransaction<T>(
+  dbName: string,
+  storeNames: string[],
+  mode: IDBTransactionMode,
+  fn: () => Promise<T>
+): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(dbName)
+
+    request.onerror = () => reject(request.error)
+    request.onsuccess = () => {
+      const db = request.result
+      const transaction = db.transaction(storeNames, mode)
+
+      // Push this transaction onto the stack
+      const context: TransactionContext = { transaction, db }
+      transactionStack.push(context)
+
+      transaction.oncomplete = () => {
+        // Remove this transaction from the stack
+        const index = transactionStack.indexOf(context)
+        if (index > -1) {
+          transactionStack.splice(index, 1)
+        }
+        db.close()
+      }
+
+      transaction.onerror = () => {
+        // Remove this transaction from the stack on error too
+        const index = transactionStack.indexOf(context)
+        if (index > -1) {
+          transactionStack.splice(index, 1)
+        }
+        reject(transaction.error)
+      }
+
+      // Execute the function
+      Promise.resolve(fn()).then(
+        (result) => resolve(result),
+        (error) => reject(error)
+      )
+    }
+  })
+}
+
 /* 📖 # Why write a database creation timestamp during upgrades?
 E2E tests create isolated temporary databases via query parameters. Recording
 the creation time once, as ISO8601, makes those databases traceable without
@@ -117,8 +218,19 @@ export class IndexedDBRepository<
 
   /**
    * Get object store for transactions
+   *
+   * If called within an inTransaction() block, reuses the existing transaction.
+   * Otherwise, creates a new transaction.
    */
   private async getStore(mode: IDBTransactionMode): Promise<IDBObjectStore> {
+    // Check if we're inside an active transaction context
+    const currentTransaction = getCurrentTransaction()
+    if (currentTransaction) {
+      // Reuse the existing transaction
+      return currentTransaction.objectStore(this.config.storeName)
+    }
+
+    // No active transaction context, create a new one
     const db = await this.dbPromise
     const transaction = db.transaction(this.config.storeName, mode)
     return transaction.objectStore(this.config.storeName)

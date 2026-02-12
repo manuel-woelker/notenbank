@@ -1,6 +1,18 @@
 import { BaseEntity, CreateInput } from './RepositoryTypes'
 import { Repository, RepositorySchemas } from './Repository'
-import { IndexedDBRepository, RepositoryConfig } from './IndexedDBRepository'
+import {
+  IndexedDBRepository,
+  RepositoryConfig,
+  inTransaction as inTransactionImpl,
+} from './IndexedDBRepository'
+
+/* 📖 # Why re-export inTransaction?
+ *
+ * Consumers should be able to use transaction batching without importing
+ * directly from IndexedDBRepository. This keeps the repository abstraction
+ * clean while exposing the performance optimization where needed.
+ */
+export { inTransactionImpl as inTransaction }
 
 type RepositoryConfigWithDynamicDb<
   T extends BaseEntity,
