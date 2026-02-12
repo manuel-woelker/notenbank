@@ -4,13 +4,17 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { IDBFactory } from 'fake-indexeddb'
 import { Dashboard } from './Dashboard'
 
-vi.mock('@tanstack/react-router', () => ({
-  Link: ({ children, ...props }: { children: React.ReactNode }) => (
-    <a {...props}>{children}</a>
-  ),
-  useNavigate: () => vi.fn(),
-  useSearch: () => ({}),
-}))
+vi.mock('@tanstack/react-router', async () => {
+  const actual = await vi.importActual('@tanstack/react-router')
+  return {
+    ...actual,
+    Link: ({ children, ...props }: { children: React.ReactNode }) => (
+      <a {...props}>{children}</a>
+    ),
+    useNavigate: () => vi.fn(),
+    useSearch: () => ({}),
+  }
+})
 
 if (!window.matchMedia) {
   window.matchMedia = () =>
@@ -35,10 +39,10 @@ describe('Dashboard', () => {
     globalThis.indexedDB = new IDBFactory()
   })
 
-  it('renders the welcome heading', async () => {
+  it('renders the dashboard with class section', async () => {
     const { getByText } = render(<Dashboard />)
     await waitFor(() => {
-      expect(getByText('Willkommen bei Notenbank')).toBeTruthy()
+      expect(getByText('Klassen')).toBeTruthy()
     })
   })
 })

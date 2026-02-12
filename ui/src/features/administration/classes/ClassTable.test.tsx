@@ -58,7 +58,7 @@ describe('ClassTable', () => {
     const onSelectClass = vi.fn()
     const onCreateClass = vi.fn().mockResolvedValue(undefined)
 
-    const { getByPlaceholderText, getByRole } = render(
+    const { container, getByRole } = render(
       <ClassTable
         classes={[]}
         loading={false}
@@ -67,8 +67,17 @@ describe('ClassTable', () => {
       />
     )
 
+    // Use container query to find the input within the rendered component
+    // This avoids issues with multiple elements from other tests when isolate: false
+    const input = container.querySelector(
+      'input[placeholder="Neuer Klassenname"]'
+    )
+    if (!input) {
+      throw new Error('Input not found')
+    }
+
     await act(async () => {
-      fireEvent.change(getByPlaceholderText('Neuer Klassenname'), {
+      fireEvent.change(input, {
         target: { value: 'Klasse B' },
       })
     })

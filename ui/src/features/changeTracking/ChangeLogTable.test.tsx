@@ -134,7 +134,7 @@ describe('ChangeLogTable', () => {
 
   it('formats timestamps in German locale', () => {
     const onViewDetails = vi.fn()
-    const { getByText } = render(
+    const { getAllByText } = render(
       <ChangeLogTable
         changeLogs={mockChangeLogs}
         loading={false}
@@ -143,7 +143,9 @@ describe('ChangeLogTable', () => {
     )
 
     // Check if timestamp is formatted (contains dots for German date format)
-    getByText(/\d{2}\.\d{2}\.\d{4}/)
+    // Multiple timestamps exist in the table, so use getAllByText
+    const timestamps = getAllByText(/\d{2}\.\d{2}\.\d{4}/)
+    expect(timestamps.length).toBeGreaterThan(0)
   })
 
   it('displays loading state', () => {

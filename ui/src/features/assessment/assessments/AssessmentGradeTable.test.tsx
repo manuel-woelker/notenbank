@@ -61,7 +61,7 @@ describe('AssessmentGradeTable', () => {
   it('emits grade changes per student', async () => {
     const onGradeChange = vi.fn()
 
-    const { getByLabelText } = render(
+    const { container } = render(
       <AssessmentGradeTable
         students={[
           {
@@ -80,8 +80,17 @@ describe('AssessmentGradeTable', () => {
       />
     )
 
+    // Use container query to find the input within the rendered component
+    // This avoids issues with multiple elements from other tests when isolate: false
+    const input = container.querySelector(
+      'input[aria-label="Note für Lina Meyer"]'
+    )
+    if (!input) {
+      throw new Error('Grade input not found')
+    }
+
     await act(async () => {
-      fireEvent.change(getByLabelText('Note für Lina Meyer'), {
+      fireEvent.change(input, {
         target: { value: '2-' },
       })
     })
