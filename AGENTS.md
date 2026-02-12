@@ -94,6 +94,34 @@ Current use cases:
 
 When implementing new features, refer to the relevant use case documentation in `docs/use-cases/` for requirements.
 
+## Development Journal
+
+Every code change must be accompanied by an entry in the development journal. Create or append to a file at `docs/journal/YYYY-MM-DD.md` using the following format:
+
+```markdown
+### HH:MM - [Synopsis of the change]
+
+**User Prompt:**
+[The exact user request]
+
+**Issues Encountered:**
+- [List of any problems, errors, or roadblocks encountered]
+
+**Decisions Made:**
+- [Architectural or design choices made and why]
+
+**Technical Info Consulted:**
+- [Documentation, code references, or external resources used]
+
+**Assumptions Made:**
+- [Any assumptions that influenced the implementation]
+
+**Other Notes:**
+- [Any other relevant information for understanding the implementation]
+```
+
+This journal provides a chronological record of development decisions and context that isn't captured in code comments or commit messages. It helps future maintainers understand the "why" behind changes.
+
 ## State Management
 
 Use the in-repo Jestor helper at `ui/src/shared/store/jestor.ts` for shared UI state.
