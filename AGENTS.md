@@ -119,6 +119,7 @@ Every code change must be accompanied by an entry in the development journal. Cr
 **Other Notes:**
 - [Any other relevant information for understanding the implementation]
 ```
+The time should be in local time.
 
 This journal provides a chronological record of development decisions and context that isn't captured in code comments or commit messages. It helps future maintainers understand the "why" behind changes.
 

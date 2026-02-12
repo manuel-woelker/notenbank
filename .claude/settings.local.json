@@ -44,7 +44,9 @@
       "Bash(GITHUB_PAGES=true ../tool-tool.exe pnpm build:*)",
       "Bash(echo:*)",
       "Bash(git restore:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(COLUMNS=250 ../tool-tool.exe pnpm run test:coverage:*)",
+      "Bash(node -e:*)"
     ]
   }
 }

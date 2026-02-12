@@ -44,6 +44,7 @@ import {
   loadAssessments,
   useAssessmentStore,
 } from '../../features/assessment/assessments/AssessmentStore'
+import { loadChangeLogs } from '../../features/changeTracking/ChangeLogStore'
 import {
   buildClassRouteSegment,
   findClassByRouteSegment,
@@ -518,6 +519,7 @@ export function RootLayout() {
         loadSubjects(),
         loadAssessments(),
         loadAssessmentGrades(),
+        loadChangeLogs(),
       ])
     } finally {
       setDbSwitching(false)
@@ -537,6 +539,7 @@ export function RootLayout() {
         loadSubjects(),
         loadAssessments(),
         loadAssessmentGrades(),
+        loadChangeLogs(),
       ])
     } finally {
       setDbSwitching(false)
