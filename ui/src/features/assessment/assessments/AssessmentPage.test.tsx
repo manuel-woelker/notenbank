@@ -98,7 +98,7 @@ describe('AssessmentPage', () => {
       classId: newClass.id,
     })
 
-    const { getByText } = render(
+    const { container, getByText } = render(
       <AssessmentPage
         classId={newClass.id}
         subjectId={subject.id}
@@ -106,8 +106,10 @@ describe('AssessmentPage', () => {
       />
     )
 
+    // Use container query to avoid issues with multiple elements from other tests when isolate: false
     await waitFor(() => {
-      expect(getByText('Leistungsfeststellung Klausur 1')).toBeTruthy()
+      const containerText = container.textContent || ''
+      expect(containerText).toContain('Leistungsfeststellung Klausur 1')
     })
 
     await waitFor(() => {

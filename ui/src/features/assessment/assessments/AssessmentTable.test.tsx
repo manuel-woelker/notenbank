@@ -126,17 +126,25 @@ describe('AssessmentTable', () => {
     )
     const onCreateAssessment = vi.fn().mockResolvedValue(undefined)
 
-    const { getByPlaceholderText, getByRole, getAllByLabelText, getByText } =
-      render(
-        <AssessmentTable
-          assessments={[]}
-          loading={false}
-          onCreateAssessment={onCreateAssessment}
-        />
-      )
+    const { container, getByRole, getAllByLabelText, getByText } = render(
+      <AssessmentTable
+        assessments={[]}
+        loading={false}
+        onCreateAssessment={onCreateAssessment}
+      />
+    )
+
+    // Use container query to find the input within the rendered component
+    // This avoids issues with multiple elements from other tests when isolate: false
+    const titleInput = container.querySelector(
+      'input[placeholder="z.B. Klausur 1"]'
+    )
+    if (!titleInput) {
+      throw new Error('Title input not found')
+    }
 
     await act(async () => {
-      fireEvent.change(getByPlaceholderText('z.B. Klausur 1'), {
+      fireEvent.change(titleInput, {
         target: { value: 'Test 1' },
       })
     })
