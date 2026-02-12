@@ -110,6 +110,97 @@ describe('IndexedDBRepository', () => {
     )
   })
 
+  describe('createMultiple', () => {
+    it('returns empty array when given empty array', async () => {
+      const created = await repository.createMultiple([])
+      expect(created).toEqual([])
+    })
+
+    it('creates multiple entities with generated ids and timestamps', async () => {
+      const inputs = [
+        { name: 'Entity 1' },
+        { name: 'Entity 2' },
+        { name: 'Entity 3' },
+      ]
+      const created = await repository.createMultiple(inputs)
+
+      expect(created).toHaveLength(3)
+      created.forEach((entity, index) => {
+        expect(entity.id).toBeDefined()
+        expect(entity.name).toBe(inputs[index].name)
+        expect(entity.createdAt).toBeInstanceOf(Date)
+        expect(entity.updatedAt).toBeInstanceOf(Date)
+        expect(entity.createdAt).toEqual(entity.updatedAt)
+      })
+    })
+
+    it('creates entities with same timestamp in single batch', async () => {
+      const inputs = [{ name: 'Entity 1' }, { name: 'Entity 2' }]
+      const created = await repository.createMultiple(inputs)
+
+      expect(created[0].createdAt).toEqual(created[1].createdAt)
+      expect(created[0].updatedAt).toEqual(created[1].updatedAt)
+    })
+
+    it('stores and retrieves all entities correctly', async () => {
+      const inputs = [
+        { name: 'Entity 1' },
+        { name: 'Entity 2' },
+        { name: 'Entity 3' },
+      ]
+      const created = await repository.createMultiple(inputs)
+
+      for (const entity of created) {
+        const retrieved = await repository.findById(entity.id)
+        expect(retrieved).toEqual(entity)
+      }
+    })
+
+    it('adds all entities to findAll results', async () => {
+      const inputs = [
+        { name: 'Entity 1' },
+        { name: 'Entity 2' },
+        { name: 'Entity 3' },
+      ]
+      const created = await repository.createMultiple(inputs)
+
+      const all = await repository.findAll()
+      expect(all).toHaveLength(3)
+      created.forEach((entity) => {
+        expect(all).toContainEqual(entity)
+      })
+    })
+
+    it('validates all inputs when schemas are provided', async () => {
+      repository = new IndexedDBRepository<TestEntity, CreateTestEntity>({
+        dbName: 'test-db',
+        dbVersion: 1,
+        storeName: 'test-entities',
+        schemas: {
+          entity: z.object({
+            id: z.string(),
+            name: z.string().min(2),
+            createdAt: z.date(),
+            updatedAt: z.date(),
+          }),
+          create: z.object({
+            name: z.string().min(2),
+          }),
+          update: z.object({
+            name: z.string().min(2).optional(),
+          }),
+        },
+      })
+
+      await expect(
+        repository.createMultiple([
+          { name: 'Valid' },
+          { name: '' } as CreateTestEntity,
+        ])
+      ).rejects.toThrow()
+    })
+  })
+
   describe('update', () => {
     it('updates an existing entity', async () => {
       const created = await repository.create({ name: 'Original' })

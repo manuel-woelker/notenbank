@@ -89,6 +89,46 @@ export function createTrackingRepository<
       return entity
     },
 
+    createMultiple: async (dataArray: TCreate[]): Promise<T[]> => {
+      // Execute the create operation
+      const entities = await repository.createMultiple(dataArray)
+
+      // Log each change (errors are caught and logged but don't break the operation)
+      await Promise.all(
+        entities.map(async (entity) => {
+          try {
+            const context = await extractContext(
+              entityType,
+              entity,
+              assessmentLookup
+            )
+            const description = generateDescription(
+              entityType,
+              'CREATE',
+              entity
+            )
+            const now = new Date()
+
+            await changeLogRepository.create({
+              timestamp: now,
+              userId: 'System', // TODO: Replace with actual user when authentication is implemented
+              operation: 'CREATE',
+              entityType,
+              entityId: entity.id,
+              entityData: entity,
+              description,
+              ...context,
+            })
+          } catch (error) {
+            // Log error but don't break the main operation
+            console.error(`Failed to log CREATE for ${entityType}:`, error)
+          }
+        })
+      )
+
+      return entities
+    },
+
     update: async (id: string, data: Partial<T>): Promise<T> => {
       // Execute the update operation
       const entity = await repository.update(id, data)
@@ -201,6 +241,7 @@ if (import.meta.vitest) {
         findById: vi.fn().mockResolvedValue(null),
         create: vi.fn().mockResolvedValue(mockEntity),
         update: vi.fn().mockResolvedValue(mockEntity),
+        createMultiple: vi.fn().mockResolvedValue([]),
         delete: vi.fn().mockResolvedValue(undefined),
       }
 
@@ -237,6 +278,7 @@ if (import.meta.vitest) {
         findById: vi.fn().mockResolvedValue(mockEntity),
         create: vi.fn().mockResolvedValue(mockEntity),
         update: vi.fn().mockResolvedValue(mockEntity),
+        createMultiple: vi.fn().mockResolvedValue([]),
         delete: vi.fn().mockResolvedValue(undefined),
       }
 
@@ -278,6 +320,7 @@ if (import.meta.vitest) {
         findById: vi.fn().mockResolvedValue(mockEntity),
         create: vi.fn().mockResolvedValue(mockEntity),
         update: vi.fn().mockResolvedValue(mockEntity),
+        createMultiple: vi.fn().mockResolvedValue([]),
         delete: vi.fn().mockResolvedValue(undefined),
       }
 
@@ -313,6 +356,7 @@ if (import.meta.vitest) {
         findById: vi.fn().mockResolvedValue(mockEntity),
         create: vi.fn().mockResolvedValue(mockEntity),
         update: vi.fn().mockResolvedValue(mockEntity),
+        createMultiple: vi.fn().mockResolvedValue([]),
         delete: vi.fn().mockResolvedValue(undefined),
       }
 
@@ -356,6 +400,7 @@ if (import.meta.vitest) {
         findById: vi.fn().mockResolvedValue(mockStudent),
         create: vi.fn().mockResolvedValue(mockStudent),
         update: vi.fn().mockResolvedValue(mockStudent),
+        createMultiple: vi.fn().mockResolvedValue([]),
         delete: vi.fn().mockResolvedValue(undefined),
       }
 

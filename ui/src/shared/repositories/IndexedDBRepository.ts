@@ -291,6 +291,69 @@ export class IndexedDBRepository<
     })
   }
 
+  /* 📖 # Why create multiple entities in a single transaction?
+   *
+   * Creating entities one-by-one results in O(n) transaction overhead.
+   * By batching multiple creates in a single transaction:
+   * 1. Reduces transaction overhead from O(n) to O(1)
+   * 2. Ensures atomicity - all entities are created or none are
+   * 3. Significantly improves performance for bulk operations
+   */
+  /**
+   * Create multiple entities in a single transaction
+   */
+  async createMultiple(dataArray: TCreate[]): Promise<T[]> {
+    if (dataArray.length === 0) {
+      return []
+    }
+
+    const timerLabel = `createMultiple(${this.config.storeName}, ${dataArray.length} entities)`
+    console.time(timerLabel)
+
+    const now = new Date()
+    const newEntities = dataArray.map((data) => {
+      const validatedInput = this.validateCreateInput(data)
+      return this.validateEntity({
+        ...validatedInput,
+        id: generateId(),
+        createdAt: now,
+        updatedAt: now,
+      } as unknown as T)
+    })
+
+    const store = await this.getStore('readwrite')
+    return new Promise((resolve, reject) => {
+      let completedCount = 0
+      const errors: (DOMException | null)[] = []
+
+      newEntities.forEach((entity) => {
+        const request = store.add(this.serialize(entity))
+
+        request.onsuccess = () => {
+          completedCount += 1
+          if (completedCount === newEntities.length) {
+            if (errors.length > 0) {
+              console.timeEnd(timerLabel)
+              reject(errors[0])
+            } else {
+              console.timeEnd(timerLabel)
+              resolve(newEntities)
+            }
+          }
+        }
+
+        request.onerror = () => {
+          errors.push(request.error)
+          completedCount += 1
+          if (completedCount === newEntities.length) {
+            console.timeEnd(timerLabel)
+            reject(errors[0])
+          }
+        }
+      })
+    })
+  }
+
   /**
    * Update an existing entity
    */

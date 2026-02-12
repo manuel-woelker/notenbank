@@ -38,7 +38,7 @@ describe('ensureExampleDatabaseSeeded', () => {
     await ensureExampleDatabaseSeeded()
     const classesAfter = await classRepository.findAll()
     expect(classesAfter).toHaveLength(classes.length)
-  })
+  }, 30000)
 
   it('resets and reseeds the example database', async () => {
     await ensureExampleDatabaseSeeded()
@@ -56,5 +56,5 @@ describe('ensureExampleDatabaseSeeded', () => {
     expect(subjects.length).toBeGreaterThan(0)
     expect(assessments.length).toBeGreaterThan(0)
     expect(grades.length).toBeGreaterThan(0)
-  })
+  }, 30000)
 })

@@ -122,6 +122,9 @@ export function createRepository<
     get create() {
       return ensureInstance().create.bind(ensureInstance())
     },
+    get createMultiple() {
+      return ensureInstance().createMultiple.bind(ensureInstance())
+    },
     get update() {
       return ensureInstance().update.bind(ensureInstance())
     },

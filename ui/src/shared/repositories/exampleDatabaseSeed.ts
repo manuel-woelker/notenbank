@@ -273,71 +273,73 @@ export async function ensureExampleDatabaseSeeded() {
     return
   }
 
-  const classEntries = await Promise.all(
-    seedClasses.map(async (seed) => ({
-      key: seed.key,
-      entity: await classRepository.create({ name: seed.name }),
-    }))
+  const classEntities = await classRepository.createMultiple(
+    seedClasses.map((seed) => ({ name: seed.name }))
   )
+  const classEntries = seedClasses.map((seed, index) => ({
+    key: seed.key,
+    entity: classEntities[index],
+  }))
   const classIdByKey = new Map(
     classEntries.map((entry) => [entry.key, entry.entity.id])
   )
 
-  const subjectEntries = await Promise.all(
-    seedSubjects.map(async (seed) => ({
-      key: seed.key,
-      entity: await subjectRepository.create({
-        name: seed.name,
-        classId: requireId(classIdByKey, seed.classKey, 'class'),
-      }),
+  const subjectEntities = await subjectRepository.createMultiple(
+    seedSubjects.map((seed) => ({
+      name: seed.name,
+      classId: requireId(classIdByKey, seed.classKey, 'class'),
     }))
   )
+  const subjectEntries = seedSubjects.map((seed, index) => ({
+    key: seed.key,
+    entity: subjectEntities[index],
+  }))
   const subjectIdByKey = new Map(
     subjectEntries.map((entry) => [entry.key, entry.entity.id])
   )
 
-  const studentEntries = await Promise.all(
-    seedStudents.map(async (seed) => ({
-      key: seed.key,
-      entity: await studentRepository.create({
-        firstName: seed.firstName,
-        lastName: seed.lastName,
-        classId: requireId(classIdByKey, seed.classKey, 'class'),
-      }),
+  const studentEntities = await studentRepository.createMultiple(
+    seedStudents.map((seed) => ({
+      firstName: seed.firstName,
+      lastName: seed.lastName,
+      classId: requireId(classIdByKey, seed.classKey, 'class'),
     }))
   )
+  const studentEntries = seedStudents.map((seed, index) => ({
+    key: seed.key,
+    entity: studentEntities[index],
+  }))
   const studentIdByKey = new Map(
     studentEntries.map((entry) => [entry.key, entry.entity.id])
   )
 
-  const assessmentEntries = await Promise.all(
-    seedAssessments.map(async (seed) => ({
-      key: seed.key,
-      entity: await assessmentRepository.create({
-        classId: requireId(classIdByKey, seed.classKey, 'class'),
-        subjectId: requireId(subjectIdByKey, seed.subjectKey, 'subject'),
-        title: seed.title,
-        type: seed.type,
-        date: seed.date,
-      }),
+  const assessmentEntities = await assessmentRepository.createMultiple(
+    seedAssessments.map((seed) => ({
+      classId: requireId(classIdByKey, seed.classKey, 'class'),
+      subjectId: requireId(subjectIdByKey, seed.subjectKey, 'subject'),
+      title: seed.title,
+      type: seed.type,
+      date: seed.date,
     }))
   )
+  const assessmentEntries = seedAssessments.map((seed, index) => ({
+    key: seed.key,
+    entity: assessmentEntities[index],
+  }))
   const assessmentIdByKey = new Map(
     assessmentEntries.map((entry) => [entry.key, entry.entity.id])
   )
 
-  await Promise.all(
-    seedAssessmentGrades.map((seed) =>
-      assessmentGradeRepository.create({
-        assessmentId: requireId(
-          assessmentIdByKey,
-          seed.assessmentKey,
-          'assessment'
-        ),
-        studentId: requireId(studentIdByKey, seed.studentKey, 'student'),
-        grade: createGrade(seed.grade),
-      })
-    )
+  await assessmentGradeRepository.createMultiple(
+    seedAssessmentGrades.map((seed) => ({
+      assessmentId: requireId(
+        assessmentIdByKey,
+        seed.assessmentKey,
+        'assessment'
+      ),
+      studentId: requireId(studentIdByKey, seed.studentKey, 'student'),
+      grade: createGrade(seed.grade),
+    }))
   )
 }
 

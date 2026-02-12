@@ -34,6 +34,11 @@ export interface Repository<T extends BaseEntity, TCreate = CreateInput<T>> {
   create(data: TCreate): Promise<T>
 
   /**
+   * Create multiple entities in a single transaction
+   */
+  createMultiple(dataArray: TCreate[]): Promise<T[]>
+
+  /**
    * Update an existing entity
    */
   update(id: string, data: Partial<T>): Promise<T>
