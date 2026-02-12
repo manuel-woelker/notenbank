@@ -568,8 +568,14 @@ export function RootLayout() {
     setTourOpen(true)
   }
 
+  /* 📖 # Why use fixed positioning for header and independent scrolling?
+  The fixed header remains visible when scrolling content, improving navigation.
+  Independent scroll areas for sidebar and content prevent the whole page from
+  scrolling as a single unit, allowing users to reference the menu while
+  browsing long content pages.
+  */
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout style={{ height: '100vh', overflow: 'hidden' }}>
       <Tour
         open={tourOpen}
         current={tourCurrent}
@@ -584,7 +590,19 @@ export function RootLayout() {
         }}
         steps={tourSteps}
       />
-      <Sider trigger={null} collapsible collapsed={collapsed}>
+      <Sider
+        trigger={null}
+        collapsible
+        collapsed={collapsed}
+        style={{
+          overflow: 'auto',
+          height: '100vh',
+          position: 'fixed',
+          left: 0,
+          top: 0,
+          bottom: 0,
+        }}
+      >
         <div
           style={{
             height: 32,
@@ -606,8 +624,24 @@ export function RootLayout() {
           items={menuItems}
         />
       </Sider>
-      <Layout>
-        <Header style={{ padding: 0, background: colorBgContainer }}>
+      <Layout
+        style={{
+          marginLeft: collapsed ? 80 : 200,
+          height: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        <Header
+          style={{
+            padding: 0,
+            background: colorBgContainer,
+            position: 'sticky',
+            top: 0,
+            zIndex: 1,
+            width: '100%',
+          }}
+        >
           <div
             style={{
               display: 'flex',
@@ -694,9 +728,10 @@ export function RootLayout() {
           style={{
             margin: '24px 16px',
             padding: 24,
-            minHeight: 280,
             background: colorBgContainer,
             borderRadius: borderRadiusLG,
+            overflow: 'auto',
+            flex: 1,
           }}
         >
           <Outlet />

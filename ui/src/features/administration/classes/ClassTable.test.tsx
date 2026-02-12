@@ -58,7 +58,7 @@ describe('ClassTable', () => {
     const onSelectClass = vi.fn()
     const onCreateClass = vi.fn().mockResolvedValue(undefined)
 
-    const { container, getByRole } = render(
+    const { container } = render(
       <ClassTable
         classes={[]}
         loading={false}
@@ -82,8 +82,18 @@ describe('ClassTable', () => {
       })
     })
 
+    // Use container query to find the enabled button within the rendered component
+    // This avoids issues with multiple elements from other tests when isolate: false
+    const buttons = Array.from(
+      container.querySelectorAll('button.ant-btn-primary')
+    ) as HTMLButtonElement[]
+    const button = buttons.find((btn) => !btn.disabled)
+    if (!button) {
+      throw new Error('Enabled submit button not found')
+    }
+
     await act(async () => {
-      fireEvent.click(getByRole('button', { name: 'Hinzufügen' }))
+      fireEvent.click(button)
     })
 
     expect(onCreateClass).toHaveBeenCalledWith('Klasse B')

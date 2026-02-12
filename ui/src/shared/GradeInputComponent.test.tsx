@@ -51,10 +51,16 @@ describe('GradeInputComponent', () => {
   it('emits parsed grades for valid german notation', async () => {
     const onChange = vi.fn()
 
-    const { getByLabelText } = render(<StatefulWrapper onChange={onChange} />)
+    const { container } = render(<StatefulWrapper onChange={onChange} />)
+
+    // Use container query to avoid test pollution from isolate: false
+    const input = container.querySelector('input[aria-label="Note"]')
+    if (!input) {
+      throw new Error('Grade input not found')
+    }
 
     await act(async () => {
-      fireEvent.change(getByLabelText('Note'), {
+      fireEvent.change(input, {
         target: { value: '2-' },
       })
     })
@@ -65,13 +71,19 @@ describe('GradeInputComponent', () => {
   it('emits null when the input is cleared', async () => {
     const onChange = vi.fn()
 
-    const { getByLabelText } = render(<StatefulWrapper onChange={onChange} />)
+    const { container } = render(<StatefulWrapper onChange={onChange} />)
+
+    // Use container query to avoid test pollution from isolate: false
+    const input = container.querySelector('input[aria-label="Note"]')
+    if (!input) {
+      throw new Error('Grade input not found')
+    }
 
     await act(async () => {
-      fireEvent.change(getByLabelText('Note'), {
+      fireEvent.change(input, {
         target: { value: '2' },
       })
-      fireEvent.change(getByLabelText('Note'), {
+      fireEvent.change(input, {
         target: { value: '' },
       })
     })
@@ -82,10 +94,16 @@ describe('GradeInputComponent', () => {
   it('ignores invalid grade strings', async () => {
     const onChange = vi.fn()
 
-    const { getByLabelText } = render(<StatefulWrapper onChange={onChange} />)
+    const { container } = render(<StatefulWrapper onChange={onChange} />)
+
+    // Use container query to avoid test pollution from isolate: false
+    const input = container.querySelector('input[aria-label="Note"]')
+    if (!input) {
+      throw new Error('Grade input not found')
+    }
 
     await act(async () => {
-      fireEvent.change(getByLabelText('Note'), {
+      fireEvent.change(input, {
         target: { value: '1-3' },
       })
     })
@@ -96,9 +114,15 @@ describe('GradeInputComponent', () => {
   it('normalizes decimal input on blur', async () => {
     const onChange = vi.fn()
 
-    const { getByLabelText } = render(<StatefulWrapper onChange={onChange} />)
+    const { container } = render(<StatefulWrapper onChange={onChange} />)
 
-    const input = getByLabelText('Note') as HTMLInputElement
+    // Use container query to avoid test pollution from isolate: false
+    const input = container.querySelector(
+      'input[aria-label="Note"]'
+    ) as HTMLInputElement
+    if (!input) {
+      throw new Error('Grade input not found')
+    }
 
     await act(async () => {
       fireEvent.change(input, {
