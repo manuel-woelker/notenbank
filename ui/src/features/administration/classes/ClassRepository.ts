@@ -7,6 +7,7 @@ import {
   NOTENBANK_DB_VERSION,
 } from '../../../shared/repositories/notenbankDb'
 import { getActiveDatabaseName } from '../../../shared/store/databaseStore'
+import { createTrackingRepository } from '../../../shared/changeTracking/createTrackingRepository'
 
 const STORE_NAME = 'classes'
 
@@ -73,7 +74,7 @@ const classSchemas = {
  * For entities with additional Date fields (e.g., Student.birthDate), provide
  * custom serialize/deserialize functions in the configuration.
  */
-export const classRepository: ClassRepository = createRepository<
+const baseClassRepository: ClassRepository = createRepository<
   Class,
   CreateClassInput
 >({
@@ -87,3 +88,14 @@ export const classRepository: ClassRepository = createRepository<
   schemas: classSchemas,
   onUpgrade: ensureNotenbankStores,
 })
+
+/* 📖 # Why wrap the repository with change tracking?
+ *
+ * The createTrackingRepository wrapper automatically logs all create, update,
+ * and delete operations to the change log, providing a complete audit trail
+ * of all class modifications without changing any calling code.
+ */
+export const classRepository: ClassRepository = createTrackingRepository(
+  baseClassRepository,
+  'class'
+)

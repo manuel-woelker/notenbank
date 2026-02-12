@@ -19,6 +19,7 @@ import {
   TeamOutlined,
   BookOutlined,
   FileTextOutlined,
+  HistoryOutlined,
 } from '@ant-design/icons'
 import {
   Outlet,
@@ -142,7 +143,11 @@ export function RootLayout() {
       return `/${segments.slice(0, -1).join('/')}`
     }
 
-    if (segments[0] === 'content' || segments[0] === 'upload') {
+    if (
+      segments[0] === 'content' ||
+      segments[0] === 'upload' ||
+      segments[0] === 'aenderungsverlauf'
+    ) {
       return '/'
     }
 
@@ -405,6 +410,13 @@ export function RootLayout() {
         label: 'Hochladen',
         onClick: () => navigate({ to: '/upload', search: (prev) => prev }),
       },
+      {
+        key: 'changelog',
+        icon: <HistoryOutlined />,
+        label: 'Änderungsverlauf',
+        onClick: () =>
+          navigate({ to: '/aenderungsverlauf', search: (prev) => prev }),
+      },
     ]
   }, [sidebarContext, classes, subjects, assessments, navigate])
 
@@ -478,6 +490,9 @@ export function RootLayout() {
     }
     if (path.startsWith('/upload')) {
       return [clickableCrumb('Hochladen', '/upload')]
+    }
+    if (path.startsWith('/aenderungsverlauf')) {
+      return [clickableCrumb('Änderungsverlauf', '/aenderungsverlauf')]
     }
     return [clickableCrumb('Übersicht', '/')]
   }, [location.pathname, navigate, classes, subjects, students])

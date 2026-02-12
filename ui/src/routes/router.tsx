@@ -9,6 +9,7 @@ import {
   assessmentRoute,
   contentRoute,
   uploadRoute,
+  changeLogRoute,
 } from './routes'
 
 /* 📖 # Why use hash-based routing?
@@ -28,6 +29,7 @@ const routeTree = rootRoute.addChildren([
   assessmentRoute,
   contentRoute,
   uploadRoute,
+  changeLogRoute,
 ])
 
 export const router = createRouter({

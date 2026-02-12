@@ -7,6 +7,7 @@ import {
   NOTENBANK_DB_VERSION,
 } from '../../../shared/repositories/notenbankDb'
 import { getActiveDatabaseName } from '../../../shared/store/databaseStore'
+import { createTrackingRepository } from '../../../shared/changeTracking/createTrackingRepository'
 
 const STORE_NAME = 'students'
 
@@ -33,7 +34,7 @@ const studentSchemas = {
   }),
 }
 
-export const studentRepository: StudentRepository = createRepository<
+const baseStudentRepository: StudentRepository = createRepository<
   Student,
   CreateStudentInput
 >({
@@ -48,3 +49,8 @@ export const studentRepository: StudentRepository = createRepository<
   schemas: studentSchemas,
   onUpgrade: ensureNotenbankStores,
 })
+
+export const studentRepository: StudentRepository = createTrackingRepository(
+  baseStudentRepository,
+  'student'
+)

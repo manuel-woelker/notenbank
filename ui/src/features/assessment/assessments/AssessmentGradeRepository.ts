@@ -11,6 +11,7 @@ import {
   NOTENBANK_DB_VERSION,
 } from '../../../shared/repositories/notenbankDb'
 import { getActiveDatabaseName } from '../../../shared/store/databaseStore'
+import { createTrackingRepository } from '../../../shared/changeTracking/createTrackingRepository'
 
 const STORE_NAME = 'assessmentGrades'
 
@@ -48,7 +49,7 @@ const assessmentGradeSchemas = {
   }),
 }
 
-export const assessmentGradeRepository: AssessmentGradeRepository =
+const baseAssessmentGradeRepository: AssessmentGradeRepository =
   createRepository<AssessmentGrade, CreateAssessmentGradeInput>({
     dbName: getActiveDatabaseName,
     dbVersion: NOTENBANK_DB_VERSION,
@@ -69,3 +70,22 @@ export const assessmentGradeRepository: AssessmentGradeRepository =
     schemas: assessmentGradeSchemas,
     onUpgrade: ensureNotenbankStores,
   })
+
+/* 📖 # Why provide assessment lookup for grade tracking?
+ *
+ * AssessmentGrade entities only have assessmentId and studentId.
+ * To enable filtering by class or subject, we need to look up the
+ * assessment to get its classId and subjectId.
+ *
+ * We use a lazy import to avoid circular dependency issues.
+ */
+export const assessmentGradeRepository: AssessmentGradeRepository =
+  createTrackingRepository(
+    baseAssessmentGradeRepository,
+    'assessment_grade',
+    async (assessmentId: string) => {
+      // Lazy import to avoid circular dependency
+      const { assessmentRepository } = await import('./AssessmentRepository')
+      return assessmentRepository.findById(assessmentId)
+    }
+  )

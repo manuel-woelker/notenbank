@@ -2,7 +2,7 @@ import type { IndexConfig } from './IndexedDBRepository'
 
 export const NOTENBANK_DB_NAME = 'notenbank'
 export const NOTENBANK_EXAMPLE_DB_NAME = 'notenbank-example'
-export const NOTENBANK_DB_VERSION = 7
+export const NOTENBANK_DB_VERSION = 8
 
 const classIndexes: IndexConfig[] = [
   { name: 'name', keyPath: 'name', options: { unique: false } },
@@ -50,6 +50,22 @@ const recentAssessmentIndexes: IndexConfig[] = [
   },
 ]
 
+const changeLogIndexes: IndexConfig[] = [
+  { name: 'timestamp', keyPath: 'timestamp', options: { unique: false } },
+  { name: 'entityType', keyPath: 'entityType', options: { unique: false } },
+  { name: 'operation', keyPath: 'operation', options: { unique: false } },
+  { name: 'entityId', keyPath: 'entityId', options: { unique: false } },
+  { name: 'classId', keyPath: 'classId', options: { unique: false } },
+  { name: 'subjectId', keyPath: 'subjectId', options: { unique: false } },
+  { name: 'assessmentId', keyPath: 'assessmentId', options: { unique: false } },
+  { name: 'studentId', keyPath: 'studentId', options: { unique: false } },
+  {
+    name: 'classId_timestamp',
+    keyPath: ['classId', 'timestamp'],
+    options: { unique: false },
+  },
+]
+
 const notenbankStores = {
   classes: classIndexes,
   students: studentIndexes,
@@ -57,6 +73,7 @@ const notenbankStores = {
   assessments: assessmentIndexes,
   assessmentGrades: assessmentGradeIndexes,
   recentAssessments: recentAssessmentIndexes,
+  changeLogs: changeLogIndexes,
 }
 
 /* 📖 # Why ensure all stores exist on any upgrade?

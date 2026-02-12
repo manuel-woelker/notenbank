@@ -29,6 +29,7 @@
     "@ant-design/icons": "^6.1.0",
     "@tanstack/react-router": "^1.158.4",
     "antd": "^6.2.3",
+    "dayjs": "^1.11.19",
     "immer": "^10.1.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

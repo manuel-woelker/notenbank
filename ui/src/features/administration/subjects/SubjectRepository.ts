@@ -7,6 +7,7 @@ import {
   NOTENBANK_DB_VERSION,
 } from '../../../shared/repositories/notenbankDb'
 import { getActiveDatabaseName } from '../../../shared/store/databaseStore'
+import { createTrackingRepository } from '../../../shared/changeTracking/createTrackingRepository'
 
 const STORE_NAME = 'subjects'
 
@@ -30,7 +31,7 @@ const subjectSchemas = {
   }),
 }
 
-export const subjectRepository: SubjectRepository = createRepository<
+const baseSubjectRepository: SubjectRepository = createRepository<
   Subject,
   CreateSubjectInput
 >({
@@ -45,3 +46,8 @@ export const subjectRepository: SubjectRepository = createRepository<
   schemas: subjectSchemas,
   onUpgrade: ensureNotenbankStores,
 })
+
+export const subjectRepository: SubjectRepository = createTrackingRepository(
+  baseSubjectRepository,
+  'subject'
+)

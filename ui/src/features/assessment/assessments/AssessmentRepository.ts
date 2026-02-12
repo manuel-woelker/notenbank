@@ -7,6 +7,7 @@ import {
   NOTENBANK_DB_VERSION,
 } from '../../../shared/repositories/notenbankDb'
 import { getActiveDatabaseName } from '../../../shared/store/databaseStore'
+import { createTrackingRepository } from '../../../shared/changeTracking/createTrackingRepository'
 
 const STORE_NAME = 'assessments'
 
@@ -50,7 +51,7 @@ const assessmentSchemas = {
   }),
 }
 
-export const assessmentRepository: AssessmentRepository = createRepository<
+const baseAssessmentRepository: AssessmentRepository = createRepository<
   Assessment,
   CreateAssessmentInput
 >({
@@ -65,3 +66,6 @@ export const assessmentRepository: AssessmentRepository = createRepository<
   schemas: assessmentSchemas,
   onUpgrade: ensureNotenbankStores,
 })
+
+export const assessmentRepository: AssessmentRepository =
+  createTrackingRepository(baseAssessmentRepository, 'assessment')

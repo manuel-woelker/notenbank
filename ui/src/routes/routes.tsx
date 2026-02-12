@@ -9,6 +9,7 @@ import { SubjectOverviewRoute } from './components/SubjectOverviewRoute'
 import { AssessmentRoute } from './components/AssessmentRoute'
 import { ContentPage } from '../features/content/ContentPage'
 import { UploadPage } from '../features/upload/UploadPage'
+import { ChangeLogPage } from '../features/changeTracking/ChangeLogPage'
 
 /* 📖 # Why use code-based routing instead of file-based?
 The project follows a use-case-based folder structure (features/administration/classes/)
@@ -71,4 +72,10 @@ export const uploadRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/upload',
   component: UploadPage,
+})
+
+export const changeLogRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/aenderungsverlauf',
+  component: ChangeLogPage,
 })
