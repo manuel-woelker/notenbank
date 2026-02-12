@@ -4,6 +4,7 @@ import { studentRepository } from '../../features/administration/students/Studen
 import { subjectRepository } from '../../features/administration/subjects/SubjectRepository'
 import { assessmentRepository } from '../../features/assessment/assessments/AssessmentRepository'
 import { assessmentGradeRepository } from '../../features/assessment/assessments/AssessmentGradeRepository'
+import { clearAllRepositoryCaches } from './createRepository'
 import { NOTENBANK_EXAMPLE_DB_NAME } from './notenbankDb'
 import { getActiveDatabaseName } from '../store/databaseStore'
 
@@ -344,28 +345,38 @@ export async function ensureExampleDatabaseSeeded() {
 Repositories cache their IndexedDB connection. Clearing each store keeps the
 cache intact while guaranteeing a clean slate for reseeding.
 */
+/* 📖 # Why completely delete and recreate the database?
+ *
+ * "Tabula Rasa" means a clean slate. Instead of deleting individual records,
+ * we completely remove the IndexedDB database and recreate it from scratch.
+ * This ensures:
+ * 1. All data is removed (including change logs from tracking)
+ * 2. No orphaned records or indexes
+ * 3. Fresh database structure matching current schema version
+ * 4. Faster than individual deletes for large datasets
+ */
 export async function resetExampleDatabase() {
   if (getActiveDatabaseName() !== NOTENBANK_EXAMPLE_DB_NAME) {
     return
   }
 
-  const [grades, assessments, subjects, students, classes] = await Promise.all([
-    assessmentGradeRepository.findAll(),
-    assessmentRepository.findAll(),
-    subjectRepository.findAll(),
-    studentRepository.findAll(),
-    classRepository.findAll(),
-  ])
+  // Completely delete the database
+  await new Promise<void>((resolve, reject) => {
+    const request = indexedDB.deleteDatabase(NOTENBANK_EXAMPLE_DB_NAME)
+    request.onsuccess = () => resolve()
+    request.onerror = () => reject(request.error)
+    request.onblocked = () => {
+      console.warn(
+        'Database deletion blocked - close other tabs using this database'
+      )
+      // Still resolve - the database will be deleted once unblocked
+      resolve()
+    }
+  })
 
-  await Promise.all(
-    grades.map((entry) => assessmentGradeRepository.delete(entry.id))
-  )
-  await Promise.all(
-    assessments.map((entry) => assessmentRepository.delete(entry.id))
-  )
-  await Promise.all(subjects.map((entry) => subjectRepository.delete(entry.id)))
-  await Promise.all(students.map((entry) => studentRepository.delete(entry.id)))
-  await Promise.all(classes.map((entry) => classRepository.delete(entry.id)))
+  // Clear all repository caches so they reconnect to the fresh database
+  clearAllRepositoryCaches()
 
+  // Re-seed the fresh database
   await ensureExampleDatabaseSeeded()
 }

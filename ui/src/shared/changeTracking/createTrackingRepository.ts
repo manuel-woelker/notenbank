@@ -43,8 +43,19 @@ export function createTrackingRepository<
 ): Repository<T, TCreate> {
   return {
     schemas: repository.schemas,
-    findAll: repository.findAll,
-    findById: repository.findById,
+    /* 📖 # Why use getters for findAll and findById?
+     *
+     * The repository methods are lazy getters that trigger IndexedDB initialization.
+     * Direct assignment (findAll: repository.findAll) would trigger this during
+     * module load time, before tests can set up fake-indexeddb. Using getters
+     * defers access until the methods are actually called.
+     */
+    get findAll() {
+      return repository.findAll
+    },
+    get findById() {
+      return repository.findById
+    },
 
     create: async (data: TCreate): Promise<T> => {
       // Execute the create operation

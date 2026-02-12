@@ -9,6 +9,21 @@ type RepositoryConfigWithDynamicDb<
   dbName: string | (() => string)
 }
 
+type CacheClearer = () => void
+
+const repositoryCacheClearers: CacheClearer[] = []
+
+/* 📖 # Why do we need a global cache registry?
+ *
+ * When `resetExampleDatabase()` deletes and recreates the IndexedDB database,
+ * all repository instances still hold references to the old (closed) database
+ * connection. We need a way to clear all cached instances so they can be
+ * recreated with fresh connections to the new database.
+ */
+export function clearAllRepositoryCaches() {
+  repositoryCacheClearers.forEach((clearer) => clearer())
+}
+
 /* 📖 # Why use a lazy getter singleton pattern?
  *
  * IndexedDB initialization during module import can cause issues in test environments
@@ -78,6 +93,11 @@ export function createRepository<
     instances.set(resolvedDbName, created)
     return created
   }
+
+  // Register this repository's cache clearer
+  repositoryCacheClearers.push(() => {
+    instances.clear()
+  })
 
   return {
     schemas,
