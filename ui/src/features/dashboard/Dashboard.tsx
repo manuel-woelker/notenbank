@@ -28,7 +28,12 @@ export function Dashboard() {
   const navigate = useNavigate()
   const search = useSearch({ from: rootRoute.id })
   const { recentAssessments, loading } = useRecentAssessmentStore()
-  const { classes, loading: classesLoading, createClass } = useClassStore()
+  const {
+    classes,
+    loading: classesLoading,
+    createClass,
+    updateClass,
+  } = useClassStore()
   const { subjects } = useSubjectStore()
   const { assessments } = useAssessmentStore()
 
@@ -93,6 +98,9 @@ export function Dashboard() {
               loading={classesLoading}
               onSelectClass={handleSelectClass}
               onCreateClass={handleCreateClass}
+              onUpdateClass={async (id, name) => {
+                await updateClass(id, { name })
+              }}
               getClassHref={getClassHref}
             />
           </Card>

@@ -1,68 +1,46 @@
-import { createStore } from '../../../shared/store/jestor'
+import {
+  createEntityStore,
+  useEntityStore,
+} from '../../../shared/store/createEntityStore'
 import { Class, CreateClassInput, ClassStoreValue } from './ClassTypes'
 import { classRepository } from './ClassRepository'
 
-interface ClassStoreState {
-  classes: Class[]
-  loading: boolean
-}
-
-export const classStore = createStore<ClassStoreState>({
+const { store, loadAll, create } = createEntityStore<Class, CreateClassInput>({
   name: 'classes',
-  initialState: { classes: [], loading: true },
-  init: () => {
-    void loadClasses()
-  },
+  repository: classRepository,
+  autoLoad: true,
 })
 
-/**
- * Load all classes from repository
- */
-export async function loadClasses() {
-  classStore.update('classes:load:start', (state) => {
-    state.loading = true
-  })
-  try {
-    const data = await classRepository.findAll()
-    classStore.update('classes:load:success', (state) => {
-      state.classes = data
-    })
-  } catch (error) {
-    console.error('Failed to load classes:', error)
-    throw error
-  } finally {
-    classStore.update('classes:load:finally', (state) => {
-      state.loading = false
-    })
-  }
-}
+export const classStore = store
+export const loadClasses = loadAll
+export const createClass = create
 
-/**
- * Create a new class
- */
-const createClass = async (input: CreateClassInput): Promise<Class> => {
+const updateClass = async (
+  classId: string,
+  updates: Partial<Class>
+): Promise<Class> => {
   try {
-    const newClass = await classRepository.create(input)
-    classStore.update('classes:create:success', (state) => {
-      state.classes.push(newClass)
+    const updated = await classRepository.update(classId, updates)
+    store.update('classes:update:success', (state) => {
+      const index = state.entities.findIndex((c) => c.id === classId)
+      if (index >= 0) {
+        state.entities[index] = updated
+      }
     })
-    return newClass
+    return updated
   } catch (error) {
-    console.error('Failed to create class:', error)
+    console.error('Failed to update class:', error)
     throw error
   }
 }
 
-/**
- * Hook to access class store
- */
 export const useClassStore = (): ClassStoreValue => {
-  const classes = classStore.select.classes()
-  const loading = classStore.select.loading()
+  const { entities, loading } = useEntityStore(store, loadAll, create)
   return {
-    classes,
+    classes: entities,
     loading,
     loadClasses,
     createClass,
+    updateClass,
   }
 }

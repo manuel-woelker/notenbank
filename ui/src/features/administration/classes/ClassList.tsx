@@ -12,7 +12,7 @@ const { Title } = Typography
  * Main page component for class listing and management
  */
 export const ClassList: React.FC = () => {
-  const { classes, loading, createClass } = useClassStore()
+  const { classes, loading, createClass, updateClass } = useClassStore()
   const { isExample } = useDatabaseStore()
   const navigate = useNavigate()
 
@@ -48,6 +48,9 @@ export const ClassList: React.FC = () => {
             }}
             onCreateClass={async (name) => {
               await createClass({ name })
+            }}
+            onUpdateClass={async (id, name) => {
+              await updateClass(id, { name })
             }}
             getClassHref={getClassHref}
           />

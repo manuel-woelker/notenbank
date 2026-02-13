@@ -17,10 +17,18 @@ describe('ClassStore', () => {
         classRepository.delete(existingClass.id)
       )
     )
-    classStore.update('classes:reset', (state) => {
-      state.classes = []
-      state.loading = true
+    // Wait for any pending auto-load to complete, then reset state
+    await waitFor(() => {
+      const state = classStore.getSnapshot()
+      return !state.loading
     })
+    classStore.update(
+      'classes:reset',
+      (state: { entities: unknown[]; loading: boolean }) => {
+        state.entities = []
+        state.loading = true
+      }
+    )
     // Clear console.error calls to avoid noise in test output
     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
   })

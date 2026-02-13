@@ -16,10 +16,18 @@ describe('SubjectStore', () => {
         subjectRepository.delete(existingSubject.id)
       )
     )
-    subjectStore.update('subjects:reset', (state) => {
-      state.subjects = []
-      state.loading = true
+    // Wait for any pending auto-load to complete, then reset state
+    await waitFor(() => {
+      const state = subjectStore.getSnapshot()
+      return !state.loading
     })
+    subjectStore.update(
+      'subjects:reset',
+      (state: { entities: unknown[]; loading: boolean }) => {
+        state.entities = []
+        state.loading = true
+      }
+    )
     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
   })
 

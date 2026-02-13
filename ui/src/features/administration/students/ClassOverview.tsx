@@ -28,11 +28,13 @@ export const ClassOverview: React.FC<ClassOverviewProps> = ({ classId }) => {
     students,
     loading: studentsLoading,
     createStudent,
+    updateStudent,
   } = useStudentStore()
   const {
     subjects,
     loading: subjectsLoading,
     createSubject,
+    updateSubject,
   } = useSubjectStore()
   const { isExample } = useDatabaseStore()
 
@@ -106,6 +108,9 @@ export const ClassOverview: React.FC<ClassOverviewProps> = ({ classId }) => {
                 onCreateSubject={async (input) => {
                   await createSubject({ ...input, classId })
                 }}
+                onUpdateSubject={async (id, updates) => {
+                  await updateSubject(id, updates)
+                }}
                 onSelectSubject={(subjectId) => {
                   if (!classRouteSegment) {
                     return
@@ -131,6 +136,9 @@ export const ClassOverview: React.FC<ClassOverviewProps> = ({ classId }) => {
                 loading={isLoading}
                 onCreateStudent={async (input) => {
                   await createStudent({ ...input, classId })
+                }}
+                onUpdateStudent={async (id, updates) => {
+                  await updateStudent(id, updates)
                 }}
                 onSelectStudent={(studentId) => {
                   if (!classRouteSegment) {

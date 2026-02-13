@@ -29,7 +29,8 @@ export const SubjectOverview: React.FC<SubjectOverviewProps> = ({
   const navigate = useNavigate()
   const { classes, loading: classesLoading } = useClassStore()
   const { subjects, loading: subjectsLoading } = useSubjectStore()
-  const { assessments, createAssessment } = useAssessmentStore()
+  const { assessments, createAssessment, updateAssessment } =
+    useAssessmentStore()
   const { assessmentGrades, loading: gradesLoading } = useAssessmentGradeStore()
   const { isExample } = useDatabaseStore()
 
@@ -130,6 +131,9 @@ export const SubjectOverview: React.FC<SubjectOverviewProps> = ({
               classId,
               subjectId,
             })
+          }}
+          onUpdateAssessment={async (id, updates) => {
+            await updateAssessment(id, updates)
           }}
           onSelectAssessment={(assessmentId) => {
             if (!classRouteSegment || !subjectRouteSegment) {

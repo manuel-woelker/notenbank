@@ -11,6 +11,10 @@ interface AssessmentTableProps {
     type: Assessment['type']
     date: Date
   }) => Promise<void>
+  onUpdateAssessment: (
+    assessmentId: string,
+    updates: Partial<Assessment>
+  ) => Promise<void>
   disableCreate?: boolean
   onSelectAssessment?: (assessmentId: string) => void
   getAssessmentHref?: (assessmentId: string) => string
@@ -46,6 +50,7 @@ export const AssessmentTable: React.FC<AssessmentTableProps> = ({
   assessments,
   loading,
   onCreateAssessment,
+  onUpdateAssessment,
   disableCreate = false,
   onSelectAssessment,
   getAssessmentHref,
@@ -55,6 +60,12 @@ export const AssessmentTable: React.FC<AssessmentTableProps> = ({
   const [type, setType] = useState<Assessment['type'] | undefined>()
   const [dateInput, setDateInput] = useState('')
   const [saving, setSaving] = useState(false)
+  const [editingKey, setEditingKey] = useState<string | null>(null)
+  const [editingTitle, setEditingTitle] = useState('')
+  const [editingType, setEditingType] = useState<Assessment['type'] | null>(
+    null
+  )
+  const [editingDate, setEditingDate] = useState('')
 
   const isNewRow = (
     row: AssessmentRow
@@ -92,6 +103,62 @@ export const AssessmentTable: React.FC<AssessmentTableProps> = ({
     }
   }
 
+  const startEditing = (record: Assessment) => {
+    setEditingKey(record.id)
+    setEditingTitle(record.title)
+    setEditingType(record.type)
+    const dateStr = record.date.toISOString().split('T')[0]
+    setEditingDate(dateStr)
+  }
+
+  const cancelEditing = () => {
+    setEditingKey(null)
+    setEditingTitle('')
+    setEditingType(null)
+    setEditingDate('')
+  }
+
+  const saveEditing = async (record: Assessment) => {
+    const trimmedTitle = editingTitle.trim()
+    if (!trimmedTitle || !editingType || !editingDate) {
+      message.error('Bitte alle Felder ausfüllen.')
+      return
+    }
+    const newDate = new Date(`${editingDate}T00:00:00`)
+    if (Number.isNaN(newDate.getTime())) {
+      message.error('Bitte ein gültiges Datum wählen.')
+      return
+    }
+    if (
+      trimmedTitle === record.title &&
+      editingType === record.type &&
+      newDate.getTime() === record.date.getTime()
+    ) {
+      setEditingKey(null)
+      setEditingTitle('')
+      setEditingType(null)
+      setEditingDate('')
+      return
+    }
+    try {
+      await onUpdateAssessment(record.id, {
+        title: trimmedTitle,
+        type: editingType,
+        date: newDate,
+      })
+      setEditingKey(null)
+      setEditingTitle('')
+      setEditingType(null)
+      setEditingDate('')
+      message.success('Leistungsfeststellung aktualisiert.')
+    } catch (error) {
+      console.error('Failed to update assessment:', error)
+      message.error(
+        'Leistungsfeststellung konnte nicht aktualisiert werden. Bitte erneut versuchen.'
+      )
+    }
+  }
+
   const shouldHandleNavigation = (event: React.MouseEvent) =>
     !event.metaKey &&
     !event.ctrlKey &&
@@ -110,7 +177,7 @@ export const AssessmentTable: React.FC<AssessmentTableProps> = ({
         return a.title.localeCompare(b.title)
       },
       defaultSortOrder: 'ascend',
-      render: (value: string, record) => {
+      render: (value: string, record: AssessmentRow) => {
         if (isNewRow(record)) {
           return (
             <Input
@@ -119,6 +186,16 @@ export const AssessmentTable: React.FC<AssessmentTableProps> = ({
               onChange={(event) => setTitle(event.target.value)}
               onPressEnter={() => void handleCreate()}
               disabled={disableCreate}
+            />
+          )
+        }
+        if (editingKey === record.id) {
+          return (
+            <Input
+              value={editingTitle}
+              onChange={(event) => setEditingTitle(event.target.value)}
+              onPressEnter={() => void saveEditing(record)}
+              autoFocus
             />
           )
         }
@@ -146,7 +223,7 @@ export const AssessmentTable: React.FC<AssessmentTableProps> = ({
       title: 'Art',
       dataIndex: 'type',
       key: 'type',
-      render: (value: Assessment['type'], record) => {
+      render: (value: Assessment['type'], record: AssessmentRow) => {
         if (isNewRow(record)) {
           return (
             <Select
@@ -158,6 +235,18 @@ export const AssessmentTable: React.FC<AssessmentTableProps> = ({
               value={type}
               onChange={(newType) => setType(newType)}
               disabled={disableCreate}
+            />
+          )
+        }
+        if (editingKey === record.id) {
+          return (
+            <Select
+              options={[
+                { label: 'Schriftlich', value: 'written' },
+                { label: 'Mündlich', value: 'oral' },
+              ]}
+              value={editingType ?? value}
+              onChange={(newType) => setEditingType(newType)}
             />
           )
         }
@@ -174,7 +263,7 @@ export const AssessmentTable: React.FC<AssessmentTableProps> = ({
       title: 'Datum',
       dataIndex: 'date',
       key: 'date',
-      render: (value: Date, record) => {
+      render: (value: Date, record: AssessmentRow) => {
         if (isNewRow(record)) {
           return (
             <Input
@@ -183,6 +272,16 @@ export const AssessmentTable: React.FC<AssessmentTableProps> = ({
               onChange={(event) => setDateInput(event.target.value)}
               disabled={disableCreate}
               aria-label="Datum"
+            />
+          )
+        }
+        if (editingKey === record.id) {
+          return (
+            <Input
+              type="date"
+              value={editingDate}
+              onChange={(event) => setEditingDate(event.target.value)}
+              onBlur={() => void saveEditing(record)}
             />
           )
         }
@@ -222,23 +321,62 @@ export const AssessmentTable: React.FC<AssessmentTableProps> = ({
       title: 'Aktionen',
       key: 'actions',
       render: (_, record) => {
-        if (!isNewRow(record)) {
-          return <span style={{ color: '#999' }}>-</span>
+        if (isNewRow(record)) {
+          return (
+            <Button
+              type="primary"
+              onClick={(e) => {
+                e.stopPropagation()
+                void handleCreate()
+              }}
+              loading={saving}
+              disabled={
+                disableCreate || !title.trim() || !type || !dateInput.trim()
+              }
+            >
+              Hinzufügen
+            </Button>
+          )
+        }
+        if (editingKey === record.id) {
+          return (
+            <>
+              <Button
+                type="link"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  void saveEditing(record)
+                }}
+                style={{ padding: '4px 8px' }}
+              >
+                Speichern
+              </Button>
+              <Button
+                type="link"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  cancelEditing()
+                }}
+                style={{ padding: '4px 8px' }}
+              >
+                Abbrechen
+              </Button>
+            </>
+          )
         }
         return (
           <Button
-            type="primary"
-            onClick={() => void handleCreate()}
-            loading={saving}
-            disabled={
-              disableCreate || !title.trim() || !type || !dateInput.trim()
-            }
+            type="link"
+            onClick={(e) => {
+              e.stopPropagation()
+              startEditing(record)
+            }}
           >
-            Hinzufügen
+            Bearbeiten
           </Button>
         )
       },
-      width: 140,
+      width: 160,
     },
   ]
 
@@ -259,12 +397,12 @@ export const AssessmentTable: React.FC<AssessmentTableProps> = ({
         }
         return {
           onClick: (event) => {
-            if (!shouldHandleNavigation(event)) {
+            if (editingKey !== null || !shouldHandleNavigation(event)) {
               return
             }
             onSelectAssessment?.(record.id)
           },
-          style: { cursor: 'pointer' },
+          style: { cursor: editingKey !== null ? 'default' : 'pointer' },
         }
       }}
       locale={{

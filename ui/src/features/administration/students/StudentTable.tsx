@@ -22,6 +22,7 @@ interface StudentTableProps {
     firstName: string
     lastName: string
   }) => Promise<void>
+  onUpdateStudent: (id: string, updates: Partial<Student>) => Promise<void>
   onSelectStudent?: (studentId: string) => void
   getStudentHref?: (studentId: string) => string
 }
@@ -33,12 +34,16 @@ export const StudentTable: React.FC<StudentTableProps> = ({
   students,
   loading,
   onCreateStudent,
+  onUpdateStudent,
   onSelectStudent,
   getStudentHref,
 }) => {
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [saving, setSaving] = useState(false)
+  const [editingKey, setEditingKey] = useState<string | null>(null)
+  const [editingFirstName, setEditingFirstName] = useState('')
+  const [editingLastName, setEditingLastName] = useState('')
 
   const handleCreate = async () => {
     const trimmedFirst = firstName.trim()
@@ -63,6 +68,48 @@ export const StudentTable: React.FC<StudentTableProps> = ({
     }
   }
 
+  const startEditing = (record: Student) => {
+    setEditingKey(record.id)
+    setEditingFirstName(record.firstName)
+    setEditingLastName(record.lastName)
+  }
+
+  const cancelEditing = () => {
+    setEditingKey(null)
+    setEditingFirstName('')
+    setEditingLastName('')
+  }
+
+  const saveEditing = async (record: Student) => {
+    const trimmedFirst = editingFirstName.trim()
+    const trimmedLast = editingLastName.trim()
+    if (!trimmedFirst || !trimmedLast) {
+      message.error('Bitte Vor- und Nachnamen eingeben.')
+      return
+    }
+    if (trimmedFirst === record.firstName && trimmedLast === record.lastName) {
+      setEditingKey(null)
+      setEditingFirstName('')
+      setEditingLastName('')
+      return
+    }
+    try {
+      await onUpdateStudent(record.id, {
+        firstName: trimmedFirst,
+        lastName: trimmedLast,
+      })
+      setEditingKey(null)
+      setEditingFirstName('')
+      setEditingLastName('')
+      message.success('Schüler aktualisiert.')
+    } catch (error) {
+      console.error('Failed to update student:', error)
+      message.error(
+        'Schüler konnte nicht aktualisiert werden. Bitte erneut versuchen.'
+      )
+    }
+  }
+
   const shouldHandleNavigation = (event: React.MouseEvent) =>
     !event.metaKey &&
     !event.ctrlKey &&
@@ -76,7 +123,7 @@ export const StudentTable: React.FC<StudentTableProps> = ({
       dataIndex: 'firstName',
       key: 'firstName',
       sorter: (a, b) => a.firstName.localeCompare(b.firstName),
-      render: (value: string, record) => {
+      render: (value: string, record: StudentRow) => {
         if ('isNew' in record) {
           return (
             <Input
@@ -84,6 +131,16 @@ export const StudentTable: React.FC<StudentTableProps> = ({
               value={firstName}
               onChange={(event) => setFirstName(event.target.value)}
               onPressEnter={() => void handleCreate()}
+            />
+          )
+        }
+        if (editingKey === record.id) {
+          return (
+            <Input
+              value={editingFirstName}
+              onChange={(event) => setEditingFirstName(event.target.value)}
+              onPressEnter={() => void saveEditing(record)}
+              autoFocus
             />
           )
         }
@@ -112,7 +169,7 @@ export const StudentTable: React.FC<StudentTableProps> = ({
       dataIndex: 'lastName',
       key: 'lastName',
       sorter: (a, b) => a.lastName.localeCompare(b.lastName),
-      render: (value: string, record) => {
+      render: (value: string, record: StudentRow) => {
         if ('isNew' in record) {
           return (
             <Input
@@ -120,6 +177,16 @@ export const StudentTable: React.FC<StudentTableProps> = ({
               value={lastName}
               onChange={(event) => setLastName(event.target.value)}
               onPressEnter={() => void handleCreate()}
+            />
+          )
+        }
+        if (editingKey === record.id) {
+          return (
+            <Input
+              value={editingLastName}
+              onChange={(event) => setEditingLastName(event.target.value)}
+              onPressEnter={() => void saveEditing(record)}
+              onBlur={() => void saveEditing(record)}
             />
           )
         }
@@ -147,21 +214,57 @@ export const StudentTable: React.FC<StudentTableProps> = ({
       title: 'Aktionen',
       key: 'actions',
       render: (_, record) => {
-        if (!('isNew' in record)) {
-          return <span style={{ color: '#999' }}>-</span>
+        if ('isNew' in record) {
+          return (
+            <Button
+              type="primary"
+              onClick={() => void handleCreate()}
+              loading={saving}
+              disabled={!firstName.trim() || !lastName.trim()}
+            >
+              Hinzufügen
+            </Button>
+          )
+        }
+        if (editingKey === record.id) {
+          return (
+            <>
+              <Button
+                type="link"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  void saveEditing(record)
+                }}
+                style={{ padding: '4px 8px' }}
+              >
+                Speichern
+              </Button>
+              <Button
+                type="link"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  cancelEditing()
+                }}
+                style={{ padding: '4px 8px' }}
+              >
+                Abbrechen
+              </Button>
+            </>
+          )
         }
         return (
           <Button
-            type="primary"
-            onClick={() => void handleCreate()}
-            loading={saving}
-            disabled={!firstName.trim() || !lastName.trim()}
+            type="link"
+            onClick={(e) => {
+              e.stopPropagation()
+              startEditing(record)
+            }}
           >
-            Hinzufügen
+            Bearbeiten
           </Button>
         )
       },
-      width: 120,
+      width: 160,
     },
   ]
 
@@ -182,12 +285,12 @@ export const StudentTable: React.FC<StudentTableProps> = ({
         }
         return {
           onClick: (event) => {
-            if (!shouldHandleNavigation(event)) {
+            if (editingKey !== null || !shouldHandleNavigation(event)) {
               return
             }
             onSelectStudent?.(record.id)
           },
-          style: { cursor: 'pointer' },
+          style: { cursor: editingKey !== null ? 'default' : 'pointer' },
         }
       }}
       locale={{

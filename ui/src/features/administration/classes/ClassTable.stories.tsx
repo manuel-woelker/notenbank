@@ -40,6 +40,7 @@ export const Default: Story = {
     loading: false,
     onSelectClass: () => {},
     onCreateClass: async () => {},
+    onUpdateClass: async () => {},
   },
 }
 
@@ -49,6 +50,7 @@ export const Empty: Story = {
     loading: false,
     onSelectClass: () => {},
     onCreateClass: async () => {},
+    onUpdateClass: async () => {},
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -66,5 +68,6 @@ export const Loading: Story = {
     loading: true,
     onSelectClass: () => {},
     onCreateClass: async () => {},
+    onUpdateClass: async () => {},
   },
 }

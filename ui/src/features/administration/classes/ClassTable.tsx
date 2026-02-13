@@ -18,6 +18,7 @@ interface ClassTableProps {
   loading: boolean
   onSelectClass: (classId: string) => void
   onCreateClass: (name: string) => Promise<void>
+  onUpdateClass: (id: string, name: string) => Promise<void>
   getClassHref?: (classId: string) => string
 }
 
@@ -29,10 +30,13 @@ export const ClassTable: React.FC<ClassTableProps> = ({
   loading,
   onSelectClass,
   onCreateClass,
+  onUpdateClass,
   getClassHref,
 }) => {
   const [newClassName, setNewClassName] = useState('')
   const [saving, setSaving] = useState(false)
+  const [editingKey, setEditingKey] = useState<string | null>(null)
+  const [editingName, setEditingName] = useState('')
 
   const isNewRow = (row: ClassRow): row is Extract<ClassRow, { isNew: true }> =>
     'isNew' in row
@@ -58,6 +62,40 @@ export const ClassTable: React.FC<ClassTableProps> = ({
     }
   }
 
+  const startEditing = (record: Class) => {
+    setEditingKey(record.id)
+    setEditingName(record.name)
+  }
+
+  const cancelEditing = () => {
+    setEditingKey(null)
+    setEditingName('')
+  }
+
+  const saveEditing = async (record: Class) => {
+    const trimmedName = editingName.trim()
+    if (!trimmedName) {
+      message.error('Bitte einen Klassennamen eingeben.')
+      return
+    }
+    if (trimmedName === record.name) {
+      setEditingKey(null)
+      setEditingName('')
+      return
+    }
+    try {
+      await onUpdateClass(record.id, trimmedName)
+      setEditingKey(null)
+      setEditingName('')
+      message.success('Klasse aktualisiert.')
+    } catch (error) {
+      console.error('Failed to update class:', error)
+      message.error(
+        'Klasse konnte nicht aktualisiert werden. Bitte erneut versuchen.'
+      )
+    }
+  }
+
   const shouldHandleNavigation = (event: React.MouseEvent) =>
     !event.metaKey &&
     !event.ctrlKey &&
@@ -76,7 +114,7 @@ export const ClassTable: React.FC<ClassTableProps> = ({
         return a.name.localeCompare(b.name)
       },
       defaultSortOrder: 'ascend',
-      render: (value: string, record) => {
+      render: (value: string, record: ClassRow) => {
         if (isNewRow(record)) {
           return (
             <Input
@@ -84,6 +122,17 @@ export const ClassTable: React.FC<ClassTableProps> = ({
               value={newClassName}
               onChange={(event) => setNewClassName(event.target.value)}
               onPressEnter={() => void handleCreate()}
+            />
+          )
+        }
+        if (editingKey === record.id) {
+          return (
+            <Input
+              value={editingName}
+              onChange={(event) => setEditingName(event.target.value)}
+              onPressEnter={() => void saveEditing(record)}
+              onBlur={() => void saveEditing(record)}
+              autoFocus
             />
           )
         }
@@ -111,21 +160,57 @@ export const ClassTable: React.FC<ClassTableProps> = ({
       title: 'Aktionen',
       key: 'actions',
       render: (_, record) => {
-        if (!('isNew' in record)) {
-          return <span style={{ color: '#999' }}>-</span>
+        if (isNewRow(record)) {
+          return (
+            <Button
+              type="primary"
+              onClick={() => void handleCreate()}
+              loading={saving}
+              disabled={!newClassName.trim()}
+            >
+              Hinzufügen
+            </Button>
+          )
+        }
+        if (editingKey === record.id) {
+          return (
+            <>
+              <Button
+                type="link"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  void saveEditing(record)
+                }}
+                style={{ padding: '4px 8px' }}
+              >
+                Speichern
+              </Button>
+              <Button
+                type="link"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  cancelEditing()
+                }}
+                style={{ padding: '4px 8px' }}
+              >
+                Abbrechen
+              </Button>
+            </>
+          )
         }
         return (
           <Button
-            type="primary"
-            onClick={() => void handleCreate()}
-            loading={saving}
-            disabled={!newClassName.trim()}
+            type="link"
+            onClick={(e) => {
+              e.stopPropagation()
+              startEditing(record)
+            }}
           >
-            Hinzufügen
+            Bearbeiten
           </Button>
         )
       },
-      width: 120,
+      width: 160,
     },
   ]
 
@@ -142,12 +227,19 @@ export const ClassTable: React.FC<ClassTableProps> = ({
       loading={loading}
       onRow={(record) => ({
         onClick: (event) => {
-          if (isNewRow(record) || !shouldHandleNavigation(event)) {
+          if (
+            isNewRow(record) ||
+            editingKey !== null ||
+            !shouldHandleNavigation(event)
+          ) {
             return
           }
           onSelectClass(record.id)
         },
-        style: { cursor: isNewRow(record) ? 'default' : 'pointer' },
+        style: {
+          cursor:
+            isNewRow(record) || editingKey !== null ? 'default' : 'pointer',
+        },
       })}
       locale={{
         emptyText: 'Keine Klassen gefunden. Oben eine neue Klasse hinzufügen.',

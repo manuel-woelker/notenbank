@@ -18,6 +18,7 @@ interface SubjectTableProps {
   subjects: Subject[]
   loading: boolean
   onCreateSubject: (input: { name: string }) => Promise<void>
+  onUpdateSubject: (id: string, updates: Partial<Subject>) => Promise<void>
   onSelectSubject?: (subjectId: string) => void
   getSubjectHref?: (subjectId: string) => string
 }
@@ -29,11 +30,14 @@ export const SubjectTable: React.FC<SubjectTableProps> = ({
   subjects,
   loading,
   onCreateSubject,
+  onUpdateSubject,
   onSelectSubject,
   getSubjectHref,
 }) => {
   const [name, setName] = useState('')
   const [saving, setSaving] = useState(false)
+  const [editingKey, setEditingKey] = useState<string | null>(null)
+  const [editingName, setEditingName] = useState('')
 
   const handleCreate = async () => {
     const trimmedName = name.trim()
@@ -56,6 +60,40 @@ export const SubjectTable: React.FC<SubjectTableProps> = ({
     }
   }
 
+  const startEditing = (record: Subject) => {
+    setEditingKey(record.id)
+    setEditingName(record.name)
+  }
+
+  const cancelEditing = () => {
+    setEditingKey(null)
+    setEditingName('')
+  }
+
+  const saveEditing = async (record: Subject) => {
+    const trimmedName = editingName.trim()
+    if (!trimmedName) {
+      message.error('Bitte einen Fachnamen eingeben.')
+      return
+    }
+    if (trimmedName === record.name) {
+      setEditingKey(null)
+      setEditingName('')
+      return
+    }
+    try {
+      await onUpdateSubject(record.id, { name: trimmedName })
+      setEditingKey(null)
+      setEditingName('')
+      message.success('Fach aktualisiert.')
+    } catch (error) {
+      console.error('Failed to update subject:', error)
+      message.error(
+        'Fach konnte nicht aktualisiert werden. Bitte erneut versuchen.'
+      )
+    }
+  }
+
   const shouldHandleNavigation = (event: React.MouseEvent) =>
     !event.metaKey &&
     !event.ctrlKey &&
@@ -69,7 +107,7 @@ export const SubjectTable: React.FC<SubjectTableProps> = ({
       dataIndex: 'name',
       key: 'name',
       sorter: (a, b) => a.name.localeCompare(b.name),
-      render: (value: string, record) => {
+      render: (value: string, record: SubjectRow) => {
         if ('isNew' in record) {
           return (
             <Input
@@ -77,6 +115,17 @@ export const SubjectTable: React.FC<SubjectTableProps> = ({
               value={name}
               onChange={(event) => setName(event.target.value)}
               onPressEnter={() => void handleCreate()}
+            />
+          )
+        }
+        if (editingKey === record.id) {
+          return (
+            <Input
+              value={editingName}
+              onChange={(event) => setEditingName(event.target.value)}
+              onPressEnter={() => void saveEditing(record)}
+              onBlur={() => void saveEditing(record)}
+              autoFocus
             />
           )
         }
@@ -104,21 +153,60 @@ export const SubjectTable: React.FC<SubjectTableProps> = ({
       title: 'Aktionen',
       key: 'actions',
       render: (_, record) => {
-        if (!('isNew' in record)) {
-          return <span style={{ color: '#999' }}>-</span>
+        if ('isNew' in record) {
+          return (
+            <Button
+              type="primary"
+              onClick={(e) => {
+                e.stopPropagation()
+                void handleCreate()
+              }}
+              loading={saving}
+              disabled={!name.trim()}
+            >
+              Hinzufügen
+            </Button>
+          )
+        }
+        if (editingKey === record.id) {
+          return (
+            <>
+              <Button
+                type="link"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  void saveEditing(record)
+                }}
+                style={{ padding: '4px 8px' }}
+              >
+                Speichern
+              </Button>
+              <Button
+                type="link"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  cancelEditing()
+                }}
+                style={{ padding: '4px 8px' }}
+              >
+                Abbrechen
+              </Button>
+            </>
+          )
         }
         return (
           <Button
-            type="primary"
-            onClick={() => void handleCreate()}
-            loading={saving}
-            disabled={!name.trim()}
+            type="link"
+            onClick={(e) => {
+              e.stopPropagation()
+              startEditing(record)
+            }}
           >
-            Hinzufügen
+            Bearbeiten
           </Button>
         )
       },
-      width: 120,
+      width: 160,
     },
   ]
 
@@ -139,12 +227,12 @@ export const SubjectTable: React.FC<SubjectTableProps> = ({
         }
         return {
           onClick: (event) => {
-            if (!shouldHandleNavigation(event)) {
+            if (editingKey !== null || !shouldHandleNavigation(event)) {
               return
             }
             onSelectSubject?.(record.id)
           },
-          style: { cursor: 'pointer' },
+          style: { cursor: editingKey !== null ? 'default' : 'pointer' },
         }
       }}
       locale={{

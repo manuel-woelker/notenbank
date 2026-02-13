@@ -31,12 +31,14 @@ describe('StudentTable', () => {
       () => ({}) as unknown as ReturnType<typeof message.error>
     )
     const onCreateStudent = vi.fn().mockResolvedValue(undefined)
+    const onUpdateStudent = vi.fn().mockResolvedValue(undefined)
 
     const { getByPlaceholderText, getByRole } = render(
       <StudentTable
         students={[]}
         loading={false}
         onCreateStudent={onCreateStudent}
+        onUpdateStudent={onUpdateStudent}
       />
     )
 
@@ -91,6 +93,7 @@ describe('StudentTable', () => {
         ]}
         loading={false}
         onCreateStudent={vi.fn()}
+        onUpdateStudent={vi.fn()}
         onSelectStudent={onSelectStudent}
       />
     )

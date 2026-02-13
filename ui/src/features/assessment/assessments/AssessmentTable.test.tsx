@@ -50,6 +50,7 @@ describe('AssessmentTable', () => {
         ]}
         loading={false}
         onCreateAssessment={vi.fn()}
+        onUpdateAssessment={vi.fn()}
         averageGradesByAssessmentId={{ 'a-1': 2.5 }}
       />
     )
@@ -96,6 +97,7 @@ describe('AssessmentTable', () => {
         ]}
         loading={false}
         onCreateAssessment={vi.fn()}
+        onUpdateAssessment={vi.fn()}
         onSelectAssessment={onSelectAssessment}
       />
     )
@@ -131,6 +133,7 @@ describe('AssessmentTable', () => {
         assessments={[]}
         loading={false}
         onCreateAssessment={onCreateAssessment}
+        onUpdateAssessment={vi.fn()}
       />
     )
 

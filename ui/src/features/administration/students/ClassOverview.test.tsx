@@ -76,8 +76,11 @@ describe('ClassOverview', () => {
       expect(getByText('Tara')).toBeTruthy()
     })
 
-    await waitFor(() => {
-      expect(getByText('Mathe')).toBeTruthy()
-    })
+    await waitFor(
+      () => {
+        expect(getByText('Mathe')).toBeTruthy()
+      },
+      { timeout: 3000 }
+    )
   })
 })

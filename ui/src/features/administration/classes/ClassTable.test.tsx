@@ -25,6 +25,7 @@ describe('ClassTable', () => {
       }) as unknown as CSSStyleDeclaration
     const onSelectClass = vi.fn()
     const onCreateClass = vi.fn().mockResolvedValue(undefined)
+    const onUpdateClass = vi.fn().mockResolvedValue(undefined)
     const classes = [
       {
         id: 'class-1',
@@ -40,6 +41,7 @@ describe('ClassTable', () => {
         loading={false}
         onSelectClass={onSelectClass}
         onCreateClass={onCreateClass}
+        onUpdateClass={onUpdateClass}
       />
     )
 
@@ -57,6 +59,7 @@ describe('ClassTable', () => {
     )
     const onSelectClass = vi.fn()
     const onCreateClass = vi.fn().mockResolvedValue(undefined)
+    const onUpdateClass = vi.fn().mockResolvedValue(undefined)
 
     const { container } = render(
       <ClassTable
@@ -64,6 +67,7 @@ describe('ClassTable', () => {
         loading={false}
         onSelectClass={onSelectClass}
         onCreateClass={onCreateClass}
+        onUpdateClass={onUpdateClass}
       />
     )
 

@@ -26,4 +26,5 @@ export interface StudentStoreValue {
   loading: boolean
   loadStudents: () => Promise<void>
   createStudent: (input: CreateStudentInput) => Promise<Student>
+  updateStudent: (id: string, updates: Partial<Student>) => Promise<Student>
 }

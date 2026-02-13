@@ -1,68 +1,49 @@
-import { createStore } from '../../../shared/store/jestor'
-import { CreateSubjectInput, Subject, SubjectStoreValue } from './SubjectTypes'
+import {
+  createEntityStore,
+  useEntityStore,
+} from '../../../shared/store/createEntityStore'
+import { Subject, CreateSubjectInput, SubjectStoreValue } from './SubjectTypes'
 import { subjectRepository } from './SubjectRepository'
 
-interface SubjectStoreState {
-  subjects: Subject[]
-  loading: boolean
-}
-
-export const subjectStore = createStore<SubjectStoreState>({
+const { store, loadAll, create } = createEntityStore<
+  Subject,
+  CreateSubjectInput
+>({
   name: 'subjects',
-  initialState: { subjects: [], loading: true },
-  init: () => {
-    void loadSubjects()
-  },
+  repository: subjectRepository,
+  autoLoad: true,
 })
 
-/**
- * Load all subjects from repository
- */
-export async function loadSubjects() {
-  subjectStore.update('subjects:load:start', (state) => {
-    state.loading = true
-  })
-  try {
-    const data = await subjectRepository.findAll()
-    subjectStore.update('subjects:load:success', (state) => {
-      state.subjects = data
-    })
-  } catch (error) {
-    console.error('Failed to load subjects:', error)
-    throw error
-  } finally {
-    subjectStore.update('subjects:load:finally', (state) => {
-      state.loading = false
-    })
-  }
-}
+export const subjectStore = store
+export const loadSubjects = loadAll
+export const createSubject = create
 
-/**
- * Create a new subject
- */
-const createSubject = async (input: CreateSubjectInput): Promise<Subject> => {
+const updateSubject = async (
+  subjectId: string,
+  updates: Partial<Subject>
+): Promise<Subject> => {
   try {
-    const newSubject = await subjectRepository.create(input)
-    subjectStore.update('subjects:create:success', (state) => {
-      state.subjects.push(newSubject)
+    const updated = await subjectRepository.update(subjectId, updates)
+    store.update('subjects:update:success', (state) => {
+      const index = state.entities.findIndex((s) => s.id === subjectId)
+      if (index >= 0) {
+        state.entities[index] = updated
+      }
     })
-    return newSubject
+    return updated
   } catch (error) {
-    console.error('Failed to create subject:', error)
+    console.error('Failed to update subject:', error)
     throw error
   }
 }
 
-/**
- * Hook to access subject store
- */
 export const useSubjectStore = (): SubjectStoreValue => {
-  const subjects = subjectStore.select.subjects()
-  const loading = subjectStore.select.loading()
+  const { entities, loading } = useEntityStore(store, loadAll, create)
   return {
-    subjects,
+    subjects: entities,
     loading,
     loadSubjects,
     createSubject,
+    updateSubject,
   }
 }

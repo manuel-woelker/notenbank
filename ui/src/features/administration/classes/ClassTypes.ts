@@ -22,4 +22,5 @@ export interface ClassStoreValue {
   loading: boolean
   loadClasses: () => Promise<void>
   createClass: (input: CreateClassInput) => Promise<Class>
+  updateClass: (id: string, updates: Partial<Class>) => Promise<Class>
 }

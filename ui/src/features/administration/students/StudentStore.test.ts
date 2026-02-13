@@ -16,10 +16,18 @@ describe('StudentStore', () => {
         studentRepository.delete(existingStudent.id)
       )
     )
-    studentStore.update('students:reset', (state) => {
-      state.students = []
-      state.loading = true
+    // Wait for any pending auto-load to complete, then reset state
+    await waitFor(() => {
+      const state = studentStore.getSnapshot()
+      return !state.loading
     })
+    studentStore.update(
+      'students:reset',
+      (state: { entities: unknown[]; loading: boolean }) => {
+        state.entities = []
+        state.loading = true
+      }
+    )
     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
   })
 

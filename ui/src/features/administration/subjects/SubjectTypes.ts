@@ -24,4 +24,5 @@ export interface SubjectStoreValue {
   loading: boolean
   loadSubjects: () => Promise<void>
   createSubject: (input: CreateSubjectInput) => Promise<Subject>
+  updateSubject: (id: string, updates: Partial<Subject>) => Promise<Subject>
 }

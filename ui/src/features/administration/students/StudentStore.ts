@@ -1,68 +1,49 @@
-import { createStore } from '../../../shared/store/jestor'
+import {
+  createEntityStore,
+  useEntityStore,
+} from '../../../shared/store/createEntityStore'
 import { Student, CreateStudentInput, StudentStoreValue } from './StudentTypes'
 import { studentRepository } from './StudentRepository'
 
-interface StudentStoreState {
-  students: Student[]
-  loading: boolean
-}
-
-export const studentStore = createStore<StudentStoreState>({
+const { store, loadAll, create } = createEntityStore<
+  Student,
+  CreateStudentInput
+>({
   name: 'students',
-  initialState: { students: [], loading: true },
-  init: () => {
-    void loadStudents()
-  },
+  repository: studentRepository,
+  autoLoad: true,
 })
 
-/**
- * Load all students from repository
- */
-export async function loadStudents() {
-  studentStore.update('students:load:start', (state) => {
-    state.loading = true
-  })
-  try {
-    const data = await studentRepository.findAll()
-    studentStore.update('students:load:success', (state) => {
-      state.students = data
-    })
-  } catch (error) {
-    console.error('Failed to load students:', error)
-    throw error
-  } finally {
-    studentStore.update('students:load:finally', (state) => {
-      state.loading = false
-    })
-  }
-}
+export const studentStore = store
+export const loadStudents = loadAll
+export const createStudent = create
 
-/**
- * Create a new student
- */
-const createStudent = async (input: CreateStudentInput): Promise<Student> => {
+const updateStudent = async (
+  studentId: string,
+  updates: Partial<Student>
+): Promise<Student> => {
   try {
-    const newStudent = await studentRepository.create(input)
-    studentStore.update('students:create:success', (state) => {
-      state.students.push(newStudent)
+    const updated = await studentRepository.update(studentId, updates)
+    store.update('students:update:success', (state) => {
+      const index = state.entities.findIndex((s) => s.id === studentId)
+      if (index >= 0) {
+        state.entities[index] = updated
+      }
     })
-    return newStudent
+    return updated
   } catch (error) {
-    console.error('Failed to create student:', error)
+    console.error('Failed to update student:', error)
     throw error
   }
 }
 
-/**
- * Hook to access student store
- */
 export const useStudentStore = (): StudentStoreValue => {
-  const students = studentStore.select.students()
-  const loading = studentStore.select.loading()
+  const { entities, loading } = useEntityStore(store, loadAll, create)
   return {
-    students,
+    students: entities,
     loading,
     loadStudents,
     createStudent,
+    updateStudent,
   }
 }

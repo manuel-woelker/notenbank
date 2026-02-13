@@ -31,12 +31,14 @@ describe('SubjectTable', () => {
       () => ({}) as unknown as ReturnType<typeof message.error>
     )
     const onCreateSubject = vi.fn().mockResolvedValue(undefined)
+    const onUpdateSubject = vi.fn().mockResolvedValue(undefined)
 
     const { getByPlaceholderText, getByRole } = render(
       <SubjectTable
         subjects={[]}
         loading={false}
         onCreateSubject={onCreateSubject}
+        onUpdateSubject={onUpdateSubject}
       />
     )
 
@@ -86,6 +88,7 @@ describe('SubjectTable', () => {
         ]}
         loading={false}
         onCreateSubject={vi.fn()}
+        onUpdateSubject={vi.fn()}
         onSelectSubject={onSelectSubject}
       />
     )
