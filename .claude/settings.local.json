@@ -46,7 +46,12 @@
       "Bash(git restore:*)",
       "Bash(git commit:*)",
       "Bash(COLUMNS=250 ../tool-tool.exe pnpm run test:coverage:*)",
-      "Bash(node -e:*)"
+      "Bash(node -e:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh auth:*)",
+      "WebFetch(domain:rxdb.info)",
+      "Bash(grep:*)",
+      "Bash(ls:*)"
     ]
   }
 }
