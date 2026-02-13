@@ -4,6 +4,7 @@ import {
   Button,
   Layout,
   Menu,
+  Spin,
   Switch,
   Tag,
   Tour,
@@ -96,6 +97,7 @@ and allows URLs to be bookmarked and shared.
 export function RootLayout() {
   const [collapsed, setCollapsed] = useState(false)
   const [dbSwitching, setDbSwitching] = useState(false)
+  const [resetting, setResetting] = useState(false)
   const [gitInfo, setGitInfo] = useState<GitInfo>(fallbackGitInfo)
   const [tourOpen, setTourOpen] = useState(false)
   const [tourCurrent, setTourCurrent] = useState(0)
@@ -531,6 +533,7 @@ export function RootLayout() {
       return
     }
     setDbSwitching(true)
+    setResetting(true)
     try {
       await resetExampleDatabase()
       await Promise.all([
@@ -543,6 +546,7 @@ export function RootLayout() {
       ])
     } finally {
       setDbSwitching(false)
+      setResetting(false)
     }
   }
 
@@ -576,6 +580,7 @@ export function RootLayout() {
   */
   return (
     <Layout style={{ height: '100vh', overflow: 'hidden' }}>
+      {resetting && <Spin fullscreen tip="Datenbank wird zurückgesetzt…" />}
       <Tour
         open={tourOpen}
         current={tourCurrent}
