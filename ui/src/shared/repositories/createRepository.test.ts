@@ -1,9 +1,8 @@
 import { z } from 'zod'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { IDBFactory } from 'fake-indexeddb'
 import type { BaseEntity, CreateInput } from './RepositoryTypes'
 import type { Repository } from './Repository'
-import { createRepository } from './createRepository'
+import { clearAllRepositoryCaches, createRepository } from './createRepository'
 
 interface TestEntity extends BaseEntity {
   name: string
@@ -27,9 +26,8 @@ describe('createRepository', () => {
     }),
   }
 
-  beforeEach(() => {
-    // Reset IndexedDB for each test
-    globalThis.indexedDB = new IDBFactory()
+  beforeEach(async () => {
+    await clearAllRepositoryCaches()
   })
 
   it('creates repository with all CRUD methods', () => {
@@ -38,7 +36,7 @@ describe('createRepository', () => {
       dbVersion: 1,
       storeName: 'test-entities',
       schemas,
-      indexes: [],
+      indexes: [{ name: 'name', keyPath: 'name', options: { unique: false } }],
     })
 
     expect(repository.findAll).toBeDefined()
@@ -59,7 +57,7 @@ describe('createRepository', () => {
       dbVersion: 1,
       storeName: 'test-entities',
       schemas,
-      indexes: [],
+      indexes: [{ name: 'name', keyPath: 'name', options: { unique: false } }],
     })
 
     // The repository should work even though instance is created lazily
@@ -77,7 +75,7 @@ describe('createRepository', () => {
       dbVersion: 1,
       storeName: 'test-entities',
       schemas,
-      indexes: [],
+      indexes: [{ name: 'name', keyPath: 'name', options: { unique: false } }],
     })
 
     // All methods should be accessible and defined
@@ -118,7 +116,7 @@ describe('createRepository', () => {
       dbVersion: 1,
       storeName: 'test-entities',
       schemas,
-      indexes: [],
+      indexes: [{ name: 'name', keyPath: 'name', options: { unique: false } }],
     })
 
     await repository.create({ name: 'DB1 Entity' })
@@ -139,8 +137,8 @@ describe('createRepository', () => {
   describe('CRUD operations work correctly', () => {
     let repository: Repository<TestEntity, CreateTestEntity>
 
-    beforeEach(() => {
-      globalThis.indexedDB = new IDBFactory()
+    beforeEach(async () => {
+      await clearAllRepositoryCaches()
       repository = createRepository<TestEntity, CreateTestEntity>({
         dbName: 'test-db',
         dbVersion: 1,
@@ -210,13 +208,15 @@ describe('createRepository', () => {
 
   describe('method binding', () => {
     it('methods can be destructured and called independently', async () => {
-      globalThis.indexedDB = new IDBFactory()
+      await clearAllRepositoryCaches()
       const repository = createRepository<TestEntity, CreateTestEntity>({
         dbName: 'test-db',
         dbVersion: 1,
         storeName: 'test-entities',
         schemas,
-        indexes: [],
+        indexes: [
+          { name: 'name', keyPath: 'name', options: { unique: false } },
+        ],
       })
 
       // Destructure methods

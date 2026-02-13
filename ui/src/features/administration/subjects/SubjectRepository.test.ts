@@ -1,10 +1,10 @@
 import { beforeAll, describe, expect, it } from 'vitest'
-import { IDBFactory } from 'fake-indexeddb'
+import { clearAllRepositoryCaches } from '../../../shared/repositories/createRepository'
 import { subjectRepository } from './SubjectRepository'
 
 describe('subjectRepository', () => {
-  beforeAll(() => {
-    globalThis.indexedDB = new IDBFactory()
+  beforeAll(async () => {
+    await clearAllRepositoryCaches()
   })
 
   it('creates and retrieves subjects for a class', async () => {

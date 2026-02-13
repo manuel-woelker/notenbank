@@ -219,11 +219,12 @@ export function createTrackingRepository<
 
 if (import.meta.vitest) {
   const { describe, it, expect, beforeEach, vi } = import.meta.vitest
-  const { IDBFactory } = await import('fake-indexeddb')
+  const { clearAllRepositoryCaches } =
+    await import('../repositories/createRepository')
 
   describe('createTrackingRepository', () => {
-    beforeEach(() => {
-      globalThis.indexedDB = new IDBFactory()
+    beforeEach(async () => {
+      await clearAllRepositoryCaches()
     })
 
     it('should track CREATE operations', async () => {

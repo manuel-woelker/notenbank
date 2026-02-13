@@ -1,18 +1,21 @@
 import { BaseEntity, CreateInput } from './RepositoryTypes'
 import { Repository, RepositorySchemas } from './Repository'
-import {
-  IndexedDBRepository,
-  RepositoryConfig,
-  inTransaction as inTransactionImpl,
-} from './IndexedDBRepository'
+import { type RepositoryConfig } from './IndexedDBRepository'
+import { RxDBRepository, destroyAllRxDatabases } from './RxDBRepository'
 
-/* 📖 # Why re-export inTransaction?
+/* 📖 # Why is inTransaction a no-op shim?
  *
- * Consumers should be able to use transaction batching without importing
- * directly from IndexedDBRepository. This keeps the repository abstraction
- * clean while exposing the performance optimization where needed.
+ * RxDB manages transactions internally. The export is kept for API
+ * compatibility but no callers depend on it (confirmed by grep).
  */
-export { inTransactionImpl as inTransaction }
+export async function inTransaction<T>(
+  _dbName: string,
+  _storeNames: string[],
+  _mode: IDBTransactionMode,
+  fn: () => Promise<T>
+): Promise<T> {
+  return fn()
+}
 
 type RepositoryConfigWithDynamicDb<
   T extends BaseEntity,
@@ -25,27 +28,25 @@ type CacheClearer = () => void
 
 const repositoryCacheClearers: CacheClearer[] = []
 
-/* 📖 # Why do we need a global cache registry?
+/* 📖 # Why is clearAllRepositoryCaches async?
  *
- * When `resetExampleDatabase()` deletes and recreates the IndexedDB database,
- * all repository instances still hold references to the old (closed) database
- * connection. We need a way to clear all cached instances so they can be
- * recreated with fresh connections to the new database.
+ * RxDB database instances must be destroyed (connections closed) before
+ * clearing the repository instance maps, otherwise stale connections
+ * would leak. The await ensures all databases are properly shut down
+ * before repositories are recreated on next access.
  */
-export function clearAllRepositoryCaches() {
+export async function clearAllRepositoryCaches() {
+  await destroyAllRxDatabases()
   repositoryCacheClearers.forEach((clearer) => clearer())
 }
 
 /* 📖 # Why use a lazy getter singleton pattern?
  *
- * IndexedDB initialization during module import can cause issues in test environments
- * where `indexedDB` needs to be mocked before repository creation.
+ * Repository initialization during module import can cause issues in test
+ * environments where `indexedDB` needs to be mocked before repository creation.
  *
  * By using getter methods that lazily instantiate the repository on first access,
- * we allow tests to set up `fake-indexeddb` before any IndexedDB operations occur.
- *
- * This pattern matches the existing ClassRepository implementation and ensures
- * backward compatibility.
+ * we allow tests to set up `fake-indexeddb` before any database operations occur.
  */
 
 /**
@@ -88,7 +89,7 @@ export function createRepository<
 >(config: RepositoryConfigWithDynamicDb<T, TCreate>): Repository<T, TCreate> {
   const schemas = config.schemas satisfies RepositorySchemas<T, TCreate>
   const { dbName, ...restConfig } = config
-  const instances = new Map<string, IndexedDBRepository<T, TCreate>>()
+  const instances = new Map<string, RxDBRepository<T, TCreate>>()
 
   const resolveDbName = () => (typeof dbName === 'function' ? dbName() : dbName)
 
@@ -98,7 +99,7 @@ export function createRepository<
     if (cached) {
       return cached
     }
-    const created = new IndexedDBRepository<T, TCreate>({
+    const created = new RxDBRepository<T, TCreate>({
       ...restConfig,
       dbName: resolvedDbName,
     })

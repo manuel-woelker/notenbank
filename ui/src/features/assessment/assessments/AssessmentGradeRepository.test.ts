@@ -1,11 +1,11 @@
 import { beforeAll, describe, expect, it } from 'vitest'
-import { IDBFactory } from 'fake-indexeddb'
+import { clearAllRepositoryCaches } from '../../../shared/repositories/createRepository'
 import { createGrade } from '../../../shared/Grade'
 import { assessmentGradeRepository } from './AssessmentGradeRepository'
 
 describe('assessmentGradeRepository', () => {
-  beforeAll(() => {
-    globalThis.indexedDB = new IDBFactory()
+  beforeAll(async () => {
+    await clearAllRepositoryCaches()
   })
 
   it('creates and retrieves grades for an assessment', async () => {

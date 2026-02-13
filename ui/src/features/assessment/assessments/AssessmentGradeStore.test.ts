@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { renderHook, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { IDBFactory } from 'fake-indexeddb'
+import { clearAllRepositoryCaches } from '../../../shared/repositories/createRepository'
 import { createGrade } from '../../../shared/Grade'
 import { assessmentGradeRepository } from './AssessmentGradeRepository'
 import {
@@ -14,7 +14,7 @@ describe('AssessmentGradeStore', () => {
   let consoleErrorSpy: ReturnType<typeof vi.spyOn>
 
   beforeEach(async () => {
-    globalThis.indexedDB = new IDBFactory()
+    await clearAllRepositoryCaches()
     const existingGrades = await assessmentGradeRepository.findAll()
     await Promise.all(
       existingGrades.map((existingGrade) =>

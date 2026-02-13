@@ -175,11 +175,12 @@ export const useChangeLogStore = () => {
 
 if (import.meta.vitest) {
   const { describe, it, expect, beforeEach } = import.meta.vitest
-  const { IDBFactory } = await import('fake-indexeddb')
+  const { clearAllRepositoryCaches } =
+    await import('../../shared/repositories/createRepository')
 
   describe('ChangeLogStore', () => {
-    beforeEach(() => {
-      globalThis.indexedDB = new IDBFactory()
+    beforeEach(async () => {
+      await clearAllRepositoryCaches()
       // Reset store state
       changeLogStore.update('test:reset', (state) => {
         state.changeLogs = []

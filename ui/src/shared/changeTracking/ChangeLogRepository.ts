@@ -154,11 +154,12 @@ export const changeLogRepository: ChangeLogRepository = createRepository<
 
 if (import.meta.vitest) {
   const { describe, it, expect, beforeEach } = import.meta.vitest
-  const { IDBFactory } = await import('fake-indexeddb')
+  const { clearAllRepositoryCaches } =
+    await import('../repositories/createRepository')
 
   describe('ChangeLogRepository', () => {
-    beforeEach(() => {
-      globalThis.indexedDB = new IDBFactory()
+    beforeEach(async () => {
+      await clearAllRepositoryCaches()
     })
 
     it('should create and retrieve a change log entry', async () => {

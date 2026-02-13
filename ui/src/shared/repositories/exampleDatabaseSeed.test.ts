@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { IDBFactory } from 'fake-indexeddb'
 import { setDatabaseMode } from '../store/databaseStore'
+import { clearAllRepositoryCaches } from './createRepository'
 import { classRepository } from '../../features/administration/classes/ClassRepository'
 import { studentRepository } from '../../features/administration/students/StudentRepository'
 import { subjectRepository } from '../../features/administration/subjects/SubjectRepository'
@@ -12,8 +12,8 @@ import {
 } from './exampleDatabaseSeed'
 
 describe('ensureExampleDatabaseSeeded', () => {
-  beforeEach(() => {
-    globalThis.indexedDB = new IDBFactory()
+  beforeEach(async () => {
+    await clearAllRepositoryCaches()
     setDatabaseMode('example')
   })
   afterEach(() => {

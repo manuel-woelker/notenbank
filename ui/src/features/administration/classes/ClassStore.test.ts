@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { renderHook, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { IDBFactory } from 'fake-indexeddb'
+import { clearAllRepositoryCaches } from '../../../shared/repositories/createRepository'
 import { classRepository } from './ClassRepository'
 import { classStore, loadClasses, useClassStore } from './ClassStore'
 
@@ -9,8 +9,8 @@ describe('ClassStore', () => {
   let consoleErrorSpy: ReturnType<typeof vi.spyOn>
 
   beforeEach(async () => {
-    // Reset IndexedDB for each test with a fresh instance
-    globalThis.indexedDB = new IDBFactory()
+    // Reset databases for each test
+    await clearAllRepositoryCaches()
     const existingClasses = await classRepository.findAll()
     await Promise.all(
       existingClasses.map((existingClass) =>

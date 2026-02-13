@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { render, waitFor, fireEvent, act } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { IDBFactory } from 'fake-indexeddb'
+import { clearAllRepositoryCaches } from '../../../shared/repositories/createRepository'
 import { classRepository } from '../classes/ClassRepository'
 import { studentRepository } from './StudentRepository'
 import { subjectRepository } from '../subjects/SubjectRepository'
@@ -40,7 +40,7 @@ const ensureAntdTestEnvironment = () => {
 describe('StudentGradesPage', () => {
   beforeEach(async () => {
     ensureAntdTestEnvironment()
-    globalThis.indexedDB = new IDBFactory()
+    await clearAllRepositoryCaches()
     const existingClasses = await classRepository.findAll()
     await Promise.all(
       existingClasses.map((existingClass) =>

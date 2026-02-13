@@ -5,6 +5,7 @@ import { subjectRepository } from '../../features/administration/subjects/Subjec
 import { assessmentRepository } from '../../features/assessment/assessments/AssessmentRepository'
 import { assessmentGradeRepository } from '../../features/assessment/assessments/AssessmentGradeRepository'
 import { clearAllRepositoryCaches } from './createRepository'
+import { removeRxDatabaseByName } from './RxDBRepository'
 import { NOTENBANK_EXAMPLE_DB_NAME } from './notenbankDb'
 import { getActiveDatabaseName } from '../store/databaseStore'
 
@@ -350,7 +351,7 @@ cache intact while guaranteeing a clean slate for reseeding.
 /* 📖 # Why completely delete and recreate the database?
  *
  * "Tabula Rasa" means a clean slate. Instead of deleting individual records,
- * we completely remove the IndexedDB database and recreate it from scratch.
+ * we completely remove the database and recreate it from scratch.
  * This ensures:
  * 1. All data is removed (including change logs from tracking)
  * 2. No orphaned records or indexes
@@ -362,28 +363,11 @@ export async function resetExampleDatabase() {
     return
   }
 
-  // Completely delete the database
-  await new Promise<void>((resolve, reject) => {
-    const request = indexedDB.deleteDatabase(NOTENBANK_EXAMPLE_DB_NAME)
-    request.onsuccess = () => resolve()
-    request.onerror = () => reject(request.error)
-    request.onblocked = () => {
-      /* 📖 # Why not resolve immediately when onblocked fires?
-      Resolving early would let the code continue before the database is
-      actually deleted, causing ensureExampleDatabaseSeeded to write into
-      a still-open (stale) database. We log a warning but keep the promise
-      pending — the onversionchange handler on each open IDBDatabase
-      connection will call db.close(), which unblocks the deletion and
-      triggers onsuccess shortly after.
-      */
-      console.warn(
-        'Database deletion blocked - open connections are being closed'
-      )
-    }
-  })
+  // Remove the example database (deletes all data permanently)
+  await removeRxDatabaseByName(NOTENBANK_EXAMPLE_DB_NAME)
 
   // Clear all repository caches so they reconnect to the fresh database
-  clearAllRepositoryCaches()
+  await clearAllRepositoryCaches()
 
   // Re-seed the fresh database
   await ensureExampleDatabaseSeeded()

@@ -29,6 +29,7 @@ export default defineConfig({
     globals: true,
     environment: 'happy-dom',
     isolate: false,
+    setupFiles: ['./src/testSetup.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],

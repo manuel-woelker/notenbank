@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { render, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { IDBFactory } from 'fake-indexeddb'
+import { clearAllRepositoryCaches } from '../../../shared/repositories/createRepository'
 import { classRepository } from '../classes/ClassRepository'
 import { studentRepository } from './StudentRepository'
 import { subjectRepository } from '../subjects/SubjectRepository'
@@ -19,7 +19,7 @@ vi.mock('@tanstack/react-router', async () => {
 
 describe('ClassOverview', () => {
   beforeEach(async () => {
-    globalThis.indexedDB = new IDBFactory()
+    await clearAllRepositoryCaches()
     const existingClasses = await classRepository.findAll()
     await Promise.all(
       existingClasses.map((existingClass) =>

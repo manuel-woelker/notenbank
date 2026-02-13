@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { render, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { IDBFactory } from 'fake-indexeddb'
+import { clearAllRepositoryCaches } from '../../../shared/repositories/createRepository'
 import { classRepository } from '../classes/ClassRepository'
 import { subjectRepository } from './SubjectRepository'
 import { assessmentRepository } from '../../assessment/assessments/AssessmentRepository'
@@ -37,7 +37,7 @@ describe('SubjectOverview', () => {
       ({
         getPropertyValue: () => '',
       }) as unknown as CSSStyleDeclaration
-    globalThis.indexedDB = new IDBFactory()
+    await clearAllRepositoryCaches()
     const existingClasses = await classRepository.findAll()
     await Promise.all(
       existingClasses.map((existingClass) =>

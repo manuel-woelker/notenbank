@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { renderHook, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { IDBFactory } from 'fake-indexeddb'
+import { clearAllRepositoryCaches } from '../../../shared/repositories/createRepository'
 import { subjectRepository } from './SubjectRepository'
 import { loadSubjects, subjectStore, useSubjectStore } from './SubjectStore'
 
@@ -9,7 +9,7 @@ describe('SubjectStore', () => {
   let consoleErrorSpy: ReturnType<typeof vi.spyOn>
 
   beforeEach(async () => {
-    globalThis.indexedDB = new IDBFactory()
+    await clearAllRepositoryCaches()
     const existingSubjects = await subjectRepository.findAll()
     await Promise.all(
       existingSubjects.map((existingSubject) =>

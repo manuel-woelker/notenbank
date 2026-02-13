@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { render, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { IDBFactory } from 'fake-indexeddb'
+import { clearAllRepositoryCaches } from '../../shared/repositories/createRepository'
 import { Dashboard } from './Dashboard'
 
 vi.mock('@tanstack/react-router', async () => {
@@ -35,8 +35,8 @@ window.getComputedStyle = () =>
   }) as unknown as CSSStyleDeclaration
 
 describe('Dashboard', () => {
-  beforeEach(() => {
-    globalThis.indexedDB = new IDBFactory()
+  beforeEach(async () => {
+    await clearAllRepositoryCaches()
   })
 
   it('renders the dashboard with class section', async () => {
