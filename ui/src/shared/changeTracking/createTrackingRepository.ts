@@ -93,8 +93,9 @@ export function createTrackingRepository<
       // Execute the create operation
       const entities = await repository.createMultiple(dataArray)
 
-      // Log each change (errors are caught and logged but don't break the operation)
-      await Promise.all(
+      // Log all changes using createMultiple for efficiency
+      const now = new Date()
+      const changeLogInputs = await Promise.all(
         entities.map(async (entity) => {
           try {
             const context = await extractContext(
@@ -107,24 +108,38 @@ export function createTrackingRepository<
               'CREATE',
               entity
             )
-            const now = new Date()
 
-            await changeLogRepository.create({
+            return {
               timestamp: now,
               userId: 'System', // TODO: Replace with actual user when authentication is implemented
-              operation: 'CREATE',
+              operation: 'CREATE' as const,
               entityType,
               entityId: entity.id,
               entityData: entity,
               description,
               ...context,
-            })
+            }
           } catch (error) {
-            // Log error but don't break the main operation
+            // Log error but don't break the operation
             console.error(`Failed to log CREATE for ${entityType}:`, error)
+            return null
           }
         })
       )
+
+      // Filter out any nulls from failed context extraction
+      const validChangeLogInputs = changeLogInputs.filter(
+        (input): input is NonNullable<typeof input> => input !== null
+      )
+
+      if (validChangeLogInputs.length > 0) {
+        try {
+          await changeLogRepository.createMultiple(validChangeLogInputs)
+        } catch (error) {
+          // Log error but don't break the operation
+          console.error(`Failed to log CREATE for ${entityType}:`, error)
+        }
+      }
 
       return entities
     },
