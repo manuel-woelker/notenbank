@@ -30,6 +30,9 @@ export default defineConfig({
     environment: 'happy-dom',
     isolate: false,
     setupFiles: ['./src/testSetup.ts'],
+    reporters: process.env.CI
+      ? ['default', 'verbose', 'github-actions']
+      : ['default'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],
