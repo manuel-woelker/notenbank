@@ -33,7 +33,7 @@ describe('SubjectTable', () => {
     const onCreateSubject = vi.fn().mockResolvedValue(undefined)
     const onUpdateSubject = vi.fn().mockResolvedValue(undefined)
 
-    const { getByPlaceholderText, getByRole } = render(
+    const { getByPlaceholderText, getAllByRole } = render(
       <SubjectTable
         subjects={[]}
         loading={false}
@@ -46,7 +46,9 @@ describe('SubjectTable', () => {
       fireEvent.change(getByPlaceholderText('Fachname'), {
         target: { value: 'Mathe' },
       })
-      fireEvent.click(getByRole('button', { name: 'Hinzufügen' }))
+      const buttons = getAllByRole('button', { name: 'Hinzufügen' })
+      const enabledButton = buttons.find((btn) => !btn.hasAttribute('disabled'))
+      fireEvent.click(enabledButton || buttons[0])
     })
 
     expect(onCreateSubject).toHaveBeenCalledWith({

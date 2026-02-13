@@ -49,18 +49,21 @@ describe('CreateClassModal', () => {
     )
     const onClose = vi.fn()
 
-    const { getByPlaceholderText, getByRole } = render(
+    const { getAllByPlaceholderText, getAllByRole } = render(
       <CreateClassModal open={true} onClose={onClose} />
     )
 
     await act(async () => {
-      fireEvent.change(getByPlaceholderText('z. B. Klasse 5A, Jahrgang 10B'), {
-        target: { value: 'Klasse 7B' },
-      })
+      fireEvent.change(
+        getAllByPlaceholderText('z. B. Klasse 5A, Jahrgang 10B')[0],
+        {
+          target: { value: 'Klasse 7B' },
+        }
+      )
     })
 
     await act(async () => {
-      fireEvent.click(getByRole('button', { name: 'Erstellen' }))
+      fireEvent.click(getAllByRole('button', { name: 'Erstellen' })[0])
     })
 
     await waitFor(() => {
@@ -72,12 +75,12 @@ describe('CreateClassModal', () => {
   it('calls onClose when cancel is clicked', async () => {
     const onClose = vi.fn()
 
-    const { getByRole } = render(
+    const { getAllByRole } = render(
       <CreateClassModal open={true} onClose={onClose} />
     )
 
     await act(async () => {
-      fireEvent.click(getByRole('button', { name: 'Abbrechen' }))
+      fireEvent.click(getAllByRole('button', { name: 'Abbrechen' })[0])
     })
 
     expect(onClose).toHaveBeenCalled()

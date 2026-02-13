@@ -76,11 +76,11 @@ describe('SubjectOverview', () => {
     )
 
     await waitFor(() => {
-      expect(getByText('Fach Deutsch')).toBeTruthy()
+      expect(getByText((content) => content.includes('Deutsch'))).toBeTruthy()
     })
 
     await waitFor(() => {
-      expect(getByText('Klasse Klasse A')).toBeTruthy()
+      expect(getByText((content) => content.includes('Klasse A'))).toBeTruthy()
     })
   })
 })

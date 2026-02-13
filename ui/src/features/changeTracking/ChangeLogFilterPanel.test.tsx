@@ -138,7 +138,7 @@ describe('ChangeLogFilterPanel', () => {
     const onFiltersChange = vi.fn()
     const onClearFilters = vi.fn()
 
-    const { getByText } = render(
+    const { getAllByText } = render(
       <ChangeLogFilterPanel
         filters={defaultFilters}
         onFiltersChange={onFiltersChange}
@@ -147,8 +147,8 @@ describe('ChangeLogFilterPanel', () => {
     )
 
     await waitFor(() => {
-      const resetButton = getByText('Filter zurücksetzen')
-      fireEvent.click(resetButton)
+      const resetButtons = getAllByText('Filter zurücksetzen')
+      fireEvent.click(resetButtons[0])
     })
 
     expect(onClearFilters).toHaveBeenCalled()

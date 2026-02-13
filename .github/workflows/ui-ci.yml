@@ -12,6 +12,11 @@ on:
       - 'ui/**'
       - '.github/workflows/ui-ci.yml'
 
+permissions:
+  contents: read
+  actions: read
+  checks: write
+
 jobs:
   ui-checks:
     name: UI Build, Test, Lint & Format Check
@@ -66,7 +71,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: ui/test-results.json
+          path: ui/test-results.xml
           retention-days: 30
 
       # Upload coverage report
@@ -78,21 +83,11 @@ jobs:
           path: ui/coverage/
           retention-days: 30
 
-      # Generate test summary
-      - name: Test Summary
+      - name: Test Report
         if: always()
-        run: |
-          echo "## Test Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          if [ -f test-results.json ]; then
-            echo "✅ Tests completed. See artifacts for detailed results." >> $GITHUB_STEP_SUMMARY
-          else
-            echo "❌ Test results file not found." >> $GITHUB_STEP_SUMMARY
-          fi
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Coverage Report" >> $GITHUB_STEP_SUMMARY
-          if [ -d coverage ]; then
-            echo "📊 Coverage report available in artifacts." >> $GITHUB_STEP_SUMMARY
-          else
-            echo "⚠️ Coverage report not generated." >> $GITHUB_STEP_SUMMARY
-          fi
+        uses: dorny/test-reporter@v2
+        with:
+          name: Vitest Tests
+          path: test-results.xml
+          reporter: jest-junit
+          fail-on-error: false

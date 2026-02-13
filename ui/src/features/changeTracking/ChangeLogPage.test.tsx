@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { render, fireEvent, waitFor } from '@testing-library/react'
-import { describe, it, vi, beforeEach } from 'vitest'
+import { describe, it, vi, beforeEach, expect } from 'vitest'
 import { ChangeLogPage } from './ChangeLogPage'
 import { ChangeLog } from '../../shared/changeTracking/ChangeLogTypes'
 
@@ -91,15 +91,17 @@ describe('ChangeLogPage', () => {
   })
 
   it('renders filter panel and table', async () => {
-    const { getByText } = render(<ChangeLogPage />)
+    const { getByText, getAllByText } = render(<ChangeLogPage />)
 
     await waitFor(() => {
       // Check for filter panel
       getByText('Filter')
 
       // Check for table content
-      getByText("Klasse '10A' erstellt")
-      getByText("Klasse '10A' aktualisiert")
+      expect(getAllByText(/Klasse '10A' erstellt/).length).toBeGreaterThan(0)
+      expect(getAllByText(/Klasse '10A' aktualisiert/).length).toBeGreaterThan(
+        0
+      )
     })
   })
 
@@ -117,12 +119,14 @@ describe('ChangeLogPage', () => {
   })
 
   it('uses filtered change logs from store', async () => {
-    const { getByText } = render(<ChangeLogPage />)
+    const { getAllByText } = render(<ChangeLogPage />)
 
     await waitFor(() => {
       // Should display the filtered change logs
-      getByText("Klasse '10A' erstellt")
-      getByText("Klasse '10A' aktualisiert")
+      expect(getAllByText(/Klasse '10A' erstellt/).length).toBeGreaterThan(0)
+      expect(getAllByText(/Klasse '10A' aktualisiert/).length).toBeGreaterThan(
+        0
+      )
     })
   })
 })

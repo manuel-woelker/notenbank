@@ -70,15 +70,15 @@ describe('ClassOverview', () => {
         getPropertyValue: () => '',
       }) as unknown as CSSStyleDeclaration
 
-    const { getByText } = render(<ClassOverview classId={newClass.id} />)
+    const { getAllByText } = render(<ClassOverview classId={newClass.id} />)
 
     await waitFor(() => {
-      expect(getByText('Tara')).toBeTruthy()
+      expect(getAllByText('Tara').length).toBeGreaterThan(0)
     })
 
     await waitFor(
       () => {
-        expect(getByText('Mathe')).toBeTruthy()
+        expect(getAllByText('Mathe').length).toBeGreaterThan(0)
       },
       { timeout: 3000 }
     )

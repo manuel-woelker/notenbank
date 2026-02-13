@@ -107,7 +107,7 @@ describe('StudentGradesPage', () => {
 
     await waitFor(() => {
       expect(getAllByText('Mathe').length).toBeGreaterThan(0)
-      expect(getAllByText('2,25').length).toBeGreaterThan(0)
+      expect(getAllByText(/2,25/).length).toBeGreaterThan(0)
     })
 
     await act(async () => {

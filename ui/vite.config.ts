@@ -31,8 +31,11 @@ export default defineConfig({
     isolate: false,
     setupFiles: ['./src/testSetup.ts'],
     reporters: process.env.CI
-      ? ['default', 'verbose', 'github-actions']
-      : ['default'],
+      ? ['default', 'verbose', 'github-actions', 'junit']
+      : ['default', 'verbose'],
+    outputFile: {
+      junit: 'test-results.xml',
+    },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],

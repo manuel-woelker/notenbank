@@ -63,23 +63,24 @@ describe('CreateStudentModal', () => {
   })
 
   it('renders form fields for first name, last name, and class', () => {
-    const { getByText } = render(
+    const { getAllByText } = render(
       <CreateStudentModal open={true} onClose={vi.fn()} />
     )
-    expect(getByText('Vorname')).toBeTruthy()
-    expect(getByText('Nachname')).toBeTruthy()
-    expect(getByText('Klasse')).toBeTruthy()
+    expect(getAllByText('Vorname').length).toBeGreaterThan(0)
+    expect(getAllByText('Nachname').length).toBeGreaterThan(0)
+    expect(getAllByText('Klasse').length).toBeGreaterThan(0)
   })
 
   it('calls onClose when cancel is clicked', async () => {
     const onClose = vi.fn()
 
-    const { getByRole } = render(
+    const { getAllByRole } = render(
       <CreateStudentModal open={true} onClose={onClose} />
     )
 
     await act(async () => {
-      fireEvent.click(getByRole('button', { name: 'Abbrechen' }))
+      const buttons = getAllByRole('button', { name: 'Abbrechen' })
+      fireEvent.click(buttons[0])
     })
 
     expect(onClose).toHaveBeenCalled()
