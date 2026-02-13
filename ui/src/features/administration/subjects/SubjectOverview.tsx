@@ -10,6 +10,7 @@ import { useDatabaseStore } from '../../../shared/store/databaseStore'
 import { buildClassRouteSegment } from '../../../shared/routes/classRoute'
 import { buildSubjectRouteSegment } from '../../../shared/routes/subjectRoute'
 import { buildAssessmentRouteSegment } from '../../../shared/routes/assessmentRoute'
+import { combineLoading } from '../../../shared/store/combineLoading'
 
 const { Title, Text } = Typography
 
@@ -28,11 +29,7 @@ export const SubjectOverview: React.FC<SubjectOverviewProps> = ({
   const navigate = useNavigate()
   const { classes, loading: classesLoading } = useClassStore()
   const { subjects, loading: subjectsLoading } = useSubjectStore()
-  const {
-    assessments,
-    loading: assessmentsLoading,
-    createAssessment,
-  } = useAssessmentStore()
+  const { assessments, createAssessment } = useAssessmentStore()
   const { assessmentGrades, loading: gradesLoading } = useAssessmentGradeStore()
   const { isExample } = useDatabaseStore()
 
@@ -84,8 +81,11 @@ export const SubjectOverview: React.FC<SubjectOverviewProps> = ({
     return averages
   }, [assessmentGrades, subjectAssessments])
 
-  const isLoading =
-    classesLoading || subjectsLoading || assessmentsLoading || gradesLoading
+  const isLoading = combineLoading(
+    classesLoading,
+    subjectsLoading,
+    gradesLoading
+  )
 
   const handleCreateAssessment = async (
     input: Parameters<typeof createAssessment>[0]

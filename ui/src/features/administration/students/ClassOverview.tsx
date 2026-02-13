@@ -10,6 +10,7 @@ import { useDatabaseStore } from '../../../shared/store/databaseStore'
 import { buildClassRouteSegment } from '../../../shared/routes/classRoute'
 import { buildSubjectRouteSegment } from '../../../shared/routes/subjectRoute'
 import { buildStudentRouteSegment } from '../../../shared/routes/studentRoute'
+import { combineLoading } from '../../../shared/store/combineLoading'
 
 const { Title, Text } = Typography
 
@@ -72,8 +73,8 @@ export const ClassOverview: React.FC<ClassOverviewProps> = ({ classId }) => {
     [subjects, classId]
   )
 
-  const isLoading = classesLoading || studentsLoading
-  const subjectsAreLoading = classesLoading || subjectsLoading
+  const isLoading = combineLoading(classesLoading, studentsLoading)
+  const subjectsAreLoading = combineLoading(classesLoading, subjectsLoading)
 
   return (
     <Space orientation="vertical" size="large" style={{ width: '100%' }}>

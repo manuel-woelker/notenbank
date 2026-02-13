@@ -12,6 +12,7 @@ import type {
   AssessmentType,
 } from '../../assessment/assessments/AssessmentTypes'
 import { useAssessmentGradeStore } from '../../assessment/assessments/AssessmentGradeStore'
+import { combineLoading } from '../../../shared/store/combineLoading'
 
 const { Title, Text } = Typography
 
@@ -59,7 +60,7 @@ export const StudentGradesPage: React.FC<StudentGradesPageProps> = ({
   const { classes, loading: classesLoading } = useClassStore()
   const { students, loading: studentsLoading } = useStudentStore()
   const { subjects, loading: subjectsLoading } = useSubjectStore()
-  const { assessments, loading: assessmentsLoading } = useAssessmentStore()
+  const { assessments } = useAssessmentStore()
   const { assessmentGrades, loading: gradesLoading } = useAssessmentGradeStore()
   const [userSelectedSubjectId, setUserSelectedSubjectId] = useState<
     string | null
@@ -159,12 +160,12 @@ export const StudentGradesPage: React.FC<StudentGradesPageProps> = ({
       .sort((a, b) => b.date.getTime() - a.date.getTime())
   }, [studentGradesBySubject, resolvedSubjectId, selectedSubject])
 
-  const isLoading =
-    classesLoading ||
-    studentsLoading ||
-    subjectsLoading ||
-    assessmentsLoading ||
+  const isLoading = combineLoading(
+    classesLoading,
+    studentsLoading,
+    subjectsLoading,
     gradesLoading
+  )
 
   const subjectColumns: ColumnsType<SubjectGradeRow> = [
     {

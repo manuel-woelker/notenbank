@@ -20,6 +20,7 @@ import { useAssessmentGradeStore } from './AssessmentGradeStore'
 import { Grade, gradeToString } from '../../../shared/Grade'
 import { GradingCurveConfig, generateGradingTable } from './GradingCurve'
 import { trackAssessmentUsage } from '../../dashboard/recentAssessments/RecentAssessmentStore'
+import { combineLoading } from '../../../shared/store/combineLoading'
 
 const { Title, Text } = Typography
 
@@ -102,12 +103,13 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
     return average.toFixed(2).replace('.', ',')
   }, [assessmentGrades, assessmentId])
 
-  const isLoading =
-    classesLoading ||
-    subjectsLoading ||
-    studentsLoading ||
-    assessmentsLoading ||
+  const isLoading = combineLoading(
+    classesLoading,
+    subjectsLoading,
+    studentsLoading,
+    assessmentsLoading,
     gradesLoading
+  )
 
   const gradingCurve = selectedAssessment?.gradingCurve ?? null
   const gradingCurveEnabled = Boolean(gradingCurve)
