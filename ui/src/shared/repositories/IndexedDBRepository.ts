@@ -177,7 +177,17 @@ export class IndexedDBRepository<
       const request = indexedDB.open(this.config.dbName, this.config.dbVersion)
 
       request.onerror = () => reject(request.error)
-      request.onsuccess = () => resolve(request.result)
+      request.onsuccess = () => {
+        const db = request.result
+        /* 📖 # Why handle onversionchange on the database connection?
+        When another context (e.g. resetExampleDatabase) calls deleteDatabase or
+        opens a higher version, IndexedDB fires versionchange on all open
+        connections. Without closing here the deletion is blocked indefinitely,
+        causing the onblocked event and a stale database handle.
+        */
+        db.onversionchange = () => db.close()
+        resolve(db)
+      }
 
       request.onupgradeneeded = (event) => {
         const db = (event.target as IDBOpenDBRequest).result

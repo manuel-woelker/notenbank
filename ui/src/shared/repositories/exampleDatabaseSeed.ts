@@ -368,11 +368,17 @@ export async function resetExampleDatabase() {
     request.onsuccess = () => resolve()
     request.onerror = () => reject(request.error)
     request.onblocked = () => {
+      /* 📖 # Why not resolve immediately when onblocked fires?
+      Resolving early would let the code continue before the database is
+      actually deleted, causing ensureExampleDatabaseSeeded to write into
+      a still-open (stale) database. We log a warning but keep the promise
+      pending — the onversionchange handler on each open IDBDatabase
+      connection will call db.close(), which unblocks the deletion and
+      triggers onsuccess shortly after.
+      */
       console.warn(
-        'Database deletion blocked - close other tabs using this database'
+        'Database deletion blocked - open connections are being closed'
       )
-      // Still resolve - the database will be deleted once unblocked
-      resolve()
     }
   })
 
