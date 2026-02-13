@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { render, fireEvent, act } from '@testing-library/react'
+import { render, fireEvent, act, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { message } from 'antd'
 import { AssessmentTable } from './AssessmentTable'
@@ -128,7 +128,7 @@ describe('AssessmentTable', () => {
     )
     const onCreateAssessment = vi.fn().mockResolvedValue(undefined)
 
-    const { container, getByRole, getAllByLabelText, getByText } = render(
+    const { container, getAllByLabelText, getByText } = render(
       <AssessmentTable
         assessments={[]}
         loading={false}
@@ -136,6 +136,8 @@ describe('AssessmentTable', () => {
         onUpdateAssessment={vi.fn()}
       />
     )
+
+    const { getByRole: getByRoleInContainer } = within(container)
 
     // Use container query to find the input within the rendered component
     // This avoids issues with multiple elements from other tests when isolate: false
@@ -153,7 +155,7 @@ describe('AssessmentTable', () => {
     })
 
     await act(async () => {
-      fireEvent.mouseDown(getByRole('combobox'))
+      fireEvent.mouseDown(getByRoleInContainer('combobox'))
     })
 
     await act(async () => {
@@ -170,7 +172,7 @@ describe('AssessmentTable', () => {
     })
 
     await act(async () => {
-      fireEvent.click(getByRole('button', { name: 'Hinzufügen' }))
+      fireEvent.click(getByRoleInContainer('button', { name: 'Hinzufügen' }))
     })
 
     expect(onCreateAssessment).toHaveBeenCalledWith(

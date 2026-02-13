@@ -1,7 +1,8 @@
 import 'fake-indexeddb/auto'
-import { beforeEach } from 'vitest'
+import { beforeEach, afterEach } from 'vitest'
 import { IDBFactory } from 'fake-indexeddb'
 import { clearAllRepositoryCaches } from './shared/repositories/createRepository'
+import { cleanup } from '@testing-library/react'
 
 /* 📖 # Why reset IndexedDB globally before each test?
  *
@@ -13,4 +14,14 @@ import { clearAllRepositoryCaches } from './shared/repositories/createRepository
 beforeEach(async () => {
   await clearAllRepositoryCaches()
   globalThis.indexedDB = new IDBFactory()
+})
+
+/* 📖 # Why cleanup DOM after each test?
+ *
+ * Tests using happy-dom don't automatically clean up the DOM between tests.
+ * Without cleanup, queries like getByRole() may find elements from previous
+ * tests, causing "Found multiple elements" errors in CI.
+ */
+afterEach(() => {
+  cleanup()
 })
