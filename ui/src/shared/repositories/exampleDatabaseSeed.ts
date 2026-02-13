@@ -5,7 +5,7 @@ import { subjectRepository } from '../../features/administration/subjects/Subjec
 import { assessmentRepository } from '../../features/assessment/assessments/AssessmentRepository'
 import { assessmentGradeRepository } from '../../features/assessment/assessments/AssessmentGradeRepository'
 import { clearAllRepositoryCaches } from './createRepository'
-import { removeRxDatabaseByName } from './RxDBRepository'
+import { removeTinyBaseDatabaseByName } from './TinyBaseRepository'
 import { NOTENBANK_EXAMPLE_DB_NAME } from './notenbankDb'
 import { getActiveDatabaseName } from '../store/databaseStore'
 
@@ -364,7 +364,7 @@ export async function resetExampleDatabase() {
   }
 
   // Remove the example database (deletes all data permanently)
-  await removeRxDatabaseByName(NOTENBANK_EXAMPLE_DB_NAME)
+  await removeTinyBaseDatabaseByName(NOTENBANK_EXAMPLE_DB_NAME)
 
   // Clear all repository caches so they reconnect to the fresh database
   await clearAllRepositoryCaches()

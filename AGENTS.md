@@ -99,7 +99,7 @@ When implementing new features, refer to the relevant use case documentation in 
 Every code change must be accompanied by an entry in the development journal. Create or append to a file at `docs/journal/YYYY-MM-DD.md` using the following format:
 
 ```markdown
-### HH:MM - [Synopsis of the change]
+### HH:MM - [Synopsis of the change] [Name of agent/model and version]
 
 **User Prompt:**
 [The exact user request]

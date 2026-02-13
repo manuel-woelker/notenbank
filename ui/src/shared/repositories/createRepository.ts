@@ -1,12 +1,16 @@
 import { BaseEntity, CreateInput } from './RepositoryTypes'
 import { Repository, RepositorySchemas } from './Repository'
-import { type RepositoryConfig } from './IndexedDBRepository'
-import { RxDBRepository, destroyAllRxDatabases } from './RxDBRepository'
+import {
+  TinyBaseRepository,
+  destroyAllTinyBaseStores,
+  type RepositoryConfig,
+  type IndexConfig,
+} from './TinyBaseRepository'
 
 /* 📖 # Why is inTransaction a no-op shim?
  *
- * RxDB manages transactions internally. The export is kept for API
- * compatibility but no callers depend on it (confirmed by grep).
+ * TinyBase manages transactions internally via store.transaction().
+ * The export is kept for API compatibility but no callers depend on it.
  */
 export async function inTransaction<T>(
   _dbName: string,
@@ -30,13 +34,12 @@ const repositoryCacheClearers: CacheClearer[] = []
 
 /* 📖 # Why is clearAllRepositoryCaches async?
  *
- * RxDB database instances must be destroyed (connections closed) before
- * clearing the repository instance maps, otherwise stale connections
- * would leak. The await ensures all databases are properly shut down
- * before repositories are recreated on next access.
+ * TinyBase persisters must be stopped and destroyed before clearing the cache,
+ * otherwise auto-save subscriptions would leak. The await ensures all
+ * persisters are properly shut down before repositories are recreated.
  */
 export async function clearAllRepositoryCaches() {
-  await destroyAllRxDatabases()
+  await destroyAllTinyBaseStores()
   repositoryCacheClearers.forEach((clearer) => clearer())
 }
 
@@ -89,7 +92,7 @@ export function createRepository<
 >(config: RepositoryConfigWithDynamicDb<T, TCreate>): Repository<T, TCreate> {
   const schemas = config.schemas satisfies RepositorySchemas<T, TCreate>
   const { dbName, ...restConfig } = config
-  const instances = new Map<string, RxDBRepository<T, TCreate>>()
+  const instances = new Map<string, TinyBaseRepository<T, TCreate>>()
 
   const resolveDbName = () => (typeof dbName === 'function' ? dbName() : dbName)
 
@@ -99,7 +102,7 @@ export function createRepository<
     if (cached) {
       return cached
     }
-    const created = new RxDBRepository<T, TCreate>({
+    const created = new TinyBaseRepository<T, TCreate>({
       ...restConfig,
       dbName: resolvedDbName,
     })
@@ -134,3 +137,5 @@ export function createRepository<
     },
   }
 }
+
+export type { RepositoryConfig, IndexConfig }
