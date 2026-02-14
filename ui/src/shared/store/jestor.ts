@@ -14,6 +14,22 @@ declare global {
   }
 }
 
+/* 📖 # Why maintain a global Jestor store reset registry?
+ *
+ * With isolate: false in Vitest, module-level singletons (including Jestor stores)
+ * persist across test files. The `hasInitialized` guard prevents stores from
+ * reloading after clearAllRepositoryCaches() resets the data layer, causing tests
+ * that run after others to see stale or empty state.
+ *
+ * Registering a reset function for every store lets clearAllRepositoryCaches()
+ * perform a full reset — data layer AND state layer — so each test starts clean.
+ */
+const jestorStoreResetters: (() => void)[] = []
+
+export function resetAllJestorStores(): void {
+  jestorStoreResetters.forEach((fn) => fn())
+}
+
 /**
  * Core store interface that provides state management capabilities
  * @template STATE - The shape of the application state
@@ -335,6 +351,24 @@ export function createStore<
     for (const key in init.derivedState) {
       selectors[key] = createSelectorHook((state) => state[key])
     }
+  }
+
+  function reset(): void {
+    baseState = init.initialState
+    hasInitialized = false
+    updateCombinedState()
+    subscribers.forEach((sub) => sub())
+  }
+
+  /* 📖 # Why only register stores that have an init function for reset?
+   *
+   * Only data-loading stores (those with an init hook) need to be reset between
+   * tests. Configuration stores like databaseStore have no init and must NOT be
+   * reset — resetting them would wipe out test-level configuration (e.g. the
+   * active database mode) mid-test and cause unrelated failures.
+   */
+  if (init.init) {
+    jestorStoreResetters.push(reset)
   }
 
   return {

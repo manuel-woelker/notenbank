@@ -6,6 +6,7 @@ import {
   type RepositoryConfig,
   type IndexConfig,
 } from './TinyBaseRepository'
+import { resetAllJestorStores } from '../store/jestor'
 
 /* 📖 # Why is inTransaction a no-op shim?
  *
@@ -39,6 +40,7 @@ const repositoryCacheClearers: CacheClearer[] = []
  * persisters are properly shut down before repositories are recreated.
  */
 export async function clearAllRepositoryCaches() {
+  resetAllJestorStores()
   await destroyAllTinyBaseStores()
   repositoryCacheClearers.forEach((clearer) => clearer())
 }
