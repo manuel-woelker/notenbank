@@ -91,6 +91,6 @@ jobs:
         uses: dorny/test-reporter@v2
         with:
           name: Vitest Tests
-          path: test-results.xml
+          path: ui/test-results.xml
           reporter: jest-junit
           fail-on-error: false
