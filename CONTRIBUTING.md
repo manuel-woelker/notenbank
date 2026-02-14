@@ -39,12 +39,12 @@ The UI follows a **use-case based** (feature-first) folder structure. All files 
 
 ```
 ui/src/features/<domain>/<entity>/
-├── *Repository.ts       # Data access layer
-├── *Types.ts            # TypeScript interfaces
-├── *Store.ts            # State management
-├── *Table.tsx           # Table component
-├── *List.tsx            # List page component
-└── Create*Modal.tsx     # Creation modal
+├── <Entity>Repository.ts       # Data access layer
+├── <Entity>Types.ts            # TypeScript interfaces
+├── <Entity>Store.ts            # State management
+├── <Entity>Table.tsx           # Table component
+├── <Entity>Page.tsx            # Page component
+└── Create<Entity>Modal.tsx     # Creation modal
 ```
 
 When adding new entities, follow this same pattern.
