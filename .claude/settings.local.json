@@ -51,7 +51,8 @@
       "Bash(gh auth:*)",
       "WebFetch(domain:rxdb.info)",
       "Bash(grep:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(wc:*)"
     ]
   }
 }
