@@ -2,7 +2,16 @@ import 'fake-indexeddb/auto'
 import { beforeEach, afterEach } from 'vitest'
 import { IDBFactory } from 'fake-indexeddb'
 import { clearAllRepositoryCaches } from './shared/repositories/createRepository'
-import { cleanup } from '@testing-library/react'
+import { cleanup, configure } from '@testing-library/react'
+
+/* 📖 # Why increase the global waitFor timeout?
+ *
+ * The default @testing-library/react waitFor timeout is 1000ms. CI runners are
+ * slower than local dev machines, causing async TinyBase/IndexedDB operations to
+ * exceed this limit. Setting a higher timeout ensures both environments behave
+ * consistently without making individual tests artificially fast-path dependent.
+ */
+configure({ asyncUtilTimeout: 5000 })
 
 /* 📖 # Why reset IndexedDB globally before each test?
  *
