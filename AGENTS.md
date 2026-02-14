@@ -123,6 +123,10 @@ The time should be in local time.
 
 This journal provides a chronological record of development decisions and context that isn't captured in code comments or commit messages. It helps future maintainers understand the "why" behind changes.
 
+Journal entries should be appended in chronological order, older entries at the top, new entries at the bottom.
+
+**Important:** When writing journal entries, use the correct model identifier. Check your system information to determine your actual model ID (e.g., `opencode/kimi-k2.5-free`, `claude-sonnet-4`, etc.). Do not copy model IDs from previous entries without verification, as different agents may be used for different tasks.
+
 ## State Management
 
 Use the in-repo Jestor helper at `ui/src/shared/store/jestor.ts` for shared UI state.
@@ -186,7 +190,9 @@ Also run `../tool-tool.exe pnpm run check` to ensure the tests pass and the code
 
 ## Commit messages
 
-Commit message should be in the "Conventional Commits" format, e.g. "feat(UI): Add about button to see version and build date"
+Commit message should be in the "Conventional Commits" format, e.g. "feat(UI): Add about button to see version and build date".
+
+Below the first line include detail information about the changes made.
 
 Never push code or ask to push code.
 
