@@ -43,18 +43,23 @@ export default defineConfig({
       exclude: [
         'src/**/*.spec.{js,ts,jsx,tsx}',
         'src/**/*.test.{js,ts,jsx,tsx}',
+        'src/**/*.stories.{js,ts,jsx,tsx}',
         'src/main.tsx',
         'src/vite-env.d.ts',
+        'src/**/routes/**/*.{js,ts,jsx,tsx}',
       ],
-      // 📖 # Why are coverage thresholds currently low?
-      // The project is in early stages with some untested UI components.
-      // These thresholds should be gradually increased as test coverage improves.
-      // Target: 80% for all metrics once the codebase matures.
+      // 📖 # Why are coverage thresholds set to 75%?
+      // Coverage improved from 66% to 74% with recent test additions.
+      // The remaining gaps are primarily in:
+      // - Module initialization code (stores with autoLoad init functions)
+      // - UI table components with inline editing complexity
+      // - Error handling branches that are hard to simulate
+      // Target: 75% now, with 80% as future goal after further refactoring.
       thresholds: {
-        lines: 55,
-        functions: 55,
-        branches: 35,
-        statements: 55,
+        lines: 75,
+        functions: 75,
+        branches: 60,
+        statements: 75,
       },
     },
   },

@@ -49,7 +49,6 @@ describe('Dashboard', () => {
   it('renders the dashboard with class section', async () => {
     const { getAllByText } = render(<Dashboard />)
     await waitFor(() => {
-      // Use getAllByText to handle multiple "Klassen" elements from test pollution
       expect(getAllByText('Klassen').length).toBeGreaterThan(0)
     })
   })

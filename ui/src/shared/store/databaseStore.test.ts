@@ -49,4 +49,33 @@ describe('databaseStore', () => {
     setDatabaseMode('primary')
     expect(getActiveDatabaseName()).toBe(NOTENBANK_DB_NAME)
   })
+
+  it('exposes temporary state via the hook', () => {
+    const { result } = renderHook(() => useDatabaseStore())
+
+    expect(result.current.isTemporary).toBe(false)
+
+    act(() => {
+      setTemporaryDatabase('test-123')
+    })
+
+    expect(result.current.isTemporary).toBe(true)
+    expect(result.current.dbName).toBe('notenbank-test-123')
+  })
+
+  it('preserves temporary state when switching back and forth', () => {
+    const { result } = renderHook(() => useDatabaseStore())
+
+    act(() => {
+      setTemporaryDatabase('test-456')
+    })
+
+    act(() => {
+      setDatabaseMode('primary')
+    })
+
+    expect(result.current.isTemporary).toBe(false)
+    expect(result.current.mode).toBe('primary')
+    expect(getActiveDatabaseName()).toBe(NOTENBANK_DB_NAME)
+  })
 })
