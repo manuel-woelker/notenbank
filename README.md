@@ -22,6 +22,7 @@ Notenbank is a student administration and grading system built as a browser-base
 - **Example Database** -- Built-in sample data ("Beispiel-Datenbank") for exploration and testing
 - **Product Tour** -- Guided onboarding tour for new users
 - **Offline-Capable** -- Data stored locally in IndexedDB, no server required
+- **No Authentication Required** -- Since all data is stored locally and never leaves your browser, there is no need for user accounts or login systems
 
 ## Tech Stack
 

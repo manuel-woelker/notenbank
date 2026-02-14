@@ -22,3 +22,11 @@ See [EXAMPLE-DATABASE.md](EXAMPLE-DATABASE.md) for details on the separate
 ## Where can I find testing information?
 
 See [TESTING.md](TESTING.md) for the testing strategy and how to run tests.
+
+## Security and Authentication
+
+**No authentication or user management is required.** Notenbank is designed as a
+purely local application—all data is stored in the browser's IndexedDB and is
+never transmitted to any server. Since data is only accessed locally by the
+single user, there is no need for login systems, user accounts, or access
+controls.
