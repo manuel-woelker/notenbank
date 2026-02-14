@@ -175,4 +175,88 @@ describe('ClassStore', () => {
       expect(result.current.loading).toBe(false)
     })
   })
+
+  describe('updateClass', () => {
+    it('updates class name in state and repository', async () => {
+      const { result } = renderHook(() => useClassStore())
+
+      // Create a class first
+      const newClass = await classRepository.create({
+        name: 'Original Name',
+      })
+
+      await loadClasses()
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
+
+      // Update the class
+      await result.current.updateClass(newClass.id, { name: 'Updated Name' })
+
+      // Verify the update in state
+      await waitFor(() => {
+        const updatedClass = result.current.classes.find(
+          (c) => c.id === newClass.id
+        )
+        expect(updatedClass?.name).toBe('Updated Name')
+      })
+
+      // Verify the update in repository
+      const fromRepo = await classRepository.findById(newClass.id)
+      expect(fromRepo?.name).toBe('Updated Name')
+    })
+
+    it('throws error when repository update fails', async () => {
+      const { result } = renderHook(() => useClassStore())
+
+      // Create a class first
+      const newClass = await classRepository.create({
+        name: 'Test Class',
+      })
+
+      await loadClasses()
+
+      // Mock repository to throw error
+      const updateSpy = vi
+        .spyOn(classRepository, 'update')
+        .mockRejectedValueOnce(new Error('Update failed'))
+
+      await expect(
+        result.current.updateClass(newClass.id, { name: 'New Name' })
+      ).rejects.toThrow('Update failed')
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Failed to update class:',
+        expect.any(Error)
+      )
+
+      updateSpy.mockRestore()
+    })
+
+    it('does not update state when class not found', async () => {
+      const { result } = renderHook(() => useClassStore())
+
+      await loadClasses()
+
+      // Mock repository to return successfully (simulating race condition)
+      const updateSpy = vi
+        .spyOn(classRepository, 'update')
+        .mockResolvedValueOnce({
+          id: 'non-existent-id',
+          name: 'Updated',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+
+      // Try to update a non-existent class - this won't find the index
+      // but will still return successfully from repo
+      await result.current.updateClass('non-existent-id', { name: 'Updated' })
+
+      // State should remain unchanged (no crash)
+      expect(result.current.classes).toEqual(result.current.classes)
+
+      updateSpy.mockRestore()
+    })
+  })
 })

@@ -4,14 +4,20 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { clearAllRepositoryCaches } from '../../shared/repositories/createRepository'
 import { Dashboard } from './Dashboard'
 
+const mockNavigate = vi.fn()
+
 vi.mock('@tanstack/react-router', async () => {
   const actual = await vi.importActual('@tanstack/react-router')
   return {
     ...actual,
-    Link: ({ children, ...props }: { children: React.ReactNode }) => (
-      <a {...props}>{children}</a>
-    ),
-    useNavigate: () => vi.fn(),
+    Link: ({
+      children,
+      ...props
+    }: {
+      children: React.ReactNode
+      to?: string
+    }) => <a {...props}>{children}</a>,
+    useNavigate: () => mockNavigate,
     useSearch: () => ({}),
   }
 })
@@ -37,6 +43,7 @@ window.getComputedStyle = () =>
 describe('Dashboard', () => {
   beforeEach(async () => {
     await clearAllRepositoryCaches()
+    mockNavigate.mockClear()
   })
 
   it('renders the dashboard with class section', async () => {

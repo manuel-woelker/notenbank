@@ -113,4 +113,90 @@ describe('SubjectStore', () => {
 
     findAllSpy.mockRestore()
   })
+
+  describe('updateSubject', () => {
+    it('updates subject data in state and repository', async () => {
+      const { result } = renderHook(() => useSubjectStore())
+
+      // Create a subject first
+      const newSubject = await subjectRepository.create({
+        name: 'Mathe',
+        classId: 'class-1',
+      })
+
+      await loadSubjects()
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
+
+      // Update the subject
+      await result.current.updateSubject(newSubject.id, { name: 'Mathematik' })
+
+      // Verify the update in state
+      await waitFor(() => {
+        const updatedSubject = result.current.subjects.find(
+          (s) => s.id === newSubject.id
+        )
+        expect(updatedSubject?.name).toBe('Mathematik')
+      })
+
+      // Verify the update in repository
+      const fromRepo = await subjectRepository.findById(newSubject.id)
+      expect(fromRepo?.name).toBe('Mathematik')
+    })
+
+    it('throws error when repository update fails', async () => {
+      const { result } = renderHook(() => useSubjectStore())
+
+      // Create a subject first
+      const newSubject = await subjectRepository.create({
+        name: 'Mathe',
+        classId: 'class-1',
+      })
+
+      await loadSubjects()
+
+      // Mock repository to throw error
+      const updateSpy = vi
+        .spyOn(subjectRepository, 'update')
+        .mockRejectedValueOnce(new Error('Update failed'))
+
+      await expect(
+        result.current.updateSubject(newSubject.id, { name: 'Mathematik' })
+      ).rejects.toThrow('Update failed')
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Failed to update subject:',
+        expect.any(Error)
+      )
+
+      updateSpy.mockRestore()
+    })
+
+    it('loadSubjects refreshes the subjects list', async () => {
+      const { result } = renderHook(() => useSubjectStore())
+
+      await loadSubjects()
+
+      const initialCount = result.current.subjects.length
+
+      // Create a subject directly in repository
+      await subjectRepository.create({
+        name: 'Sport',
+        classId: 'class-a',
+      })
+
+      // Reload subjects
+      await result.current.loadSubjects()
+
+      await waitFor(() => {
+        expect(result.current.subjects.length).toBe(initialCount + 1)
+      })
+
+      expect(
+        result.current.subjects.find((subject) => subject.name === 'Sport')
+      ).toBeDefined()
+    })
+  })
 })

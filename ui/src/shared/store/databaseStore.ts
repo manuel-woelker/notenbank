@@ -28,6 +28,11 @@ const getInitialDatabaseState = (): DatabaseState => {
     }
   }
   const hash = window.location.hash
+  if (!hash) {
+    return {
+      mode: 'primary',
+    }
+  }
   const queryIndex = hash.indexOf('?')
   if (queryIndex === -1) {
     return {
