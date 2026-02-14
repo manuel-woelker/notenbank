@@ -59,6 +59,7 @@ import {
   buildStudentRouteSegment,
   findStudentByRouteSegment,
 } from '../../shared/routes/studentRoute'
+import { ErrorBoundary } from '../../shared/ErrorBoundary'
 import {
   DatabaseMode,
   useDatabaseStore,
@@ -739,7 +740,9 @@ export function RootLayout() {
             flex: 1,
           }}
         >
-          <Outlet />
+          <ErrorBoundary>
+            <Outlet />
+          </ErrorBoundary>
         </Content>
         <Footer style={{ textAlign: 'center' }}>
           Notenbank | Commit:{' '}
