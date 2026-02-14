@@ -57,6 +57,9 @@ jobs:
         run: pnpm format:check
         continue-on-error: false
 
+      - name: Generate git info
+        run: node scripts/generate-git-info.js
+
       - name: Run tests with coverage
         run: pnpm test:ci
         continue-on-error: false
