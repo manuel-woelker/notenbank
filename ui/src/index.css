@@ -33,7 +33,9 @@ body {
 }
 
 .ant-menu-dark .nb-sidebar-item-active.ant-menu-item,
-.ant-menu-dark .nb-sidebar-item-active > .ant-menu-submenu-title {
+.ant-menu-dark .nb-sidebar-item-active.ant-menu-item:hover,
+.ant-menu-dark .nb-sidebar-item-active > .ant-menu-submenu-title,
+.ant-menu-dark .nb-sidebar-item-active > .ant-menu-submenu-title:hover {
   background-color: #1677ff;
 }
 
