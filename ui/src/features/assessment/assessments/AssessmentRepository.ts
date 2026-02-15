@@ -51,6 +51,26 @@ const assessmentSchemas = {
   }),
 }
 
+/* 📖 # Why serialize gradingCurve to JSON?
+ *
+ * TinyBase stores data as primitive key-value pairs and doesn't support
+ * nested objects directly. The gradingCurve object needs to be serialized
+ * to JSON for storage and parsed back when reading.
+ */
+
+// Extended serialized type that handles gradingCurve as a JSON string
+interface SerializedAssessment {
+  id: string
+  classId: string
+  subjectId: string
+  title: string
+  type: 'written' | 'oral'
+  date: string
+  gradingCurve: string | null
+  createdAt: string
+  updatedAt: string
+}
+
 const baseAssessmentRepository: AssessmentRepository = createRepository<
   Assessment,
   CreateAssessmentInput
@@ -65,6 +85,45 @@ const baseAssessmentRepository: AssessmentRepository = createRepository<
   ],
   schemas: assessmentSchemas,
   onUpgrade: ensureNotenbankStores,
+  serialize: (entity) => {
+    const result: Record<string, unknown> = {}
+    for (const [key, value] of Object.entries(entity)) {
+      if (value instanceof Date) {
+        result[key] = value.toISOString()
+      } else if (
+        key === 'gradingCurve' &&
+        value !== null &&
+        value !== undefined
+      ) {
+        result[key] = JSON.stringify(value)
+      } else {
+        result[key] = value
+      }
+    }
+    return result as unknown as SerializedAssessment
+  },
+  deserialize: (data) => {
+    const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/
+    const result: Record<string, unknown> = {}
+    for (const [key, value] of Object.entries(data)) {
+      if (typeof value === 'string') {
+        if (ISO_DATE_REGEX.test(value)) {
+          result[key] = new Date(value)
+        } else if (key === 'gradingCurve') {
+          try {
+            result[key] = JSON.parse(value)
+          } catch {
+            result[key] = null
+          }
+        } else {
+          result[key] = value
+        }
+      } else {
+        result[key] = value
+      }
+    }
+    return result as unknown as Assessment
+  },
 })
 
 export const assessmentRepository: AssessmentRepository =

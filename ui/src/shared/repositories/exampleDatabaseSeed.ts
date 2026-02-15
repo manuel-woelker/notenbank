@@ -1,4 +1,8 @@
 import { createGrade } from '../Grade'
+import {
+  calculateGradeFromCurve,
+  GradingCurveConfig,
+} from '../../features/assessment/assessments/GradingCurve'
 import { classRepository } from '../../features/administration/classes/ClassRepository'
 import { studentRepository } from '../../features/administration/students/StudentRepository'
 import { subjectRepository } from '../../features/administration/subjects/SubjectRepository'
@@ -24,11 +28,17 @@ type SeedAssessment = {
   title: string
   type: 'written' | 'oral'
   date: Date
+  gradingCurve?: {
+    mode: 'points' | 'errors'
+    grade1Value: number
+    grade4Value: number
+  } | null
 }
 type SeedAssessmentGrade = {
   assessmentKey: string
   studentKey: string
   grade: number
+  points?: number | null
 }
 
 const requireId = (map: Map<string, string>, key: string, label: string) => {
@@ -212,13 +222,26 @@ const buildAssessmentsForSubject = (
   const assessments: SeedAssessment[] = []
 
   for (let i = 0; i < writtenCount; i += 1) {
+    const assessmentKey = `${subject.key}-written-${i + 1}`
+    /* 📖 # Why add a grading curve to Mathematik Schriftlich 1?
+     This demonstrates the Notenlinie feature for points-based grading.
+     Grade 1 requires 40 points, Grade 4 requires 20 points.
+     This creates a linear grading curve where each grade corresponds
+     to specific point thresholds.
+     */
+    const gradingCurve =
+      assessmentKey === 'mathe-5a-written-1'
+        ? { mode: 'points' as const, grade1Value: 40, grade4Value: 20 }
+        : undefined
+
     assessments.push({
-      key: `${subject.key}-written-${i + 1}`,
+      key: assessmentKey,
       classKey: subject.classKey,
       subjectKey: subject.key,
       title: `Schriftlich ${i + 1}`,
       type: 'written',
       date: new Date(baseDate.getTime() + i * 14 * 24 * 60 * 60 * 1000),
+      gradingCurve,
     })
   }
 
@@ -246,16 +269,50 @@ const gradeCycle = [
   1.0, 1.5, 2.0, 2.25, 2.5, 2.75, 3.0, 3.25, 3.5, 3.75, 4.0, 4.25, 4.5, 5.0,
 ]
 
+/* 📖 # Why compute grades from points for assessments with grading curves?
+ * When an assessment has a grading curve defined, we should seed it with
+ * raw points/errors and let the curve compute the grades. This demonstrates
+ * the complete grading workflow where teachers enter points and the system
+ * automatically calculates grades based on the defined thresholds.
+ */
+const gradingCurveForMathe5a: GradingCurveConfig = {
+  mode: 'points',
+  grade1Value: 40,
+  grade4Value: 20,
+}
+
+const generatePointsForMathe5a = (studentIndex: number): number => {
+  // Generate points ranging from 0 to 40 in 2-point increments
+  // This gives a good distribution across the grading scale
+  const pointsCycle = [0, 5, 10, 15, 20, 25, 30, 35, 40, 38, 32, 28]
+  return pointsCycle[studentIndex % pointsCycle.length]
+}
+
 const seedAssessmentGrades: SeedAssessmentGrade[] = seedAssessments.flatMap(
   (assessment, assessmentIndex) => {
     const studentsForClass = seedStudents.filter(
       (student) => student.classKey === assessment.classKey
     )
-    return studentsForClass.map((student, studentIndex) => ({
-      assessmentKey: assessment.key,
-      studentKey: student.key,
-      grade: gradeCycle[(assessmentIndex + studentIndex) % gradeCycle.length],
-    }))
+    return studentsForClass.map((student, studentIndex) => {
+      // Special handling for mathe-5a-written-1 with grading curve
+      if (assessment.key === 'mathe-5a-written-1') {
+        const points = generatePointsForMathe5a(studentIndex)
+        const grade = calculateGradeFromCurve(points, gradingCurveForMathe5a)
+        return {
+          assessmentKey: assessment.key,
+          studentKey: student.key,
+          grade: grade as unknown as number,
+          points,
+        }
+      }
+
+      // Default: use grade cycle for assessments without grading curve
+      return {
+        assessmentKey: assessment.key,
+        studentKey: student.key,
+        grade: gradeCycle[(assessmentIndex + studentIndex) % gradeCycle.length],
+      }
+    })
   }
 )
 
@@ -321,6 +378,7 @@ export async function ensureExampleDatabaseSeeded() {
       title: seed.title,
       type: seed.type,
       date: seed.date,
+      gradingCurve: seed.gradingCurve ?? null,
     }))
   )
   const assessmentEntries = seedAssessments.map((seed, index) => ({
@@ -340,6 +398,7 @@ export async function ensureExampleDatabaseSeeded() {
       ),
       studentId: requireId(studentIdByKey, seed.studentKey, 'student'),
       grade: createGrade(seed.grade),
+      points: seed.points ?? null,
     }))
   )
 }

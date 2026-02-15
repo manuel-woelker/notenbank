@@ -33,13 +33,16 @@ export interface RepositoryConfig<
   schemas: RepositorySchemas<T, TCreate>
   onUpgrade?: (db: IDBDatabase) => void
   /**
-   * Custom serializer for entities with additional Date fields beyond createdAt/updatedAt
+   * Custom serializer for entities. Defaults to converting Date fields to ISO strings.
+   * Return type must be compatible with TinyBase storage (Record<string, string | number | boolean>)
    */
-  serialize?: (entity: T) => Serialized<T>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  serialize?: (entity: T) => any
   /**
-   * Custom deserializer for entities with additional Date fields beyond createdAt/updatedAt
+   * Custom deserializer for entities. Defaults to parsing ISO date strings back to Date objects.
    */
-  deserialize?: (data: Serialized<T>) => T
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  deserialize?: (data: any) => T
 }
 
 const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/
