@@ -5,7 +5,7 @@ import { findClassByRouteSegment } from '../../shared/routes/classRoute'
 import { findSubjectByRouteSegment } from '../../shared/routes/subjectRoute'
 import { findAssessmentByRouteSegment } from '../../shared/routes/assessmentRoute'
 
-type SidebarContext = {
+export type SidebarContext = {
   showClassTree: boolean
   selectedKey: string
   openKeys: string[]
