@@ -102,7 +102,20 @@ describe('resolveSidebarContext', () => {
     )
 
     expect(context.showClassTree).toBe(false)
-    expect(context.selectedKey).toBe('content')
+    expect(context.selectedKey).toBe('dashboard')
+    expect(context.openKeys).toEqual([])
+  })
+
+  it('selects changelog menu item for changelog routes', () => {
+    const context = resolveSidebarContext(
+      '/aenderungsverlauf',
+      classes,
+      subjects,
+      assessments
+    )
+
+    expect(context.showClassTree).toBe(false)
+    expect(context.selectedKey).toBe('changelog')
     expect(context.openKeys).toEqual([])
   })
 })

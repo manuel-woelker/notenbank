@@ -16,6 +16,15 @@ import { buildSubjectRouteSegment } from '../../shared/routes/subjectRoute'
 import { buildAssessmentRouteSegment } from '../../shared/routes/assessmentRoute'
 import type { SidebarContext } from './resolveSidebarContext'
 
+/* 📖 # Why add an explicit active class for menu nodes?
+Ant Design highlights selected leaf items via selectedKeys, but submenu titles
+with children do not consistently get the same visual treatment. Adding a
+dedicated class lets us style active non-leaf nodes so the most specific
+sidebar target is always clearly visible.
+*/
+const getActiveClassName = (key: string, selectedKey: string): string =>
+  key === selectedKey ? 'nb-sidebar-item-active' : ''
+
 /* 📖 # Why derive selected menu from URL location instead of state?
 TanStack Router manages navigation via URL changes. By using useLocation() to
 determine which menu item should be highlighted, we ensure the menu state stays
@@ -77,6 +86,10 @@ export function useMenuItems(
                     isCurrentSubject && assessmentChildren.length > 0
                   return {
                     key: `subject:${subject.id}`,
+                    className: getActiveClassName(
+                      `subject:${subject.id}`,
+                      sidebarContext.selectedKey
+                    ),
                     icon: <BookOutlined />,
                     label: subject.name,
                     ...(hasAssessments
@@ -101,6 +114,10 @@ export function useMenuItems(
           const hasSubjects = isCurrentClass && subjectChildren.length > 0
           return {
             key: `class:${classItem.id}`,
+            className: getActiveClassName(
+              `class:${classItem.id}`,
+              sidebarContext.selectedKey
+            ),
             icon: <TeamOutlined />,
             label: classItem.name,
             ...(hasSubjects
@@ -127,12 +144,14 @@ export function useMenuItems(
     return [
       {
         key: 'dashboard',
+        className: getActiveClassName('dashboard', sidebarContext.selectedKey),
         icon: <UserOutlined />,
         label: 'Übersicht',
         onClick: () => navigate({ to: '/', search: (prev) => prev }),
       },
       {
         key: 'classes',
+        className: getActiveClassName('classes', sidebarContext.selectedKey),
         icon: <TeamOutlined />,
         label: <span data-tour="menu-classes">Klassen</span>,
         ...(hasClassChildren
@@ -148,6 +167,7 @@ export function useMenuItems(
       },
       {
         key: 'changelog',
+        className: getActiveClassName('changelog', sidebarContext.selectedKey),
         icon: <HistoryOutlined />,
         label: 'Änderungsverlauf',
         onClick: () =>

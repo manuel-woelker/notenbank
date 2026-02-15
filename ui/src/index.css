@@ -32,6 +32,11 @@ body {
   cursor: pointer;
 }
 
+.ant-menu-dark .nb-sidebar-item-active.ant-menu-item,
+.ant-menu-dark .nb-sidebar-item-active > .ant-menu-submenu-title {
+  background-color: #1677ff;
+}
+
 h1 {
   font-size: 3.2em;
   line-height: 1.1;

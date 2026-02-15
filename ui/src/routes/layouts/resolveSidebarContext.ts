@@ -58,10 +58,10 @@ export const resolveSidebarContext = (
         ? `class:${currentClass.id}`
         : showClassTree
           ? 'classes'
-          : segments[0] === 'content'
-            ? 'content'
-            : segments[0] === 'upload'
-              ? 'upload'
+          : segments[0] === 'aenderungsverlauf'
+            ? 'changelog'
+            : segments[0] === 'content' || segments[0] === 'upload'
+              ? 'dashboard'
               : 'dashboard'
 
   const openKeys: string[] = []

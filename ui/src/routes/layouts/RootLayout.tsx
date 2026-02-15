@@ -7,10 +7,13 @@ import {
   useSearch,
 } from '@tanstack/react-router'
 import { loadClasses } from '../../features/administration/classes/ClassStore'
+import { useClassStore } from '../../features/administration/classes/ClassStore'
 import { loadSubjects } from '../../features/administration/subjects/SubjectStore'
+import { useSubjectStore } from '../../features/administration/subjects/SubjectStore'
 import { loadStudents } from '../../features/administration/students/StudentStore'
 import { loadAssessmentGrades } from '../../features/assessment/assessments/AssessmentGradeStore'
 import { loadAssessments } from '../../features/assessment/assessments/AssessmentStore'
+import { useAssessmentStore } from '../../features/assessment/assessments/AssessmentStore'
 import { loadChangeLogs } from '../../features/changeTracking/ChangeLogStore'
 import { ErrorBoundary } from '../../shared/ErrorBoundary'
 import {
@@ -63,10 +66,14 @@ export function RootLayout() {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken()
+  const { classes } = useClassStore()
+  const { subjects } = useSubjectStore()
+  const { assessments } = useAssessmentStore()
 
   const sidebarContext = useMemo(
-    () => resolveSidebarContext(location.pathname, [], [], []),
-    [location.pathname]
+    () =>
+      resolveSidebarContext(location.pathname, classes, subjects, assessments),
+    [location.pathname, classes, subjects, assessments]
   )
 
   const tourRoutes = useTourRoutes()
